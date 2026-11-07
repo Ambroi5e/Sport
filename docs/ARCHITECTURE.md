@@ -54,7 +54,7 @@ Chaque table porte un `user_id`. Les catalogues communs (exercices, aliments de 
 | Compte | `profiles`, `user_modules`, `goals` | v0.1 |
 | Accès | `invitations`, `user_roles` | v0.1 |
 | Corps | `body_weights` (v0.1), `body_measurements`, `progress_photos` | v0.1, v0.5 |
-| Musculation | `exercises`, `exercise_muscles`, `workout_templates`, `template_items`, `workouts`, `workout_sets` | v0.2 |
+| Musculation | `exercises` (muscles en tableaux sur l'exercice), `workout_templates`, `template_items`, `workouts`, `workout_sets` (une série prévue n'a pas encore de `completed_at`) | v0.2 |
 | Nutrition | `foods`, `recipes`, `recipe_items`, `food_logs`, `nutrition_targets`, `tdee_estimates` | v0.4, v0.6 |
 | Plan prédictif | `programs`, `program_goals`, `planned_sessions`, `planned_sets`, `exercise_preferences` | v0.6 |
 | Activités | `activities`, `activity_segments`, `hr_zones`, `race_plans` | v0.8, v0.11 |
@@ -74,3 +74,11 @@ Chaque table porte un `user_id`. Les catalogues communs (exercices, aliments de 
 - `AIProvider` : désactivée par défaut (`FEATURE_AI=false`). Si elle est activée un jour : clé côté serveur uniquement, quota par personne, file d'attente, nom du modèle jamais affiché.
 - `LabelReader` : lit une photo d'étiquette nutritionnelle et renvoie des valeurs pour 100 g à vérifier. Implémentation v0.6 : Tesseract.js dans un Web Worker, sur le téléphone, photo jamais envoyée au serveur. Implémentation future possible via `AIProvider`.
 - `ImportProvider` : un format d'entrée (Strong, Hevy, CSV générique, GPX, FIT, Apple Santé) produit des lignes validées par zod.
+
+## Musculation (v0.2)
+
+- **Muscles** : `primary_muscles` et `secondary_muscles` sont des tableaux sur `exercises`, au lieu d'une table de liaison. Le calcul du volume par muscle reste dans le moteur.
+- **Séries prévues** : démarrer depuis un modèle crée les séries à l'avance, sans `completed_at`. Valider une série la complète ; terminer la séance retire les séries non validées.
+- **Enregistrement idempotent** : chaque série reçoit son identifiant dans le navigateur et s'enregistre par upsert. La file hors ligne de la v0.3 s'appuiera dessus sans doublon.
+- **Records** : calculés à la volée par `lib/engine/training.ts` à partir des séries, sans table. Le record battu s'affiche dès la validation, comparé aux records d'avant la séance.
+- **Cohérence** : clés étrangères composites `(workout_id, user_id)` et `(template_id, user_id)`, et `exercise_is_usable()` dans les politiques : impossible d'écrire dans la séance d'un autre ou d'utiliser son exercice personnel.

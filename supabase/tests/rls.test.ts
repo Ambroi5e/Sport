@@ -69,6 +69,61 @@ describe.skipIf(!adminUrl)("RLS et inscription", () => {
     });
   });
 
+  describe("inscription avec Google (invitation réservée)", () => {
+    const reserve = (code: string, email: string) =>
+      asUser(client, null, async () => {
+        const { rows } = await client.query<{ ok: boolean }>("select public.reserve_invitation($1, $2) as ok", [code, email]);
+        return rows[0].ok;
+      });
+
+    /** Réservation hors transaction annulée, comme l'appel réel depuis la page d'inscription. */
+    const reserveForReal = async (code: string, email: string) => {
+      await client.query("set role anon");
+      try {
+        const { rows } = await client.query<{ ok: boolean }>("select public.reserve_invitation($1, $2) as ok", [code, email]);
+        return rows[0].ok;
+      } finally {
+        await client.query("reset role");
+      }
+    };
+
+    it("un visiteur réserve un code valable, pas un code inconnu, utilisé ou mal formé", async () => {
+      await seedInvitation(client, "FONTE-GGGG-0001");
+      expect(await reserve("fonte-gggg-0001", "Chloe@Example.test")).toBe(true);
+      expect(await reserve("FONTE-ZZZZ-9999", "chloe@example.test")).toBe(false);
+      expect(await reserve("FONTE-AAAA-1111", "chloe@example.test")).toBe(false);
+      expect(await reserve("FONTE-GGGG-0001", "pas-une-adresse")).toBe(false);
+    });
+
+    it("crée le compte Google dont l'adresse correspond à la réservation, une seule fois", async () => {
+      await seedInvitation(client, "FONTE-GGGG-0002");
+      expect(await reserveForReal("FONTE-GGGG-0002", "Chloe@Example.test")).toBe(true);
+
+      const chloe = await signUp(client, "chloe@example.test");
+      const { rows } = await client.query("select used_by from public.invitations where used_by = $1", [chloe]);
+      expect(rows).toHaveLength(1);
+      expect(await reserveForReal("FONTE-GGGG-0002", "autre@example.test")).toBe(false);
+    });
+
+    it("refuse un compte Google d'une autre adresse que celle réservée", async () => {
+      await seedInvitation(client, "FONTE-GGGG-0003");
+      expect(await reserveForReal("FONTE-GGGG-0003", "denis@example.test")).toBe(true);
+      await expect(signUp(client, "intrus@example.test")).rejects.toThrow(/invitation_invalid/);
+    });
+
+    it("refuse une réservation expirée", async () => {
+      await seedInvitation(client, "FONTE-GGGG-0004");
+      expect(await reserveForReal("FONTE-GGGG-0004", "emma@example.test")).toBe(true);
+      await client.query("update public.invitations set reserved_until = now() - interval '1 minute' where reserved_email = 'emma@example.test'");
+      await expect(signUp(client, "emma@example.test")).rejects.toThrow(/invitation_invalid/);
+    });
+
+    it("un visiteur ne lit toujours pas les invitations ni les adresses réservées", async () => {
+      const { rows } = await asUser(client, null, () => client.query("select reserved_email from public.invitations"));
+      expect(rows).toEqual([]);
+    });
+  });
+
   describe("cloisonnement entre utilisateurs", () => {
     const ownTables = ["profiles", "goals", "user_modules", "body_weights"] as const;
 

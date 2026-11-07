@@ -83,6 +83,8 @@ export type Database = {
           created_by: string | null
           expires_at: string
           id: string
+          reserved_email: string | null
+          reserved_until: string | null
           used_at: string | null
           used_by: string | null
         }
@@ -92,6 +94,8 @@ export type Database = {
           created_by?: string | null
           expires_at?: string
           id?: string
+          reserved_email?: string | null
+          reserved_until?: string | null
           used_at?: string | null
           used_by?: string | null
         }
@@ -101,6 +105,8 @@ export type Database = {
           created_by?: string | null
           expires_at?: string
           id?: string
+          reserved_email?: string | null
+          reserved_until?: string | null
           used_at?: string | null
           used_by?: string | null
         }
@@ -218,6 +224,10 @@ export type Database = {
       }
       invitation_hash: { Args: { p_code: string }; Returns: string }
       is_admin: { Args: never; Returns: boolean }
+      reserve_invitation: {
+        Args: { p_code: string; p_email: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_module:

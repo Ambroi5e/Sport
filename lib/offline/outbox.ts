@@ -121,6 +121,7 @@ function scheduleRetry() {
 }
 
 async function drain() {
+  let sent = 0;
   // `userId` peut changer pendant un envoi (startOutbox) : relu à chaque tour.
   for (;;) {
     if (!userId) return;
@@ -131,7 +132,8 @@ async function drain() {
         notice = null;
         emit();
       }
-      for (const listener of drainListeners) listener();
+      // Seulement si quelque chose vient de partir, pas à chaque retour dans l'app.
+      if (sent) for (const listener of drainListeners) listener();
       return;
     }
     if (navigator.onLine === false) return scheduleRetry();
@@ -151,6 +153,7 @@ async function drain() {
       return scheduleRetry();
     }
     queue = settle(queue, entry.id);
+    sent += 1;
     if (!result.ok) rejected = { ...rejected, [entry.key]: result.error };
     failures = 0;
     notice = null;
@@ -166,7 +169,7 @@ export function flush(): Promise<void> {
   return flushing;
 }
 
-/** Prévient à chaque fois que la file vient de se vider. Renvoie de quoi se désabonner. */
+/** Prévient chaque fois que la file vient de se vider après un envoi. Renvoie de quoi se désabonner. */
 export function onDrained(listener: () => void): () => void {
   drainListeners.add(listener);
   return () => drainListeners.delete(listener);

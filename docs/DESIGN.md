@@ -41,6 +41,7 @@ Contrastes mesurés selon WCAG 2.1 (texte normal : 4,5:1 minimum).
 | `success` | #3FBF7F | #1A7044 | progression dans la cible | 7,9 / 5,5 |
 | `warning` | #F2B53A | #8A5A00 | rythme hors cible | 10,1 / 5,4 |
 | `danger` | #FF6363 | #C62828 | erreurs, suppression | 6,4 / 5,1 |
+| `chart` | #FF6B1A | #E0550A | traits et colonnes des courbes | 5,9 / 3,8 sur `surface` (élément graphique : 3:1) |
 
 Règles :
 
@@ -48,6 +49,7 @@ Règles :
 - Pas de dégradé, pas de verre dépoli, pas d'ombre en mode sombre : la profondeur vient des paliers `bg` → `surface` → `surface-2` et d'une bordure `line`.
 - En mode clair, une ombre discrète sur les cartes : `0 1px 2px rgb(0 0 0 / 0.06)`.
 - Les couleurs de statut ne remplacent jamais un texte : « +0,6 kg/sem, au-dessus de la cible » en plus de la couleur.
+- Courbes : une seule série par couleur (`chart`), pesées brutes en `muted`, grille en `line`, textes en `text` ou `muted`, jamais dans la couleur de la série. Résumé écrit et tableau des valeurs pour chaque courbe. `chart` vaut l'accent, sauf en clair pour Fonte (#E0550A) et Carnet (#A87F00), où l'accent n'atteint pas 3:1 sur la carte.
 
 ## Typographie
 

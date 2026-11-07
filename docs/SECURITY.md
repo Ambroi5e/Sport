@@ -29,9 +29,17 @@ Les données de santé (poids, mensurations, photos, forme, nutrition) sont des 
 
 - CSP stricte avec nonce par requête (générée dans `proxy.ts`), `frame-ancestors 'none'`.
 - HSTS, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy` restrictive.
-- Photos dans un bucket privé, URLs signées de 60 secondes.
 - Cache du service worker : fichiers statiques seulement, plus une exception assumée depuis la v0.3, la copie de la séance en cours (une seule page) pour la rouvrir sans réseau. Elle est remplacée à chaque nouvelle séance et effacée à la fin de la séance et à la déconnexion.
 - `localStorage` : file des saisies pas encore envoyées, chrono et réglages de séance. Chaque opération en file porte l'identifiant de son auteur et ne part qu'avec sa session ; la RLS refuse de toute façon d'écrire chez un autre. La déconnexion efface tout ce que l'app a gardé sur l'appareil, après avoir prévenu s'il reste des saisies non envoyées.
+
+## Photos de progression
+
+- Bucket Supabase Storage privé `progress-photos` : aucune URL publique, JPEG seulement, 1 Mo au plus (limites du bucket).
+- Un dossier par utilisateur (`<user_id>/<id>.jpg`). Politiques de `storage.objects` : lecture, dépôt et suppression seulement dans son propre dossier. Le chemin enregistré dans `progress_photos` est imposé par une contrainte. Tests RLS sur une copie du schéma `storage`.
+- Réduction et réencodage sur le téléphone avant l'envoi : 1 600 px, sans métadonnées EXIF, donc sans position GPS ni modèle d'appareil. Le serveur revérifie le type, la taille et la signature JPEG.
+- Affichage par liens signés de 10 minutes, générés côté serveur à chaque page. 10 minutes plutôt que 60 secondes : les vignettes se chargent au défilement, un lien trop court casserait l'affichage d'une page ouverte depuis une minute. Pas d'optimiseur d'images : aucune copie hors du bucket.
+- Suppression d'une photo : le fichier est effacé avant la ligne, jamais de fichier orphelin. La suppression du compte avec ses photos arrive en v0.7.
+- Jamais montrées aux amis tant que la permission « photos » n'existe pas (v0.9), et alors seulement sur accord explicite.
 
 ## Fichiers importés
 

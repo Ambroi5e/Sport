@@ -20,6 +20,7 @@ Fonte est une application web (PWA) de suivi musculation, endurance, nutrition, 
 - Supabase : Postgres + RLS sur toutes les tables, Auth par e-mail (code à 6 chiffres) et Google, toujours sur invitation, Storage privé, Realtime, Edge Functions. Projet `sport`, région Paris (eu-west-3).
 - zod pour toute validation, react-hook-form pour les formulaires, next-intl (français seul jusqu'à v1.0).
 - Moteur de calcul pur dans `lib/engine` : aucun import de React, Next ou Supabase. Testé avec Vitest.
+- Courbes en SVG maison rendues côté serveur (`components/charts`), sans bibliothèque de graphiques (décision v0.5).
 - Qualité : oxlint, `tsc --noEmit`, Vitest, tests RLS sur Postgres local, Playwright (`--trace off`).
 - Hébergement Vercel, CI GitHub Actions.
 - Pas d'IA en v1 : interface `AIProvider` désactivée par défaut.

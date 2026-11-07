@@ -4,6 +4,16 @@ Format : une entrée par version (semver), du plus récent au plus ancien. Les m
 
 ## [Non publié]
 
+### v0.3 : séance en direct
+
+- Saisie sans réseau : chaque série validée est gardée sur le téléphone puis envoyée dès que possible, sans doublon, avec son heure de validation. État visible quand l'envoi tarde (« 2 séries en attente d'envoi »), session expirée signalée avec un lien pour se reconnecter.
+- Séance en cours rouvrable sans réseau, depuis la page hors ligne (« Reprendre ma séance ») : seule page personnelle gardée par l'app, effacée à la fin de la séance et à la déconnexion.
+- Chrono de repos : démarre à chaque série validée, se règle par 15 s, retient la durée par exercice, reste visible sur toutes les pages, vibration et son discret à la fin.
+- Écran gardé allumé pendant la séance, avec un bouton pour le couper.
+- Réglages : carte « Séance » (repos par défaut, son, écran allumé), propre à l'appareil.
+- Déconnexion : efface la file, le chrono et les réglages de séance du téléphone, après avertissement s'il reste des saisies non envoyées.
+- Pas de migration.
+
 ### v0.2 : musculation
 
 - Séance : démarrer depuis un modèle ou en libre, séries préremplies avec la dernière fois, validation en un tap, record battu signalé tout de suite, ajout ou retrait de séries et d'exercices, résumé de fin (durée, séries, volume, records).

@@ -18,7 +18,7 @@ export function PageHeader({
   action?: ReactNode;
 }) {
   return (
-    <header className="flex items-center gap-3 pb-4 pt-2 md:pb-6 md:pt-4">
+    <header className="flex items-center gap-3 pb-4 pt-5 md:pb-6 md:pt-8">
       {back ? (
         <Link
           href={back}

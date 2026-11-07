@@ -93,7 +93,7 @@ export function QuickWeigh({
           "Enregistrer la pesée"
         )}
       </Button>
-      <p aria-live="polite" className="min-h-5 text-center text-[13px] text-muted">
+      <p aria-live="polite" className="text-center text-[13px] text-muted empty:-mt-4">
         {state.error ? <span className="text-danger">{state.error}</span> : loggedToday ? "Déjà pesé aujourd'hui : une nouvelle saisie remplace la précédente." : null}
       </p>
     </form>

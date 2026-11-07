@@ -55,6 +55,20 @@ export async function asUser<T>(
   }
 }
 
+/** Comme asUser, mais valide la transaction : sert à préparer des données. */
+export async function asUserCommit(client: Client, userId: string, fn: () => Promise<void>) {
+  await client.query("begin");
+  try {
+    await client.query("set local role authenticated");
+    await client.query("select set_config('request.jwt.claim.sub', $1, true)", [userId]);
+    await fn();
+    await client.query("commit");
+  } catch (error) {
+    await client.query("rollback");
+    throw error;
+  }
+}
+
 /** Crée un utilisateur comme le ferait Supabase Auth (en superutilisateur). */
 export async function signUp(client: Client, email: string, inviteCode?: string) {
   const { rows } = await client.query<{ id: string }>(

@@ -4,6 +4,15 @@ Format : une entrée par version (semver), du plus récent au plus ancien. Les m
 
 ## [Non publié]
 
+### v0.2 : musculation
+
+- Séance : démarrer depuis un modèle ou en libre, séries préremplies avec la dernière fois, validation en un tap, record battu signalé tout de suite, ajout ou retrait de séries et d'exercices, résumé de fin (durée, séries, volume, records).
+- Bibliothèque de 71 exercices en français, recherche sans accents, filtre par groupe musculaire, exercices personnels, fiche exercice avec records et historique.
+- Modèles : création, séries et fourchette de répétitions, ordre, démarrage en un tap, enregistrement d'une séance terminée comme modèle.
+- Historique par semaine, page Records (1RM estimé, charge max, répétitions, volume), volume de la semaine par muscle face au repère général de 10 à 20 séries.
+- Moteur : volume, 1RM (Epley, 12 répétitions au plus), records, séries par muscle, préremplissage. Tests.
+- Migration non destructive appliquée : `20261108000000_musculation.sql`, avec 24 tests RLS.
+
 ### v0.1.1 : styles au choix et connexion Google
 
 - Trois styles au choix dans Réglages : Fonte (graphite et orange), Couloir (nuit et cyan), Carnet (encre et surligneur), chacun en sombre et en clair, avec leurs polices et leurs angles. Choix gardé sur l'appareil.

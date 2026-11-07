@@ -8,6 +8,13 @@ import { QuickWeigh } from "@/components/weight/quick-weigh";
 import { WeightTrend } from "@/components/weight/trend";
 import { OnboardingForm } from "@/app/onboarding/onboarding-form";
 import { StylePicker } from "@/components/settings/style-picker";
+import { ExerciseForm } from "@/components/training/exercise-form";
+import { ExerciseList } from "@/components/training/exercise-list";
+import { MuscleVolume } from "@/components/training/muscle-volume";
+import { RecordTiles, recordTiles } from "@/components/training/record-tiles";
+import { TemplateItems } from "@/components/training/template-forms";
+import { WorkoutLogger } from "@/components/training/workout-logger";
+import { SAMPLE_BLOCKS, SAMPLE_EXERCISES, SAMPLE_HISTORY, SAMPLE_ITEMS, SAMPLE_VOLUME } from "./exemples";
 import { getAppearance } from "@/lib/appearance";
 
 /**
@@ -42,9 +49,40 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
         ) : ecran === "entrainement" ? (
           <>
             <PageHeader title="Entraînement" />
-            <EmptyState icon={<BarbellIcon size={22} />} title="Tes séances arrivent dans la prochaine version">
-              Tu pourras noter tes séries en un tap, retrouver tes records et ton 1RM estimé, et suivre le volume par muscle.
-            </EmptyState>
+            <div className="grid gap-4 md:max-w-xl">
+              <Card className="grid gap-4">
+                <h2 className="text-lg font-semibold">Volume de la semaine</h2>
+                <MuscleVolume perMuscle={SAMPLE_VOLUME} />
+              </Card>
+              <EmptyState icon={<BarbellIcon size={22} />} title="Aucun modèle pour l'instant">
+                Un modèle, c&apos;est ta séance type : ses exercices, ses séries et ta fourchette de répétitions.
+              </EmptyState>
+            </div>
+          </>
+        ) : ecran === "seance" ? (
+          <>
+            <PageHeader back="/apercu" eyebrow="vendredi 7 novembre" title="Push A" />
+            <WorkoutLogger workoutId="apercu" blocks={SAMPLE_BLOCKS} history={SAMPLE_HISTORY} unit="kg" finished={false} />
+          </>
+        ) : ecran === "modele" ? (
+          <>
+            <PageHeader back="/apercu" eyebrow="Modèle" title="Push A" />
+            <div className="md:max-w-2xl">
+              <TemplateItems templateId="apercu" items={SAMPLE_ITEMS} />
+            </div>
+          </>
+        ) : ecran === "exercices" ? (
+          <>
+            <PageHeader back="/apercu" title="Exercices" />
+            <ExerciseList exercises={SAMPLE_EXERCISES} />
+          </>
+        ) : ecran === "exercice" ? (
+          <>
+            <PageHeader back="/apercu" eyebrow="Barre" title="Développé couché" />
+            <div className="grid gap-6 md:max-w-3xl">
+              <RecordTiles tiles={recordTiles(SAMPLE_HISTORY["ex-dc"].records, "charge", "kg")} />
+              <ExerciseForm />
+            </div>
           </>
         ) : (
           <>

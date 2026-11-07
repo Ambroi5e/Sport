@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { defaultModules } from ".";
-import { addDays, daysBetween, localDate } from "../dates";
+import { addDays, daysBetween, localDate, weekStart } from "../dates";
 
 describe("modules par défaut", () => {
   it("active la musculation pour une prise de masse, pas l'endurance", () => {
@@ -31,5 +31,11 @@ describe("dates", () => {
   it("ajoute des jours et mesure un écart", () => {
     expect(addDays("2026-12-30", 3)).toBe("2027-01-02");
     expect(daysBetween("2026-11-07", "2027-04-12")).toBe(156);
+  });
+
+  it("trouve le lundi de la semaine", () => {
+    expect(weekStart("2026-11-07")).toBe("2026-11-02"); // samedi
+    expect(weekStart("2026-11-08")).toBe("2026-11-02"); // dimanche
+    expect(weekStart("2026-11-09")).toBe("2026-11-09"); // lundi
   });
 });

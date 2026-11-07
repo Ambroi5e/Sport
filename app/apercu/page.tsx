@@ -34,7 +34,10 @@ import { QuickPicks } from "@/components/nutrition/quick-picks";
 import { TargetsForm } from "@/components/nutrition/targets-form";
 import { TodayNutritionCard } from "@/components/nutrition/today-card";
 import { addFoodLog, createFood, saveRecipe } from "@/app/(app)/nutrition/actions";
+import { BarcodeScanner } from "@/components/nutrition/barcode-scanner";
+import { LabelReader } from "@/components/nutrition/label-reader";
 import { RealTdeeCard } from "@/components/nutrition/real-tdee-card";
+import { ScanNotice } from "@/components/nutrition/scan-notice";
 import { RecipeEditor } from "@/components/nutrition/recipe-editor";
 import { RecipeList } from "@/components/nutrition/recipe-list";
 import { buttonClasses } from "@/components/ui/button";
@@ -65,6 +68,9 @@ import {
   SAMPLE_MEASUREMENTS,
   SAMPLE_PHOTOS,
   SAMPLE_INGREDIENTS,
+  SAMPLE_LABEL,
+  SAMPLE_OFF,
+  SAMPLE_OFF_PREFILL,
   SAMPLE_PROGRAM,
   SAMPLE_REAL_TDEE,
   SAMPLE_REAL_TDEE_WAITING,
@@ -343,6 +349,36 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
             <PageHeader title="Nouvel aliment" back="/apercu?ecran=nutrition-ajouter" />
             <div className="md:max-w-xl">
               <FoodForm action={createFood} defaultName="Granola" submitLabel="Créer et choisir la quantité" />
+            </div>
+          </>
+        ) : ecran === "nutrition-scanner" ? (
+          <>
+            <PageHeader title="Scanner" back="/apercu?ecran=nutrition-ajouter" />
+            <div className="md:max-w-xl">
+              <BarcodeScanner query="repas=diner" />
+            </div>
+          </>
+        ) : ecran === "nutrition-code-trouve" ? (
+          <>
+            <PageHeader title={SAMPLE_OFF.name} eyebrow="Code 3017620422003" back="/apercu?ecran=nutrition-scanner" />
+            <div className="grid gap-5 md:max-w-xl">
+              <ScanNotice code="3017620422003" kind="trouve" />
+              <FoodForm action={createFood} hidden={{}} prefill={SAMPLE_OFF_PREFILL} submitLabel="Créer et choisir la quantité" />
+            </div>
+          </>
+        ) : ecran === "nutrition-code-inconnu" ? (
+          <>
+            <PageHeader title="Nouveau produit" eyebrow="Code 3760123456784" back="/apercu?ecran=nutrition-scanner" />
+            <div className="grid gap-5 md:max-w-4xl">
+              <ScanNotice code="3760123456784" kind="inconnu" />
+              <LabelReader action={createFood} hidden={{}} submitLabel="Créer et choisir la quantité" />
+            </div>
+          </>
+        ) : ecran === "nutrition-etiquette" ? (
+          <>
+            <PageHeader title="Lire une étiquette" back="/apercu?ecran=nutrition-ajouter" />
+            <div className="md:max-w-4xl">
+              <LabelReader action={createFood} hidden={{}} submitLabel="Créer et choisir la quantité" sample={SAMPLE_LABEL} />
             </div>
           </>
         ) : ecran === "seance" ? (

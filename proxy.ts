@@ -16,7 +16,8 @@ function contentSecurityPolicy(nonce: string) {
   const isDev = process.env.NODE_ENV === "development";
   return [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDev ? " 'unsafe-eval'" : ""}`,
+    // 'wasm-unsafe-eval' : compiler le lecteur de codes-barres en WebAssembly, et rien d'autre.
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'wasm-unsafe-eval'${isDev ? " 'unsafe-eval'" : ""}`,
     // Les attributs style (React) et les feuilles de next/font demandent 'unsafe-inline' ;
     // le risque reste faible tant que les scripts sont verrouillés par nonce.
     "style-src 'self' 'unsafe-inline'",
@@ -69,7 +70,7 @@ export const config = {
   matcher: [
     {
       source:
-        "/((?!_next/static|_next/image|favicon.ico|icon.svg|icons/|sw.js|manifest.webmanifest|robots.txt).*)",
+        "/((?!_next/static|_next/image|favicon.ico|icon.svg|icons/|scan/|sw.js|manifest.webmanifest|robots.txt).*)",
       missing: [
         { type: "header", key: "next-router-prefetch" },
         { type: "header", key: "purpose", value: "prefetch" },

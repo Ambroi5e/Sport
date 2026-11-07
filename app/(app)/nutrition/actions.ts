@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { getProfile, requireUserId } from "@/lib/auth";
 import { addDays, localDate } from "@/lib/dates";
-import { MEALS, type Meal } from "@/lib/engine";
+import { isValidBarcode, MEALS, type Meal } from "@/lib/engine";
 import { dayHref, FOOD_COLUMNS, isDay, toFood } from "@/lib/nutrition";
 import { MAX_PORTIONS, MAX_RECIPE_ITEMS, recipeRow } from "@/lib/recipes";
 import { createClient } from "@/lib/supabase/server";
@@ -225,8 +225,16 @@ export async function createFood(_prev: FormState, formData: FormData): Promise<
   await requireUserId();
   const parsed = readFood(formData);
   if (!parsed.success) return { error: parsed.error.issues[0].message, values: foodValues(formData) };
+  // Code-barres venu du scan : gardé sur l'aliment pour le retrouver au scan suivant.
+  const code = formData.get("barcode");
+  const barcode = typeof code === "string" && isValidBarcode(code) ? code : null;
   const supabase = await createClient();
-  const { data, error } = await supabase.from("foods").insert(foodRow(parsed.data)).select("id").single();
+  const { data, error } = await supabase
+    .from("foods")
+    .insert({ ...foodRow(parsed.data), barcode })
+    .select("id")
+    .single();
+  if (error?.code === "23505") return { error: "Tu as déjà un aliment avec ce code-barres : retrouve-le dans Mes aliments.", values: foodValues(formData) };
   if (error || !data) return { error: SAVE_ERROR, values: foodValues(formData) };
   revalidatePath("/nutrition");
   const m = meal.safeParse(formData.get("meal"));

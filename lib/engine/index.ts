@@ -9,3 +9,4 @@ export * from "./nutrition";
 export * from "./body";
 export * from "./program";
 export * from "./adaptive";
+export * from "./label";

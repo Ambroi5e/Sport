@@ -15,18 +15,21 @@ export function FoodForm({
   food,
   defaultName,
   hidden = {},
+  prefill = {},
   submitLabel,
 }: {
   action: (state: FormState, formData: FormData) => Promise<FormState>;
   food?: Food;
   defaultName?: string;
   hidden?: Record<string, string>;
+  /** Valeurs trouvées ailleurs (Open Food Facts, photo d'étiquette), à vérifier. */
+  prefill?: Partial<Record<"name" | "brand" | "kcal" | "proteinG" | "carbsG" | "fatG" | "portionLabel" | "portionG", string>>;
   submitLabel: string;
 }) {
   const [state, formAction] = useActionState(action, {} as FormState);
   const decimal = { inputMode: "decimal" as const, autoComplete: "off", enterKeyHint: "next" as const };
   // Saisie refusée : on la remet telle quelle plutôt que de vider le formulaire.
-  const v = (key: string, fallback: string) => state.values?.[key] ?? fallback;
+  const v = (key: keyof typeof prefill, fallback: string) => state.values?.[key] ?? prefill[key] ?? fallback;
 
   return (
     <form action={formAction} className="grid gap-5" noValidate>

@@ -5,14 +5,8 @@ import Link from "next/link";
 import { useDeferredValue, useState, type ReactNode } from "react";
 import { useFormStatus } from "react-dom";
 import { cn } from "@/components/ui/cn";
+import { searchKey } from "@/lib/text";
 import { EQUIPMENT_LABELS, MUSCLE_GROUPS, MUSCLE_LABELS, type ExerciseSummary } from "@/lib/training";
-
-function normalize(text: string) {
-  return text
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase();
-}
 
 /**
  * Bibliothèque filtrable. Avec `addAction`, chaque ligne ajoute l'exercice
@@ -30,10 +24,10 @@ export function ExerciseList({
   const deferredQuery = useDeferredValue(query);
 
   const muscles = group ? MUSCLE_GROUPS.find((g) => g.id === group)?.muscles ?? [] : null;
-  const q = normalize(deferredQuery.trim());
+  const q = searchKey(deferredQuery.trim());
   const visible = exercises.filter(
     (e) =>
-      (!q || normalize(e.name).includes(q)) && (!muscles || e.primary_muscles.some((m) => muscles.includes(m))),
+      (!q || searchKey(e.name).includes(q)) && (!muscles || e.primary_muscles.some((m) => muscles.includes(m))),
   );
 
   return (

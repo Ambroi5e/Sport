@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
 import { FoodForm } from "@/components/nutrition/food-form";
 import { ConfirmAction } from "@/components/ui/confirm-action";
@@ -15,6 +15,8 @@ export default async function EditFoodPage({ params }: { params: Promise<{ id: s
   if (!z.uuid().safeParse(id).success) notFound();
   const food = await getFood(id);
   if (!food.personal) notFound();
+  // Une recette se corrige par ses ingrédients.
+  if (food.recipe) redirect(`/nutrition/recettes/${food.id}`);
   return (
     <>
       <PageHeader title={food.name} back="/nutrition/aliments" />

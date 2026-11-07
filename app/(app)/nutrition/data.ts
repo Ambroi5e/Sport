@@ -2,7 +2,7 @@ import "server-only";
 import { notFound } from "next/navigation";
 import { requireUserId } from "@/lib/auth";
 import { addDays } from "@/lib/dates";
-import { dayTypeFor, frequentFoods, nutrientsFor, sumNutrients, type DayType, type Meal, type Nutrients } from "@/lib/engine";
+import { dayTypeFor, frequentFoods, nutrientsFor, sumNutrients, type DayType, type Meal, type Nutrients, type WeighIn } from "@/lib/engine";
 import { FOOD_COLUMNS, toFood, type Food, type JournalEntry, type Target } from "@/lib/nutrition";
 import { createClient } from "@/lib/supabase/server";
 
@@ -123,12 +123,90 @@ export async function getSavedMeals(): Promise<SavedMeal[]> {
   });
 }
 
-/** Aliments créés par l'utilisateur, non archivés. */
+/** Aliments créés par l'utilisateur, non archivés ; les recettes ont leur propre liste. */
 export async function getPersonalFoods(): Promise<Food[]> {
   const userId = await requireUserId();
   const supabase = await createClient();
-  const { data } = await supabase.from("foods").select(FOOD_COLUMNS).eq("user_id", userId).is("archived_at", null).order("name");
+  const { data } = await supabase.from("foods").select(FOOD_COLUMNS).eq("user_id", userId).eq("is_recipe", false).is("archived_at", null).order("name");
   return (data ?? []).map(toFood);
+}
+
+/** Ingrédients possibles d'une recette : tout aliment non archivé, sauf les recettes. */
+export async function getIngredients(): Promise<Food[]> {
+  await requireUserId();
+  const supabase = await createClient();
+  const { data } = await supabase.from("foods").select(FOOD_COLUMNS).eq("is_recipe", false).is("archived_at", null).order("name");
+  return (data ?? []).map(toFood);
+}
+
+export type RecipeSummary = { food: Food; portions: number };
+
+export async function getRecipes(): Promise<RecipeSummary[]> {
+  const userId = await requireUserId();
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("foods")
+    .select(`${FOOD_COLUMNS}, recipe_portions`)
+    .eq("user_id", userId)
+    .eq("is_recipe", true)
+    .is("archived_at", null)
+    .order("name");
+  return (data ?? []).map((r) => ({ food: toFood(r), portions: r.recipe_portions ?? 1 }));
+}
+
+export type Recipe = { food: Food; cookedG: number | null; portions: number; items: { food: Food; grams: number }[] };
+
+/** Une recette et ses ingrédients, dans l'ordre de saisie. */
+export async function getRecipe(id: string): Promise<Recipe> {
+  const userId = await requireUserId();
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("foods")
+    .select(
+      `${FOOD_COLUMNS}, recipe_total_g, recipe_portions, recipe_items!recipe_items_recipe_id_user_id_fkey(grams, position, foods!recipe_items_food_id_fkey(${FOOD_COLUMNS}))`,
+    )
+    .eq("id", id)
+    .eq("user_id", userId)
+    .eq("is_recipe", true)
+    .is("archived_at", null)
+    .maybeSingle();
+  if (!data) notFound();
+  const items = [...data.recipe_items]
+    .sort((a, b) => a.position - b.position)
+    .flatMap((i) => (i.foods ? [{ food: toFood(i.foods), grams: Number(i.grams) }] : []));
+  return {
+    food: toFood(data),
+    cookedG: data.recipe_total_g === null ? null : Number(data.recipe_total_g),
+    portions: data.recipe_portions ?? 1,
+    items,
+  };
+}
+
+/** Calories notées par jour entre deux dates incluses (jours sans rien noté absents). */
+export async function getDailyIntake(from: string, to: string): Promise<{ date: string; kcal: number }[]> {
+  const userId = await requireUserId();
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("food_logs")
+    .select("eaten_on, grams, foods(kcal)")
+    .eq("user_id", userId)
+    .gte("eaten_on", from)
+    .lte("eaten_on", to)
+    .limit(5000);
+  const days = new Map<string, number>();
+  for (const row of data ?? []) {
+    if (!row.foods) continue;
+    days.set(row.eaten_on, (days.get(row.eaten_on) ?? 0) + (Number(row.foods.kcal) * Number(row.grams)) / 100);
+  }
+  return [...days].map(([date, kcal]) => ({ date, kcal }));
+}
+
+/** Pesées depuis une date, pour la dépense réelle. */
+export async function getWeightsSince(from: string): Promise<WeighIn[]> {
+  const userId = await requireUserId();
+  const supabase = await createClient();
+  const { data } = await supabase.from("body_weights").select("measured_on, weight_kg").eq("user_id", userId).gte("measured_on", from).order("measured_on");
+  return (data ?? []).map((w) => ({ date: w.measured_on, kg: Number(w.weight_kg) }));
 }
 
 /** Dernière pesée, pour la cible suggérée. */

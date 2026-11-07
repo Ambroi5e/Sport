@@ -1,6 +1,7 @@
 /** Nutrition : libellés, aliments tels que les écrans les lisent, formats. */
 import type { DayType, Meal, Nutrients } from "@/lib/engine";
 import { MEALS } from "@/lib/engine";
+import { searchKey } from "@/lib/text";
 
 export const MEAL_LABELS: Record<Meal, string> = {
   petit_dejeuner: "Petit-déjeuner",
@@ -48,6 +49,8 @@ export type Food = {
   portionG: number | null;
   portionLabel: string | null;
   personal: boolean;
+  /** Recette : valeurs calculées depuis ses ingrédients, portion = une part. */
+  recipe: boolean;
 };
 
 export type FoodRow = {
@@ -61,9 +64,10 @@ export type FoodRow = {
   fat_g: number;
   portion_g: number | null;
   portion_label: string | null;
+  is_recipe: boolean;
 };
 
-export const FOOD_COLUMNS = "id, user_id, name, brand, kcal, protein_g, carbs_g, fat_g, portion_g, portion_label";
+export const FOOD_COLUMNS = "id, user_id, name, brand, kcal, protein_g, carbs_g, fat_g, portion_g, portion_label, is_recipe";
 
 export function toFood(row: FoodRow): Food {
   return {
@@ -74,7 +78,23 @@ export function toFood(row: FoodRow): Food {
     portionG: row.portion_g === null ? null : Number(row.portion_g),
     portionLabel: row.portion_label,
     personal: row.user_id !== null,
+    recipe: row.is_recipe,
   };
+}
+
+/**
+ * Recherche sans accents : chaque mot doit apparaître dans le nom ou la marque,
+ * les noms qui commencent par la recherche d'abord (« riz » avant « farine de riz »).
+ */
+export function matchFoods(foods: readonly Food[], query: string, limit: number): Food[] {
+  const q = searchKey(query.trim());
+  if (!q) return [];
+  return foods
+    .map((f) => ({ f, key: searchKey(`${f.name} ${f.brand ?? ""}`) }))
+    .filter(({ key }) => q.split(/\s+/).every((word) => key.includes(word)))
+    .sort((a, b) => Number(!a.key.startsWith(q)) - Number(!b.key.startsWith(q)))
+    .slice(0, limit)
+    .map(({ f }) => f);
 }
 
 export function isMeal(value: unknown): value is Meal {

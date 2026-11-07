@@ -6,7 +6,8 @@ import { z } from "zod";
 import { getProfile, requireUserId } from "@/lib/auth";
 import { addDays, localDate } from "@/lib/dates";
 import { MEALS, type Meal } from "@/lib/engine";
-import { dayHref, isDay } from "@/lib/nutrition";
+import { dayHref, FOOD_COLUMNS, isDay, toFood } from "@/lib/nutrition";
+import { MAX_PORTIONS, MAX_RECIPE_ITEMS, recipeRow } from "@/lib/recipes";
 import { createClient } from "@/lib/supabase/server";
 
 /** `values` renvoie la saisie quand elle est refusée : le formulaire la garde au lieu de se vider. */
@@ -248,11 +249,36 @@ export async function updateFood(foodId: string, _prev: FormState, formData: For
     .from("foods")
     .update({ ...foodRow(parsed.data), updated_at: new Date().toISOString() })
     .eq("id", id.parse(foodId))
+    .eq("is_recipe", false)
     .select("id")
     .maybeSingle();
   if (error || !data) return { error: SAVE_ERROR, values: foodValues(formData) };
+  await recomputeRecipes(supabase, data.id);
   revalidatePath("/nutrition", "layout");
   redirect("/nutrition/aliments");
+}
+
+type Supabase = Awaited<ReturnType<typeof createClient>>;
+
+/** Un ingrédient corrigé : les recettes qui l'utilisent suivent, et les jours où elles sont notées aussi. */
+async function recomputeRecipes(supabase: Supabase, foodId: string) {
+  const { data: uses } = await supabase.from("recipe_items").select("recipe_id").eq("food_id", foodId);
+  const recipeIds = [...new Set((uses ?? []).map((u) => u.recipe_id))];
+  if (!recipeIds.length) return;
+  const { data: recipes } = await supabase
+    .from("foods")
+    .select(`id, recipe_total_g, recipe_portions, recipe_items!recipe_items_recipe_id_user_id_fkey(grams, foods!recipe_items_food_id_fkey(${FOOD_COLUMNS}))`)
+    .in("id", recipeIds)
+    .eq("is_recipe", true);
+  const now = new Date().toISOString();
+  await Promise.all(
+    (recipes ?? []).map(async (r) => {
+      const items = r.recipe_items.flatMap((i) => (i.foods ? [{ grams: Number(i.grams), per100: toFood(i.foods).per100 }] : []));
+      const result = recipeRow(items, r.recipe_total_g === null ? null : Number(r.recipe_total_g), r.recipe_portions ?? 1);
+      // Hors limites (pesée douteuse) : la recette garde ses valeurs, l'écran de la recette le dira.
+      if (result.ok) await supabase.from("foods").update({ ...result.row, updated_at: now }).eq("id", r.id);
+    }),
+  );
 }
 
 /** Retire un aliment des listes ; il reste dans les jours où il a été noté. */
@@ -262,6 +288,121 @@ export async function archiveFood(foodId: string) {
   await supabase.from("foods").update({ archived_at: new Date().toISOString() }).eq("id", id.parse(foodId));
   revalidatePath("/nutrition", "layout");
   redirect("/nutrition/aliments");
+}
+
+// Recettes ------------------------------------------------------------------------
+
+const recipeSchema = z.object({
+  name: z.string().trim().min(2, "Le nom doit faire au moins 2 caractères.").max(80, "80 caractères au maximum."),
+  portions: z
+    .number({ error: "Indique le nombre de parts." })
+    .int("Le nombre de parts est un nombre entier.")
+    .min(1, "Une part au moins.")
+    .max(MAX_PORTIONS, `${MAX_PORTIONS} parts au maximum.`),
+  cookedG: z
+    .number({ error: "Le poids cuit est un nombre de grammes, ou laisse vide." })
+    .gt(0, "Le poids cuit doit être positif.")
+    .max(50000, "50 kg au maximum pour le plat entier.")
+    .nullable(),
+  items: z
+    .array(
+      z.object({
+        foodId: id,
+        grams: z
+          .number({ error: "Indique le poids de chaque ingrédient." })
+          .gt(0, "Chaque ingrédient doit peser plus de 0 g.")
+          .max(10000, "10 kg au maximum par ingrédient."),
+      }),
+    )
+    .min(1, "Ajoute au moins un ingrédient.")
+    .max(MAX_RECIPE_ITEMS, `${MAX_RECIPE_ITEMS} ingrédients au maximum.`),
+});
+
+function readItems(value: FormDataEntryValue | null): unknown {
+  try {
+    const list = JSON.parse(typeof value === "string" ? value : "[]");
+    return Array.isArray(list) ? list.map((i) => ({ foodId: i?.foodId, grams: typeof i?.grams === "number" ? i.grams : decimal(typeof i?.grams === "string" ? i.grams : null) })) : [];
+  } catch {
+    return [];
+  }
+}
+
+const round1 = (n: number) => Math.round(n * 10) / 10;
+
+/**
+ * Crée ou modifie une recette : les valeurs pour 100 g et la part sont recalculées
+ * ici depuis les ingrédients relus en base, jamais reprises du navigateur.
+ */
+export async function saveRecipe(recipeId: string | null, _prev: FormState, formData: FormData): Promise<FormState> {
+  await requireUserId();
+  if (recipeId !== null) id.parse(recipeId);
+  const parsed = recipeSchema.safeParse({
+    name: typeof formData.get("name") === "string" ? formData.get("name") : "",
+    portions: decimal(formData.get("portions")),
+    cookedG: decimal(formData.get("cookedG")),
+    items: readItems(formData.get("items")),
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+  const v = parsed.data;
+
+  const supabase = await createClient();
+  const foodIds = [...new Set(v.items.map((i) => i.foodId))];
+  const { data: rows } = await supabase.from("foods").select(FOOD_COLUMNS).in("id", foodIds);
+  const foods = new Map((rows ?? []).map((r) => [r.id, toFood(r)]));
+  // Pas de recette dans une recette : cela évite les boucles et les recalculs en chaîne.
+  if (foodIds.some((f) => !foods.has(f) || foods.get(f)!.recipe || f === recipeId)) {
+    return { error: "Un ingrédient n'est plus disponible ou est lui-même une recette : retire-le et réessaie." };
+  }
+  const result = recipeRow(
+    v.items.map((i) => ({ grams: i.grams, per100: foods.get(i.foodId)!.per100 })),
+    v.cookedG,
+    v.portions,
+  );
+  if (!result.ok) return { error: result.error };
+  const items = (recipe: string) => v.items.map((i, position) => ({ recipe_id: recipe, food_id: i.foodId, grams: round1(i.grams), position }));
+
+  if (recipeId === null) {
+    const { data: recipe, error } = await supabase
+      .from("foods")
+      .insert({ name: v.name, ...result.row, is_recipe: true })
+      .select("id")
+      .single();
+    if (error || !recipe) return { error: SAVE_ERROR };
+    const { error: itemsError } = await supabase.from("recipe_items").insert(items(recipe.id));
+    if (itemsError) {
+      // Pas de recette vide : on retire celle qui vient d'être créée.
+      await supabase.from("foods").delete().eq("id", recipe.id);
+      return { error: SAVE_ERROR };
+    }
+  } else {
+    // Nouveaux ingrédients d'abord, anciens retirés à la fin : un échec en route ne vide jamais la recette.
+    const { data: old } = await supabase.from("recipe_items").select("id").eq("recipe_id", recipeId);
+    const { data: added, error: itemsError } = await supabase.from("recipe_items").insert(items(recipeId)).select("id");
+    if (itemsError || !added) return { error: SAVE_ERROR };
+    const { data: updated, error } = await supabase
+      .from("foods")
+      .update({ name: v.name, ...result.row, updated_at: new Date().toISOString() })
+      .eq("id", recipeId)
+      .eq("is_recipe", true)
+      .select("id")
+      .maybeSingle();
+    if (error || !updated) {
+      await supabase.from("recipe_items").delete().in("id", added.map((a) => a.id));
+      return { error: SAVE_ERROR };
+    }
+    if (old?.length) await supabase.from("recipe_items").delete().in("id", old.map((o) => o.id));
+  }
+  revalidatePath("/nutrition", "layout");
+  redirect("/nutrition/recettes");
+}
+
+/** Retire une recette des listes ; elle reste dans les jours où elle a été notée. */
+export async function archiveRecipe(recipeId: string) {
+  await requireUserId();
+  const supabase = await createClient();
+  await supabase.from("foods").update({ archived_at: new Date().toISOString() }).eq("id", id.parse(recipeId)).eq("is_recipe", true);
+  revalidatePath("/nutrition", "layout");
+  redirect("/nutrition/recettes");
 }
 
 // Cibles ------------------------------------------------------------------------

@@ -3,8 +3,7 @@
 import { CaretRightIcon, MagnifyingGlassIcon, PlusIcon } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useDeferredValue, useState, type ReactNode } from "react";
-import { formatKcal, formatMacro, type Food } from "@/lib/nutrition";
-import { searchKey } from "@/lib/text";
+import { formatKcal, formatMacro, matchFoods, type Food } from "@/lib/nutrition";
 
 const MAX_RESULTS = 40;
 
@@ -14,17 +13,9 @@ const MAX_RESULTS = 40;
  */
 export function FoodPicker({ foods, params, children }: { foods: Food[]; params: string; children: ReactNode }) {
   const [query, setQuery] = useState("");
-  const q = searchKey(useDeferredValue(query).trim());
-
-  const matches = q
-    ? foods
-        .map((f) => ({ f, key: searchKey(`${f.name} ${f.brand ?? ""}`) }))
-        .filter(({ key }) => q.split(/\s+/).every((word) => key.includes(word)))
-        // Les noms qui commencent par la recherche d'abord (« riz » avant « farine de riz »).
-        .sort((a, b) => Number(!a.key.startsWith(q)) - Number(!b.key.startsWith(q)))
-        .slice(0, MAX_RESULTS)
-        .map(({ f }) => f)
-    : [];
+  const deferred = useDeferredValue(query);
+  const q = deferred.trim();
+  const matches = matchFoods(foods, deferred, MAX_RESULTS);
 
   return (
     <div className="grid gap-5">
@@ -55,7 +46,7 @@ export function FoodPicker({ foods, params, children }: { foods: Food[]; params:
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-[15px] font-medium">
                         {f.name}
-                        {f.personal ? <span className="ml-2 text-[12px] font-normal text-muted">perso</span> : null}
+                        {f.personal ? <span className="ml-2 text-[12px] font-normal text-muted">{f.recipe ? "recette" : "perso"}</span> : null}
                       </span>
                       <span className="block truncate text-[13px] text-muted">
                         {f.brand ? `${f.brand} · ` : ""}

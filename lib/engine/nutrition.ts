@@ -85,8 +85,9 @@ const round = (value: number, step: number) => Math.round(value / step) * step;
 
 /**
  * Cible suggérée, à titre de repère général : métabolisme de base
- * (Mifflin-St Jeor) × activité, ajusté à l'objectif, ±5 % selon le type de
- * jour. Calories arrondies à 50, protéines à 5.
+ * (Mifflin-St Jeor) × activité, ou la dépense réelle mesurée quand elle est
+ * connue, ajusté à l'objectif, ±5 % selon le type de jour. Calories arrondies à
+ * 50, protéines à 5.
  */
 export function suggestTargets(p: {
   sex: Sex;
@@ -95,8 +96,10 @@ export function suggestTargets(p: {
   age: number;
   sessionsPerWeek: number;
   goal: string | null;
+  /** Dépense réelle mesurée (TDEE adaptatif) : remplace la formule quand elle est fiable. */
+  maintenanceKcal?: number | null;
 }): TargetSuggestion {
-  const maintenance = tdee(bmrMifflin(p), activityFromSessions(p.sessionsPerWeek));
+  const maintenance = p.maintenanceKcal ?? tdee(bmrMifflin(p), activityFromSessions(p.sessionsPerWeek));
   const base = maintenance * (GOAL_FACTORS[p.goal ?? ""] ?? 1);
   const proteinG = round(p.weightKg * (HIGH_PROTEIN_GOALS.has(p.goal ?? "") ? 2 : 1.6), 5);
   return {
@@ -104,4 +107,28 @@ export function suggestTargets(p: {
     entrainement: { kcal: round(base * (1 + TRAINING_DAY_SPREAD), 50), proteinG },
     repos: { kcal: round(base * (1 - TRAINING_DAY_SPREAD), 50), proteinG },
   };
+}
+
+export type RecipeNutrients = {
+  total: Nutrients;
+  /** Somme des ingrédients crus. */
+  rawG: number;
+  /** Poids total une fois cuit (la somme crue s'il n'est pas pesé). */
+  totalG: number;
+  per100: Nutrients;
+  portionG: number;
+  perPortion: Nutrients;
+};
+
+/**
+ * Valeurs d'une recette : somme des ingrédients, ramenée à 100 g du plat cuit
+ * (l'eau perdue ou gagnée change la densité, pas les apports), et à la part.
+ */
+export function recipeNutrients(items: readonly { grams: number; per100: Nutrients }[], totalG?: number | null, portions = 1): RecipeNutrients {
+  const total = sumNutrients(items.map((i) => nutrientsFor(i.per100, i.grams)));
+  const rawG = items.reduce((sum, i) => sum + Math.max(0, i.grams), 0);
+  const weight = totalG && totalG > 0 ? totalG : rawG;
+  const scale = (n: Nutrients, f: number): Nutrients => ({ kcal: n.kcal * f, proteinG: n.proteinG * f, carbsG: n.carbsG * f, fatG: n.fatG * f });
+  const parts = Math.max(1, Math.round(portions));
+  return { total, rawG, totalG: weight, per100: weight > 0 ? scale(total, 100 / weight) : NO_NUTRIENTS, portionG: weight / parts, perPortion: scale(total, 1 / parts) };
 }

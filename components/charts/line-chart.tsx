@@ -17,9 +17,15 @@ export function LineChart({
   format,
   className = "h-44",
   ticks: tickCount = 4,
+  dashed = false,
+  goal,
 }: {
   points?: Point[];
   line?: Point[];
+  /** Trait en pointillés : une projection, pas une mesure. */
+  dashed?: boolean;
+  /** Valeur visée, en ligne de repère horizontale. */
+  goal?: number;
   from: string;
   to: string;
   format: (value: number) => string;
@@ -27,7 +33,7 @@ export function LineChart({
   className?: string;
   ticks?: number;
 }) {
-  const values = [...points, ...line].map((p) => p.value);
+  const values = [...points, ...line].map((p) => p.value).concat(goal === undefined ? [] : [goal]);
   if (values.length === 0) return null;
 
   const ticks = niceTicks(Math.min(...values), Math.max(...values), tickCount);
@@ -54,14 +60,24 @@ export function LineChart({
         {ticks.map((t) => (
           <span key={t} className="absolute inset-x-0 border-t border-line" style={{ top: `${y(t)}%` }} />
         ))}
+        {goal !== undefined ? <span className="absolute inset-x-0 border-t-2 border-dashed border-muted" style={{ top: `${y(goal)}%` }} /> : null}
         {line.length > 1 ? (
           <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 size-full overflow-visible">
-            <path d={path} fill="none" className="stroke-chart" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+            <path
+              d={path}
+              fill="none"
+              className="stroke-chart"
+              strokeWidth={2}
+              strokeLinejoin="round"
+              strokeLinecap="round"
+              strokeDasharray={dashed ? "6 5" : undefined}
+              vectorEffect="non-scaling-stroke"
+            />
           </svg>
         ) : null}
-        {points.map((p) => (
+        {points.map((p, i) => (
           <span
-            key={p.date}
+            key={`${p.date}-${i}`}
             title={`${formatAxisDate(p.date)} : ${format(p.value)}`}
             className="absolute grid size-6 -translate-x-1/2 -translate-y-1/2 place-items-center"
             style={{ left: `${x(p.date)}%`, top: `${y(p.value)}%` }}
@@ -96,8 +112,8 @@ export function LineChart({
   );
 }
 
-/** Légende d'une courbe à deux séries : pastille pour les points, trait pour la ligne. */
-export function LineLegend({ points, line }: { points: string; line: string }) {
+/** Légende d'une courbe : pastille pour les points, trait pour la ligne, pointillés pour la valeur visée. */
+export function LineLegend({ points, line, dashed = false, goal }: { points: string; line: string; dashed?: boolean; goal?: string }) {
   return (
     <ul className="flex flex-wrap gap-x-4 gap-y-1 text-[13px] text-muted">
       <li className="flex items-center gap-1.5">
@@ -105,9 +121,21 @@ export function LineLegend({ points, line }: { points: string; line: string }) {
         {points}
       </li>
       <li className="flex items-center gap-1.5">
-        <span className="h-0.5 w-4 rounded-full bg-chart" aria-hidden="true" />
+        {dashed ? (
+          <svg width="16" height="2" aria-hidden="true" className="overflow-visible">
+            <line x1="0" y1="1" x2="16" y2="1" className="stroke-chart" strokeWidth={2} strokeDasharray="4 3" />
+          </svg>
+        ) : (
+          <span className="h-0.5 w-4 rounded-full bg-chart" aria-hidden="true" />
+        )}
         {line}
       </li>
+      {goal ? (
+        <li className="flex items-center gap-1.5">
+          <span className="w-4 border-t-2 border-dashed border-muted" aria-hidden="true" />
+          {goal}
+        </li>
+      ) : null}
     </ul>
   );
 }

@@ -1,4 +1,4 @@
-import { BarbellIcon, FlagIcon } from "@phosphor-icons/react/ssr";
+import { BarbellIcon, CalendarCheckIcon, FlagIcon } from "@phosphor-icons/react/ssr";
 import { notFound } from "next/navigation";
 import { AppNav } from "@/components/nav/app-nav";
 import { Card } from "@/components/ui/card";
@@ -15,6 +15,14 @@ import { RecordTiles, recordTiles } from "@/components/training/record-tiles";
 import { TemplateItems } from "@/components/training/template-forms";
 import { RestTimerDock } from "@/components/training/rest-timer";
 import { WorkoutLogger } from "@/components/training/workout-logger";
+import { PreferenceToggle } from "@/components/training/preference-toggle";
+import { ProgramForm } from "@/components/training/program-form";
+import { ProgramNextCard } from "@/components/training/program-next-card";
+import { ProgramView } from "@/components/training/program-view";
+import { ReplaceForm } from "@/components/training/replace-form";
+import { startWorkout } from "@/app/(app)/entrainement/actions";
+import { createProgram, endProgram, replaceProgramItem, setExercisePreference } from "@/app/(app)/entrainement/programme/actions";
+import { goalOptions } from "@/lib/program";
 import { SessionSettings } from "@/components/settings/session-settings";
 import { FoodForm } from "@/components/nutrition/food-form";
 import { FoodPicker } from "@/components/nutrition/food-picker";
@@ -52,6 +60,8 @@ import {
   SAMPLE_ITEMS,
   SAMPLE_MEASUREMENTS,
   SAMPLE_PHOTOS,
+  SAMPLE_PROGRAM,
+  SAMPLE_REPLACE,
   SAMPLE_SETS,
   SAMPLE_TARGETS,
   SAMPLE_TODAY,
@@ -162,10 +172,54 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
             <ProgressTabs current="/progres/force" />
             <StrengthView sets={SAMPLE_SETS} names={SAMPLE_EXERCISE_NAMES} start={addDays(weekStart(SAMPLE_DAY), -77)} today={SAMPLE_DAY} unit="kg" />
           </>
+        ) : ecran === "programme" ? (
+          <>
+            <PageHeader back="/apercu?ecran=entrainement" eyebrow="Programme" title={SAMPLE_PROGRAM.name} />
+            <ProgramView data={SAMPLE_PROGRAM} unit="kg" startAction={startWorkout} endAction={endProgram.bind(null, "apercu")} />
+          </>
+        ) : ecran === "programme-vide" ? (
+          <>
+            <PageHeader back="/apercu?ecran=entrainement" title="Programme" />
+            <div className="grid gap-4 md:max-w-2xl">
+              <EmptyState icon={<CalendarCheckIcon size={22} />} title="Pas de programme en cours">
+                Dis à Fonte combien de séances tu fais, combien de temps, avec quel matériel et ce que tu veux faire progresser : il te génère tes séances, te
+                propose la charge du jour à chaque séance et te montre où tu en es face à ton objectif.
+              </EmptyState>
+            </div>
+          </>
+        ) : ecran === "programme-nouveau" ? (
+          <>
+            <PageHeader back="/apercu?ecran=programme-vide" title="Nouveau programme" />
+            <div className="grid gap-4 md:max-w-2xl">
+              <Card>
+                <ProgramForm action={createProgram} defaults={{ sessions: 4 }} goalOptions={goalOptions(SAMPLE_EXERCISES)} unit="kg" minDate="2026-11-08" />
+              </Card>
+            </div>
+          </>
+        ) : ecran === "programme-remplacer" ? (
+          <>
+            <PageHeader back="/apercu?ecran=programme" eyebrow="Haut A" title="Remplacer un exercice" />
+            <div className="grid gap-4 md:max-w-2xl">
+              <Card className="grid gap-1">
+                <p className="label-caps">Actuellement</p>
+                <p className="font-title text-[22px]">Développé couché</p>
+                <p className="text-[14px] text-muted">4 × 6–10 · Pectoraux</p>
+              </Card>
+              <Card>
+                <ReplaceForm action={replaceProgramItem.bind(null, "apercu")} current="Développé couché" options={SAMPLE_REPLACE} />
+              </Card>
+            </div>
+          </>
         ) : ecran === "entrainement" ? (
           <>
             <PageHeader title="Entraînement" />
             <div className="grid gap-4 md:max-w-xl">
+              <ProgramNextCard
+                week={SAMPLE_PROGRAM.week}
+                deload={false}
+                session={{ id: "seance-2", name: SAMPLE_PROGRAM.sessions[2].name, exerciseNames: SAMPLE_PROGRAM.sessions[2].items.map((i) => i.name) }}
+                startAction={startWorkout}
+              />
               <Card className="grid gap-4">
                 <h2 className="text-lg font-semibold">Volume de la semaine</h2>
                 <MuscleVolume perMuscle={SAMPLE_VOLUME} />
@@ -224,7 +278,15 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
         ) : ecran === "seance" ? (
           <>
             <PageHeader back="/apercu" eyebrow="vendredi 7 novembre" title="Push A" />
-            <WorkoutLogger userId="apercu" workoutId="apercu" blocks={SAMPLE_BLOCKS} history={SAMPLE_HISTORY} unit="kg" finished={false} />
+            <WorkoutLogger
+              userId="apercu"
+              workoutId="apercu"
+              blocks={SAMPLE_BLOCKS}
+              history={SAMPLE_HISTORY}
+              suggestions={{ 0: "Suggéré : 72,5 kg, une rep de plus par série jusqu'à 10, puis la charge monte." }}
+              unit="kg"
+              finished={false}
+            />
           </>
         ) : ecran === "modele" ? (
           <>
@@ -242,6 +304,9 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
           <>
             <PageHeader back="/apercu" eyebrow="Barre" title="Développé couché" />
             <div className="grid gap-6 md:max-w-3xl">
+              <Card>
+                <PreferenceToggle action={setExercisePreference.bind(null, "apercu")} current="aime" />
+              </Card>
               <RecordTiles tiles={recordTiles(SAMPLE_HISTORY["ex-dc"].records, "charge", "kg")} />
               <ExerciseForm />
             </div>

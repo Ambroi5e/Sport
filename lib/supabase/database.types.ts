@@ -73,6 +73,35 @@ export type Database = {
         }
         Relationships: []
       }
+      exercise_preferences: {
+        Row: {
+          created_at: string
+          exercise_id: string
+          preference: Database["public"]["Enums"]["exercise_preference"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          exercise_id: string
+          preference: Database["public"]["Enums"]["exercise_preference"]
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          exercise_id?: string
+          preference?: Database["public"]["Enums"]["exercise_preference"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exercise_preferences_exercise_id_fkey"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "exercises"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exercises: {
         Row: {
           archived_at: string | null
@@ -372,6 +401,71 @@ export type Database = {
         }
         Relationships: []
       }
+      programs: {
+        Row: {
+          created_at: string
+          deload_every: number
+          ended_on: string | null
+          equipment: Database["public"]["Enums"]["equipment"][]
+          goal_date: string | null
+          goal_exercise_id: string | null
+          goal_kg: number | null
+          id: string
+          name: string
+          priority_muscles: Database["public"]["Enums"]["muscle"][]
+          session_minutes: number
+          sessions_per_week: number
+          starts_on: string
+          updated_at: string
+          user_id: string
+          weeks: number
+        }
+        Insert: {
+          created_at?: string
+          deload_every?: number
+          ended_on?: string | null
+          equipment: Database["public"]["Enums"]["equipment"][]
+          goal_date?: string | null
+          goal_exercise_id?: string | null
+          goal_kg?: number | null
+          id?: string
+          name: string
+          priority_muscles?: Database["public"]["Enums"]["muscle"][]
+          session_minutes: number
+          sessions_per_week: number
+          starts_on: string
+          updated_at?: string
+          user_id?: string
+          weeks?: number
+        }
+        Update: {
+          created_at?: string
+          deload_every?: number
+          ended_on?: string | null
+          equipment?: Database["public"]["Enums"]["equipment"][]
+          goal_date?: string | null
+          goal_exercise_id?: string | null
+          goal_kg?: number | null
+          id?: string
+          name?: string
+          priority_muscles?: Database["public"]["Enums"]["muscle"][]
+          session_minutes?: number
+          sessions_per_week?: number
+          starts_on?: string
+          updated_at?: string
+          user_id?: string
+          weeks?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "programs_goal_exercise_id_fkey"
+            columns: ["goal_exercise_id"]
+            isOneToOne: false
+            referencedRelation: "exercises"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       progress_photos: {
         Row: {
           created_at: string
@@ -642,6 +736,7 @@ export type Database = {
           id: string
           name: string
           position: number
+          program_id: string | null
           updated_at: string
           user_id: string
         }
@@ -650,6 +745,7 @@ export type Database = {
           id?: string
           name: string
           position?: number
+          program_id?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -658,10 +754,19 @@ export type Database = {
           id?: string
           name?: string
           position?: number
+          program_id?: string | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "workout_templates_program_fkey"
+            columns: ["program_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id", "user_id"]
+          },
+        ]
       }
       workouts: {
         Row: {
@@ -773,6 +878,7 @@ export type Database = {
         | "elastique"
         | "autre"
       exercise_measure: "charge" | "poids_du_corps" | "duree"
+      exercise_preference: "aime" | "evite"
       goal_type:
         | "prise_de_masse"
         | "seche"
@@ -830,6 +936,7 @@ export const Constants = {
       day_type: ["entrainement", "repos"],
       equipment: ["barre", "halteres", "machine", "poulie", "poids_du_corps", "kettlebell", "elastique", "autre"],
       exercise_measure: ["charge", "poids_du_corps", "duree"],
+      exercise_preference: ["aime", "evite"],
       goal_type: [
         "prise_de_masse", "seche", "recomposition", "force", "hyrox", "course_10k", "semi_marathon", "marathon",
         "triathlon_s", "triathlon_m", "triathlon_70_3", "triathlon_ironman", "raquette", "collectif", "forme",

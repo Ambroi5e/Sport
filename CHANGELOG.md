@@ -4,6 +4,18 @@ Format : une entrée par version (semver), du plus récent au plus ancien. Les m
 
 ## [Non publié]
 
+### v0.6 : plan prédictif et charge suggérée
+
+- Programme généré : séances par semaine, durée, matériel, muscles prioritaires et objectif chiffré facultatif (« développé couché à 100 kg en mai »). Fonte répartit les séances, choisit les exercices selon le matériel, les préférences et les habitudes, et fixe séries et fourchettes. Les séances sont des modèles : tout reste modifiable.
+- Charge suggérée en séance : double progression (la charge monte quand toutes les séries atteignent le haut de la fourchette, sinon une rep de plus), semaine de décharge toutes les 5 semaines (60 % des séries, charge −10 %). Les séries sont préremplies et une phrase explique la suggestion.
+- Écran Programme : semaine en cours, prochaine séance avec ses charges, objectif avec le 1RM estimé réel et la projection jusqu'à la date estimée, séances de la semaine, volume prévu par muscle, réglages et fin du programme.
+- Séance ratée : le programme reprend dans l'ordre, sans calendrier à rattraper.
+- Remplacer un exercice en deux taps, parmi les exercices équivalents, avec l'option de l'écarter des prochains programmes.
+- Fiche exercice : j'aime, sans avis, à éviter.
+- Entraînement : la prochaine séance du programme en tête, à démarrer en un tap.
+- La spécification v0.6 est découpée en trois versions : v0.6 (plan prédictif), v0.6.1 (TDEE adaptatif, recettes), v0.6.2 (code-barres, photo d'étiquette).
+- Migration non destructive appliquée : `20261111000000_programme.sql` (tables `programs`, `exercise_preferences`, colonne `workout_templates.program_id`), avec 13 tests RLS.
+
 ### v0.5 : corps, progrès et tableau de bord
 
 - Progrès, section Poids : courbe des pesées avec la moyenne sur 7 jours, sur 1, 3, 6 ou 12 mois, résumé écrit et tableau des valeurs.

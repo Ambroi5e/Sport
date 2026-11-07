@@ -32,7 +32,9 @@ Tableau de bord, musculation, endurance, Hyrox, sports additionnels, planning in
 | v0.3 | Mode séance en direct (un tap par série, chrono, écran allumé, hors ligne) |
 | v0.4 | Nutrition rapide : aliments pour 100 g et quantité en grammes, favoris, « refaire comme hier », cibles par type de jour |
 | v0.5 | Corps et progrès, tableau de bord |
-| v0.6 | Plan prédictif, TDEE adaptatif, recettes, scan de code-barres (Open Food Facts) et photo d'étiquette nutritionnelle |
+| v0.6 | Plan prédictif : programme généré, charge suggérée en séance, projection vers un objectif chiffré |
+| v0.6.1 | TDEE adaptatif, recettes |
+| v0.6.2 | Scan de code-barres (Open Food Facts) et photo d'étiquette nutritionnelle |
 | v0.7 | Confidentialité, export JSON + CSV, suppression du compte, SMTP personnalisé |
 | v0.8 | Sports additionnels, planning intelligent, forme du jour |
 | v0.9 | Amis, partage par catégorie, séances communes en temps réel |

@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckIcon, CloudSlashIcon, MinusIcon, PlusIcon, SunIcon, TrophyIcon } from "@phosphor-icons/react";
+import { CheckIcon, CloudSlashIcon, MinusIcon, PlusIcon, SunIcon, TrendUpIcon, TrophyIcon } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { SetInput } from "@/app/(app)/entrainement/actions";
@@ -139,6 +139,7 @@ export function WorkoutLogger({
   workoutId,
   blocks: initialBlocks,
   history,
+  suggestions = {},
   unit,
   finished,
 }: {
@@ -146,6 +147,8 @@ export function WorkoutLogger({
   workoutId: string;
   blocks: LoggerBlock[];
   history: LoggerHistory;
+  /** Charge suggérée par le programme, par numéro d'exercice dans la séance. */
+  suggestions?: Record<number, string>;
   unit: WeightUnit;
   finished: boolean;
 }) {
@@ -341,6 +344,12 @@ export function WorkoutLogger({
               ) : (
                 <p className="text-[13px] text-muted">Première fois : tes valeurs serviront de référence.</p>
               )}
+              {suggestions[block.order] && !finished ? (
+                <p className="mt-1 flex items-start gap-1.5 text-[14px] text-text">
+                  <TrendUpIcon size={16} weight="bold" className="mt-0.5 shrink-0 text-accent-text" aria-hidden="true" />
+                  {suggestions[block.order]}
+                </p>
+              ) : null}
             </header>
 
             <div className="mt-3 grid gap-2">

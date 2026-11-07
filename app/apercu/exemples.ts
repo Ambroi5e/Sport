@@ -1,5 +1,19 @@
+import type { ProgramViewData } from "@/components/training/program-view";
 import type { LoggerBlock, LoggerHistory } from "@/components/training/workout-logger";
-import { nutrientsFor, sumNutrients, type DayType, type Meal, type SetEntry, type WeighIn } from "@/lib/engine";
+import {
+  buildProgram,
+  e1rmHistory,
+  nutrientsFor,
+  plannedSetsPerMuscle,
+  programWeek,
+  projectE1RM,
+  sumNutrients,
+  type CatalogExercise,
+  type DayType,
+  type Meal,
+  type SetEntry,
+  type WeighIn,
+} from "@/lib/engine";
 import type { MeasurementRow, Photo, PhotoPose } from "@/lib/body";
 import type { Food, JournalEntry, Target } from "@/lib/nutrition";
 import type { ExerciseSummary } from "@/lib/training";
@@ -250,3 +264,99 @@ export const SAMPLE_SETS: SetEntry[] = Array.from({ length: 12 * 3 }, (_, n) => 
       })),
     );
   });
+
+// Programme (v0.6) ------------------------------------------------------------------
+
+const cx = (id: string, name: string, equipment: string, primary: string[], secondary: string[] = [], measure = "charge"): CatalogExercise => ({
+  id,
+  name,
+  equipment,
+  measure,
+  primary,
+  secondary,
+});
+
+/** Un extrait du catalogue commun, assez pour générer un programme haut / bas. */
+export const SAMPLE_CATALOG: CatalogExercise[] = [
+  cx("ex-dc", "Développé couché", "barre", ["pectoraux"], ["triceps", "epaules_avant"]),
+  cx("ex-dc-halteres", "Développé couché haltères", "halteres", ["pectoraux"], ["triceps", "epaules_avant"]),
+  cx("ex-incline", "Développé incliné", "barre", ["pectoraux"], ["epaules_avant", "triceps"]),
+  cx("ex-ecarte", "Écarté à la poulie", "poulie", ["pectoraux"], ["epaules_avant"]),
+  cx("ex-rowing", "Rowing barre", "barre", ["dorsaux"], ["trapezes", "epaules_arriere", "biceps", "lombaires"]),
+  cx("ex-rowing-haltere", "Rowing haltère un bras", "halteres", ["dorsaux"], ["epaules_arriere", "biceps"]),
+  cx("ex-tirage", "Tirage vertical", "poulie", ["dorsaux"], ["biceps", "epaules_arriere"]),
+  cx("ex-tirage-h", "Tirage horizontal", "poulie", ["dorsaux"], ["trapezes", "biceps", "epaules_arriere"]),
+  cx("ex-militaire", "Développé militaire", "barre", ["epaules_avant"], ["epaules_laterales", "triceps"]),
+  cx("ex-dev-assis", "Développé haltères assis", "halteres", ["epaules_avant"], ["epaules_laterales", "triceps"]),
+  cx("ex-laterales", "Élévations latérales", "halteres", ["epaules_laterales"]),
+  cx("ex-laterales-poulie", "Élévations latérales à la poulie", "poulie", ["epaules_laterales"]),
+  cx("ex-face-pull", "Face pull", "poulie", ["epaules_arriere"], ["trapezes"]),
+  cx("ex-curl", "Curl haltères", "halteres", ["biceps"], ["avant_bras"]),
+  cx("ex-curl-poulie", "Curl à la poulie", "poulie", ["biceps"]),
+  cx("ex-triceps", "Extension triceps à la corde", "poulie", ["triceps"]),
+  cx("ex-barre-front", "Barre au front", "barre", ["triceps"]),
+  cx("ex-squat", "Squat", "barre", ["quadriceps", "fessiers"], ["adducteurs", "lombaires"]),
+  cx("ex-squat-avant", "Squat avant", "barre", ["quadriceps"], ["fessiers", "abdominaux"]),
+  cx("ex-presse", "Presse à cuisses", "machine", ["quadriceps", "fessiers"], ["adducteurs"]),
+  cx("ex-sdt", "Soulevé de terre", "barre", ["ischios", "fessiers", "lombaires"], ["dorsaux", "trapezes", "quadriceps", "avant_bras"]),
+  cx("ex-roumain", "Soulevé de terre roumain", "barre", ["ischios", "fessiers"], ["lombaires", "avant_bras"]),
+  cx("ex-leg-curl", "Leg curl assis", "machine", ["ischios"]),
+  cx("ex-hip-thrust", "Hip thrust", "barre", ["fessiers"], ["ischios"]),
+  cx("ex-mollets", "Mollets debout", "machine", ["mollets"]),
+  cx("ex-crunch", "Crunch à la poulie", "poulie", ["abdominaux"]),
+];
+
+const programSessions = buildProgram(SAMPLE_CATALOG, {
+  sessionsPerWeek: 4,
+  sessionMinutes: 60,
+  equipment: ["barre", "halteres", "machine", "poulie", "poids_du_corps"],
+  priority: ["epaules_laterales"],
+  goalExerciseId: "ex-dc",
+});
+const catalogName = Object.fromEntries(SAMPLE_CATALOG.map((e) => [e.id, e.name]));
+const sessionViews = programSessions.map((s, i) => ({
+  id: `seance-${i}`,
+  name: s.name,
+  items: s.items.map((it, k) => ({ id: `item-${i}-${k}`, name: catalogName[it.exerciseId], sets: it.sets, repMin: it.repMin, repMax: it.repMax })),
+}));
+const dcHistory = e1rmHistory(SAMPLE_SETS)["ex-dc"].map((h) => ({ date: h.date, e1rm: h.e1rm }));
+
+export const SAMPLE_PROGRAM: ProgramViewData = {
+  id: "programme",
+  name: "Haut / bas, 4 séances",
+  startsOn: "2026-10-13",
+  weeks: 12,
+  deloadEvery: 5,
+  sessionMinutes: 60,
+  equipment: ["barre", "halteres", "machine", "poulie", "poids_du_corps"],
+  priority: ["epaules_laterales"],
+  week: programWeek("2026-10-13", SAMPLE_DAY),
+  deload: false,
+  today: SAMPLE_DAY,
+  next: {
+    session: sessionViews[2],
+    suggestions: {
+      "item-2-0": "87,5 kg × 6, charge en hausse",
+      "item-2-1": "62 kg, une rep de plus",
+      "item-2-2": "12 kg, une rep de plus",
+      "item-2-3": "14 kg × 10, charge en hausse",
+      "item-2-4": "17,5 kg, une rep de plus",
+    },
+  },
+  sessions: sessionViews,
+  planned: plannedSetsPerMuscle(programSessions, SAMPLE_CATALOG),
+  goal: {
+    exerciseName: "Développé couché",
+    kg: 120,
+    date: "2027-05-01",
+    history: dcHistory,
+    projection: projectE1RM({ history: dcHistory, today: SAMPLE_DAY, targetKg: 120, level: "intermediaire", startsOn: "2026-10-13", deloadEvery: 5 }),
+  },
+};
+
+export const SAMPLE_REPLACE = [
+  { id: "ex-dc-halteres", name: "Développé couché haltères", detail: "Haltères · Pectoraux", liked: true },
+  { id: "ex-incline", name: "Développé incliné", detail: "Barre · Pectoraux", liked: false },
+  { id: "ex-presse-pec", name: "Presse à pectoraux", detail: "Machine · Pectoraux", liked: false },
+  { id: "ex-ecarte", name: "Écarté à la poulie", detail: "Poulie · Pectoraux", liked: false },
+];

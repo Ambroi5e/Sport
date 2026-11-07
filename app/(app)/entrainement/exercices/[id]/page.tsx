@@ -9,7 +9,10 @@ import { PageHeader } from "@/components/ui/page-header";
 import { getProfile } from "@/lib/auth";
 import { formatLongDate } from "@/lib/dates";
 import { EQUIPMENT_LABELS, MEASURE_LABELS, MUSCLE_LABELS, formatSet } from "@/lib/training";
+import { PreferenceToggle } from "@/components/training/preference-toggle";
 import { archiveExercise } from "../../actions";
+import { setExercisePreference } from "../../programme/actions";
+import { getPreferences } from "../../programme/data";
 import { getCompletedSets, getExercise, summarizeHistory, type CompletedSet } from "../../data";
 
 export const metadata: Metadata = { title: "Exercice" };
@@ -18,7 +21,7 @@ export default async function ExercisePage({ params }: { params: Promise<{ id: s
   const { id } = await params;
   const [profile, exercise] = await Promise.all([getProfile(), getExercise(id)]);
   const unit = profile?.weight_unit === "lb" ? "lb" : "kg";
-  const sets = await getCompletedSets([exercise.id]);
+  const [sets, prefs] = await Promise.all([getCompletedSets([exercise.id]), getPreferences()]);
   const history = summarizeHistory(sets)[exercise.id];
   const tiles = history ? recordTiles(history.records, exercise.measure, unit) : [];
 
@@ -46,6 +49,9 @@ export default async function ExercisePage({ params }: { params: Promise<{ id: s
             ) : null}
           </p>
           <p className="text-[15px] text-muted">{MEASURE_LABELS[exercise.measure]}</p>
+          <div className="mt-2 border-t border-line pt-3">
+            <PreferenceToggle action={setExercisePreference.bind(null, exercise.id)} current={prefs[exercise.id] ?? null} />
+          </div>
         </Card>
 
         {sessions.length === 0 ? (

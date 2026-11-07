@@ -1,6 +1,6 @@
 import { isDeloadWeek, lastSession, loadIncrement, programWeek, suggestSets, type CatalogExercise, type PlannedSet, type Suggestion, type WeightUnit } from "@/lib/engine";
 import type { Enums } from "@/lib/supabase/database.types";
-import { formatWeight, type ExerciseSummary } from "@/lib/training";
+import { formatWeight, MUSCLE_GROUPS, type ExerciseSummary } from "@/lib/training";
 
 export type ExercisePreference = Enums<"exercise_preference">;
 
@@ -10,11 +10,34 @@ export const PREFERENCE_LABELS: Record<ExercisePreference, string> = { aime: "J'
 export const PROGRAM_SESSIONS = [2, 3, 4, 5, 6] as const;
 export const PROGRAM_MINUTES = [30, 45, 60, 75, 90] as const;
 export const PROGRAM_WEEKS = [8, 12, 16] as const;
+/** Matériel coché par défaut : celui d'une salle classique. */
+export const DEFAULT_EQUIPMENT = ["barre", "halteres", "machine", "poulie", "poids_du_corps"];
 /** Au-delà, tout devient prioritaire et plus rien ne l'est. */
 export const MAX_PRIORITY_MUSCLES = 3;
 
+/** Exercices possibles pour un objectif chiffré : ceux avec charge, par groupe musculaire. */
+export function goalOptions(exercises: readonly Pick<ExerciseSummary, "id" | "name" | "measure" | "primary_muscles">[]) {
+  return MUSCLE_GROUPS.map((g) => ({
+    group: g.label,
+    exercises: exercises.filter((e) => e.measure === "charge" && g.muscles.includes(e.primary_muscles[0])).map((e) => ({ id: e.id, name: e.name })),
+  })).filter((g) => g.exercises.length > 0);
+}
+
 export function toCatalog(e: ExerciseSummary): CatalogExercise {
   return { id: e.id, name: e.name, equipment: e.equipment, measure: e.measure, primary: e.primary_muscles, secondary: e.secondary_muscles };
+}
+
+/** Version courte, dans la liste de la prochaine séance. */
+export function suggestionShort(s: Suggestion, unit: WeightUnit): string {
+  if (s.weightKg === null) return s.kind === "decharge" ? `${s.reps} reps, décharge` : "une rep de plus";
+  const load = `${formatWeight(s.weightKg, unit)} ${unit}`;
+  return s.kind === "monter" ? `${load} × ${s.reps}, charge en hausse` : s.kind === "decharge" ? `${load} × ${s.reps}, décharge` : `${load}, une rep de plus`;
+}
+
+/** Fourchette d'un exercice : « 4 × 6–10 ». */
+export function planLabel(sets: number, repMin: number | null, repMax: number | null): string {
+  if (repMin === null) return `${sets} séries`;
+  return `${sets} × ${repMin}${repMax !== null && repMax !== repMin ? `–${repMax}` : ""}`;
 }
 
 /** Une phrase sous l'exercice en séance : ce qui est proposé, et pourquoi. */

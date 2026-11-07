@@ -115,13 +115,14 @@ export async function getTemplates() {
   const supabase = await createClient();
   const { data } = await supabase
     .from("workout_templates")
-    .select("id, name, position, template_items(id, position, sets, exercises(name))")
+    .select("id, name, position, program_id, template_items(id, position, sets, exercises(name))")
     .eq("user_id", userId)
     .order("position")
     .order("created_at");
   return (data ?? []).map((t) => ({
     id: t.id,
     name: t.name,
+    programId: t.program_id,
     exerciseNames: [...t.template_items].sort((a, b) => a.position - b.position).map((i) => i.exercises?.name ?? ""),
     totalSets: t.template_items.reduce((sum, i) => sum + i.sets, 0),
   }));

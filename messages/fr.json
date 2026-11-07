@@ -38,7 +38,13 @@
       "unknownAccount": "Aucun compte avec cet e-mail. Si tu as un code d'invitation, crée ton compte.",
       "wrongCode": "Ce code ne correspond pas ou a expiré. Demande-en un nouveau.",
       "tooMany": "Trop de demandes d'affilée. Réessaie dans quelques minutes.",
-      "generic": "La connexion n'a pas abouti. Vérifie ta connexion internet et réessaie."
-    }
+      "generic": "La connexion n'a pas abouti. Vérifie ta connexion internet et réessaie.",
+      "googleNoAccount": "Ce compte Google n'est relié à aucun compte Fonte. Si tu as un code d'invitation, crée ton compte avec l'adresse de ce compte Google.",
+      "googleFailed": "La connexion avec Google n'a pas abouti. Réessaie, ou reçois un code par e-mail.",
+      "linkExpired": "Ce lien a expiré ou a déjà servi. Demande un nouveau code."
+    },
+    "google": "Continuer avec Google",
+    "orEmail": "ou avec ton e-mail",
+    "googleSignupHint": "Avec Google, choisis le compte de l'adresse saisie ci-dessus."
   }
 }

@@ -195,11 +195,14 @@ export type Database = {
           fat_g: number
           fiber_g: number | null
           id: string
+          is_recipe: boolean
           kcal: number
           name: string
           portion_g: number | null
           portion_label: string | null
           protein_g: number
+          recipe_portions: number | null
+          recipe_total_g: number | null
           salt_g: number | null
           slug: string | null
           sugar_g: number | null
@@ -215,11 +218,14 @@ export type Database = {
           fat_g: number
           fiber_g?: number | null
           id?: string
+          is_recipe?: boolean
           kcal: number
           name: string
           portion_g?: number | null
           portion_label?: string | null
           protein_g: number
+          recipe_portions?: number | null
+          recipe_total_g?: number | null
           salt_g?: number | null
           slug?: string | null
           sugar_g?: number | null
@@ -235,11 +241,14 @@ export type Database = {
           fat_g?: number
           fiber_g?: number | null
           id?: string
+          is_recipe?: boolean
           kcal?: number
           name?: string
           portion_g?: number | null
           portion_label?: string | null
           protein_g?: number
+          recipe_portions?: number | null
+          recipe_total_g?: number | null
           salt_g?: number | null
           slug?: string | null
           sugar_g?: number | null
@@ -492,6 +501,51 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      recipe_items: {
+        Row: {
+          created_at: string
+          food_id: string
+          grams: number
+          id: string
+          position: number
+          recipe_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          food_id: string
+          grams: number
+          id?: string
+          position?: number
+          recipe_id: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          food_id?: string
+          grams?: number
+          id?: string
+          position?: number
+          recipe_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recipe_items_food_id_fkey"
+            columns: ["food_id"]
+            isOneToOne: false
+            referencedRelation: "foods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recipe_items_recipe_id_user_id_fkey"
+            columns: ["recipe_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "foods"
+            referencedColumns: ["id", "user_id"]
+          },
+        ]
       }
       saved_meal_items: {
         Row: {

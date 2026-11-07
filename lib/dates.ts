@@ -20,3 +20,15 @@ const shortFormatter = new Intl.DateTimeFormat("fr-FR", { weekday: "short", day:
 export function formatShortDate(date: string): string {
   return shortFormatter.format(new Date(`${date}T00:00:00Z`));
 }
+
+/** Lundi de la semaine d'une date AAAA-MM-JJ. */
+export function weekStart(date: string): string {
+  const day = new Date(`${date}T00:00:00Z`).getUTCDay(); // 0 = dimanche
+  return addDays(date, day === 0 ? -6 : 1 - day);
+}
+
+const longFormatter = new Intl.DateTimeFormat("fr-FR", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" });
+
+export function formatLongDate(date: string): string {
+  return longFormatter.format(new Date(`${date}T00:00:00Z`));
+}

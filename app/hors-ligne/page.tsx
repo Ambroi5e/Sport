@@ -4,9 +4,10 @@ import { ResumeSession } from "@/components/offline/resume-session";
 
 export const metadata: Metadata = { title: "Hors ligne" };
 
-// Page servie par le service worker quand le réseau manque. Statique, sans donnée personnelle :
-// le lien vers la séance gardée est ajouté dans le navigateur.
-export const dynamic = "force-static";
+// Page servie par le service worker quand le réseau manque, sans donnée personnelle : le lien
+// vers la séance gardée est ajouté dans le navigateur. Rendue à la demande pour que ses scripts
+// portent le nonce de la CSP (une page statique n'en a pas, et ses scripts seraient bloqués).
+export const dynamic = "force-dynamic";
 
 export default function OfflinePage() {
   return (

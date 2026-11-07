@@ -191,3 +191,59 @@ export async function getSetsSince(date: string) {
   }
   return { sets, muscles };
 }
+
+const PAGE = 1000;
+
+/**
+ * Séries validées depuis une date (incluse), pour les courbes de force. Lues par
+ * pages de 1 000 lignes, la limite par requête de l'API.
+ */
+export async function getTrainingSetsSince(date: string): Promise<SetEntry[]> {
+  const userId = await requireUserId();
+  const supabase = await createClient();
+  const sets: SetEntry[] = [];
+  for (let from = 0; ; from += PAGE) {
+    const { data } = await supabase
+      .from("workout_sets")
+      .select("id, exercise_id, workout_id, weight_kg, reps, duration_seconds, is_warmup, workouts!inner(performed_on)")
+      .eq("user_id", userId)
+      .not("completed_at", "is", null)
+      .gte("workouts.performed_on", date)
+      .order("id")
+      .range(from, from + PAGE - 1);
+    for (const s of data ?? []) {
+      sets.push({
+        exerciseId: s.exercise_id,
+        workoutId: s.workout_id,
+        date: s.workouts.performed_on,
+        weightKg: s.weight_kg === null ? null : Number(s.weight_kg),
+        reps: s.reps,
+        durationSeconds: s.duration_seconds,
+        isWarmup: s.is_warmup,
+      });
+    }
+    if (!data || data.length < PAGE) return sets;
+  }
+}
+
+/** Une date par séance terminée depuis `date` (incluse). */
+export async function getFinishedWorkoutDates(date: string): Promise<string[]> {
+  const userId = await requireUserId();
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("workouts")
+    .select("performed_on")
+    .eq("user_id", userId)
+    .not("ended_at", "is", null)
+    .gte("performed_on", date);
+  return (data ?? []).map((w) => w.performed_on);
+}
+
+/** Noms des exercices demandés, archivés compris (leurs séries restent dans l'historique). */
+export async function getExerciseNames(ids: string[]): Promise<Record<string, string>> {
+  if (ids.length === 0) return {};
+  await requireUserId();
+  const supabase = await createClient();
+  const { data } = await supabase.from("exercises").select("id, name").in("id", ids);
+  return Object.fromEntries((data ?? []).map((e) => [e.id, e.name]));
+}

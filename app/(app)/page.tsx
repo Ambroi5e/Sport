@@ -1,14 +1,18 @@
 import { FlagIcon, GearSixIcon } from "@phosphor-icons/react/ssr";
 import Link from "next/link";
 import { TodayNutritionCard } from "@/components/nutrition/today-card";
+import { PaceAlertNotice } from "@/components/progress/pace-alert";
+import { WeekCard } from "@/components/progress/week-card";
+import { WeeklyVolume } from "@/components/progress/weekly-volume";
 import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { QuickWeigh } from "@/components/weight/quick-weigh";
 import { WeightTrend } from "@/components/weight/trend";
 import { getProfile } from "@/lib/auth";
-import { daysBetween, formatShortDate } from "@/lib/dates";
-import { kgTo, sumNutrients } from "@/lib/engine";
+import { addDays, daysBetween, formatShortDate, weekStart } from "@/lib/dates";
+import { currentWeek, HIGH_PROTEIN_GOALS, kgTo, sumNutrients, weeklyVolume } from "@/lib/engine";
 import { GOAL_LABELS } from "@/lib/goals";
+import { getFinishedWorkoutDates, getTrainingSetsSince } from "./entrainement/data";
 import { getDayLogs, getDayType, getTargets } from "./nutrition/data";
 import { getPrimaryGoal, getWeightSummary } from "./weight-data";
 
@@ -17,7 +21,18 @@ export default async function HomePage() {
   const unit = profile.weight_unit === "lb" ? "lb" : "kg";
   const goal = await getPrimaryGoal(profile.user_id);
   const weight = await getWeightSummary(profile.user_id, profile.timezone, goal?.type ?? null);
-  const [meals, targets, dayType] = await Promise.all([getDayLogs(weight.today), getTargets(), getDayType(weight.today, profile.training_days)]);
+  const monday = weekStart(weight.today);
+  // Musculation et force : le volume des 8 dernières semaines a sa place sur l'accueil.
+  const strengthGoal = goal ? HIGH_PROTEIN_GOALS.has(goal.type) : false;
+  const [meals, targets, dayType, workoutDates, sets] = await Promise.all([
+    getDayLogs(weight.today),
+    getTargets(),
+    getDayType(weight.today, profile.training_days),
+    getFinishedWorkoutDates(monday),
+    strengthGoal ? getTrainingSetsSince(addDays(monday, -49)) : Promise.resolve([]),
+  ]);
+  const week = currentWeek(weight.today, workoutDates, profile.training_days);
+  const planned = profile.sessions_per_week ?? (profile.training_days.length || null);
   const daysLeft = goal?.target_date ? daysBetween(weight.today, goal.target_date) : null;
 
   return (
@@ -38,22 +53,27 @@ export default async function HomePage() {
       />
 
       <div className="grid gap-4 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] md:gap-6">
-        <Card aria-labelledby="poids-titre" className="grid gap-4">
-          <div className="flex items-baseline justify-between">
-            <h2 id="poids-titre" className="text-lg font-semibold">
-              Pesée du jour
-            </h2>
-            <Link href="/progres" className="text-sm font-medium text-accent-text underline-offset-4 hover:underline">
-              Historique
-            </Link>
-          </div>
-          <QuickWeigh
-            initial={weight.latest ? Math.round(kgTo(unit, weight.latest.kg) * 10) / 10 : null}
-            unit={unit}
-            loggedToday={weight.loggedToday}
-          />
-          <WeightTrend average7={weight.average7} rate={weight.rate} status={weight.status} target={weight.target} unit={unit} />
-        </Card>
+        <div className="grid content-start gap-4">
+          <Card aria-labelledby="poids-titre" className="grid gap-4">
+            <div className="flex items-baseline justify-between">
+              <h2 id="poids-titre" className="text-lg font-semibold">
+                Pesée du jour
+              </h2>
+              <Link href="/progres" className="text-sm font-medium text-accent-text underline-offset-4 hover:underline">
+                Courbe
+              </Link>
+            </div>
+            <QuickWeigh
+              initial={weight.latest ? Math.round(kgTo(unit, weight.latest.kg) * 10) / 10 : null}
+              unit={unit}
+              loggedToday={weight.loggedToday}
+            />
+            <WeightTrend average7={weight.average7} rate={weight.rate} status={weight.status} target={weight.target} unit={unit} />
+            {weight.alert && weight.target ? <PaceAlertNotice alert={weight.alert} target={weight.target} unit={unit} /> : null}
+          </Card>
+
+          <WeekCard days={week.days} done={week.done} planned={planned} />
+        </div>
 
         <div className="grid content-start gap-4">
           {goal ? (
@@ -77,6 +97,20 @@ export default async function HomePage() {
           ) : null}
 
           <TodayNutritionCard totals={sumNutrients(meals.map((m) => m.nutrients))} target={targets[dayType] ?? null} dayType={dayType} />
+
+          {strengthGoal && sets.length ? (
+            <Card aria-labelledby="volume-titre" className="grid gap-3">
+              <div className="flex items-baseline justify-between">
+                <h2 id="volume-titre" className="text-lg font-semibold">
+                  Volume, 8 semaines
+                </h2>
+                <Link href="/progres/force" className="text-sm font-medium text-accent-text underline-offset-4 hover:underline">
+                  Force
+                </Link>
+              </div>
+              <WeeklyVolume weeks={weeklyVolume(sets, weight.today, 8)} unit={unit} table={false} className="h-28" />
+            </Card>
+          ) : null}
         </div>
       </div>
     </>

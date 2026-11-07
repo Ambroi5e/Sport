@@ -4,6 +4,17 @@ Format : une entrée par version (semver), du plus récent au plus ancien. Les m
 
 ## [Non publié]
 
+### v0.5 : corps, progrès et tableau de bord
+
+- Progrès, section Poids : courbe des pesées avec la moyenne sur 7 jours, sur 1, 3, 6 ou 12 mois, résumé écrit et tableau des valeurs.
+- Alerte de rythme (prise de masse, sèche) : quand deux semaines de suite sortent de la fourchette dans le même sens, l'app propose ±200 kcal sur la cible, en conseil général, jamais appliqué tout seul.
+- Mensurations : neuf zones en cm, plusieurs d'un coup, valeurs du jour préremplies, écart depuis la première mesure et la précédente, rappel de mesurer toujours du même côté.
+- Photos de progression privées : face, profil, dos, réduites et nettoyées de leurs métadonnées (dont le GPS) sur le téléphone, liens d'affichage de 10 minutes, comparaison côte à côte de deux dates, suppression.
+- Force : volume des 8 dernières semaines et 1RM estimé par séance des exercices les plus suivis.
+- Accueil : semaine en cours (séances faites face aux séances prévues, jour par jour), alerte de rythme, volume des 8 semaines pour la musculation et la force.
+- Courbes en SVG maison, sans bibliothèque ni JavaScript envoyé au téléphone, lisibles dans les trois styles.
+- Migration non destructive appliquée : `20261110000000_corps.sql` (tables `body_measurements`, `progress_photos`, bucket privé `progress-photos`), avec 14 tests RLS.
+
 ### v0.4 : nutrition rapide
 
 - Onglet Nutrition : jour affiché et jours précédents, calories et protéines face à la cible du jour (entraînement ou repos), glucides et lipides, quatre repas avec leurs aliments.

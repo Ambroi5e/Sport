@@ -13,6 +13,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      body_measurements: {
+        Row: {
+          created_at: string
+          id: string
+          measured_on: string
+          site: Database["public"]["Enums"]["body_site"]
+          updated_at: string
+          user_id: string
+          value_cm: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          measured_on: string
+          site: Database["public"]["Enums"]["body_site"]
+          updated_at?: string
+          user_id?: string
+          value_cm: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          measured_on?: string
+          site?: Database["public"]["Enums"]["body_site"]
+          updated_at?: string
+          user_id?: string
+          value_cm?: number
+        }
+        Relationships: []
+      }
       body_weights: {
         Row: {
           created_at: string
@@ -339,6 +369,33 @@ export type Database = {
           updated_at?: string
           user_id?: string
           weight_unit?: string
+        }
+        Relationships: []
+      }
+      progress_photos: {
+        Row: {
+          created_at: string
+          id: string
+          pose: Database["public"]["Enums"]["photo_pose"]
+          storage_path: string
+          taken_on: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          pose: Database["public"]["Enums"]["photo_pose"]
+          storage_path: string
+          taken_on: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          pose?: Database["public"]["Enums"]["photo_pose"]
+          storage_path?: string
+          taken_on?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -695,6 +752,16 @@ export type Database = {
         | "planning"
         | "amis"
       app_role: "admin"
+      body_site:
+        | "cou"
+        | "epaules"
+        | "poitrine"
+        | "bras"
+        | "avant_bras"
+        | "taille"
+        | "hanches"
+        | "cuisse"
+        | "mollet"
       day_type: "entrainement" | "repos"
       equipment:
         | "barre"
@@ -741,6 +808,7 @@ export type Database = {
         | "fessiers"
         | "adducteurs"
         | "mollets"
+      photo_pose: "face" | "profil" | "dos"
       sex: "homme" | "femme" | "autre"
       training_level: "debutant" | "intermediaire" | "avance"
     }
@@ -758,6 +826,7 @@ export const Constants = {
     Enums: {
       app_module: ["musculation", "endurance", "hyrox", "sports", "nutrition", "courses", "corps", "complements", "planning", "amis"],
       app_role: ["admin"],
+      body_site: ["cou", "epaules", "poitrine", "bras", "avant_bras", "taille", "hanches", "cuisse", "mollet"],
       day_type: ["entrainement", "repos"],
       equipment: ["barre", "halteres", "machine", "poulie", "poids_du_corps", "kettlebell", "elastique", "autre"],
       exercise_measure: ["charge", "poids_du_corps", "duree"],
@@ -770,6 +839,7 @@ export const Constants = {
         "pectoraux", "dorsaux", "trapezes", "lombaires", "epaules_avant", "epaules_laterales", "epaules_arriere",
         "biceps", "triceps", "avant_bras", "abdominaux", "obliques", "quadriceps", "ischios", "fessiers", "adducteurs", "mollets",
       ],
+      photo_pose: ["face", "profil", "dos"],
       sex: ["homme", "femme", "autre"],
       training_level: ["debutant", "intermediaire", "avance"],
     },

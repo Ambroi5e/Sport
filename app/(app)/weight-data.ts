@@ -1,6 +1,6 @@
 import "server-only";
 import { addDays, localDate } from "@/lib/dates";
-import { movingAverage, rateStatus, weeklyRate, type WeighIn } from "@/lib/engine";
+import { movingAverage, paceAlert, rateStatus, weeklyRate, type WeighIn } from "@/lib/engine";
 import { weightRateTarget, type GoalType } from "@/lib/goals";
 import { createClient } from "@/lib/supabase/server";
 
@@ -28,6 +28,7 @@ export async function getWeightSummary(userId: string, timezone: string, goal: G
     rate,
     target,
     status: target ? rateStatus(rate, target) : null,
+    alert: target ? paceAlert(entries, today, target) : null,
   };
 }
 

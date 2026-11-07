@@ -149,6 +149,31 @@ describe.skipIf(!adminUrl)("RLS nutrition", () => {
       expect(archived).toBe(1);
     });
 
+    it("les cibles se mettent à jour par upsert, comme le fait la page Cibles", async () => {
+      const rows = await asUser(client, alice, async () => {
+        await client.query(
+          "insert into public.nutrition_targets (user_id, day_type, kcal, protein_g) values ($1, 'entrainement', 3600, 190), ($1, 'repos', 3400, 190) on conflict (user_id, day_type) do update set kcal = excluded.kcal, protein_g = excluded.protein_g",
+          [alice],
+        );
+        return (await client.query("select day_type, kcal, protein_g from public.nutrition_targets order by day_type")).rows;
+      });
+      expect(rows).toEqual([
+        { day_type: "entrainement", kcal: 3600, protein_g: 190 },
+        { day_type: "repos", kcal: 3400, protein_g: 190 },
+      ]);
+    });
+
+    it("Bruno ne peut pas écraser les cibles d'Alice par upsert", async () => {
+      await expect(
+        asUser(client, bruno, () =>
+          client.query(
+            "insert into public.nutrition_targets (user_id, day_type, kcal, protein_g) values ($1, 'repos', 900, 10) on conflict (user_id, day_type) do update set kcal = excluded.kcal",
+            [alice],
+          ),
+        ),
+      ).rejects.toThrow(/row-level security/);
+    });
+
     it("refuse un jour de la semaine hors de 1 à 7", async () => {
       await expect(
         asUser(client, alice, () => client.query("update public.profiles set training_days = '{0,8}' where user_id = $1", [alice])),

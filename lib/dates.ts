@@ -32,3 +32,10 @@ const longFormatter = new Intl.DateTimeFormat("fr-FR", { weekday: "long", day: "
 export function formatLongDate(date: string): string {
   return longFormatter.format(new Date(`${date}T00:00:00Z`));
 }
+
+/** Heure et minute locales dans le fuseau de l'utilisateur. */
+export function localTime(timeZone: string, now: Date = new Date()): { hour: number; minute: number } {
+  const parts = new Intl.DateTimeFormat("en-GB", { timeZone, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(now);
+  const get = (type: string) => Number(parts.find((p) => p.type === type)?.value ?? 0);
+  return { hour: get("hour"), minute: get("minute") };
+}

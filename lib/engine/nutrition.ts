@@ -68,9 +68,9 @@ export function frequentFoods(uses: FoodUse[], limit = 8): { foodId: string; cou
 }
 
 /** Objectifs pour lesquels on vise 2 g de protéines par kg ; 1,6 g/kg pour les autres. */
-const HIGH_PROTEIN_GOALS = new Set(["prise_de_masse", "seche", "recomposition", "force"]);
+export const HIGH_PROTEIN_GOALS: ReadonlySet<string> = new Set(["prise_de_masse", "seche", "recomposition", "force"]);
 /** Ajustement des calories à l'objectif ; maintien pour ceux qui n'y sont pas. */
-const GOAL_FACTORS: Record<string, number> = { prise_de_masse: 1.1, seche: 0.8 };
+export const GOAL_FACTORS: Readonly<Record<string, number>> = { prise_de_masse: 1.1, seche: 0.8 };
 /** Écart entre jour d'entraînement et jour de repos, autour de la cible moyenne. */
 export const TRAINING_DAY_SPREAD = 0.05;
 

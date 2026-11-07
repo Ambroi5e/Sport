@@ -6,6 +6,7 @@ import { z } from "zod";
 import { getProfile, getUserId, requireUserId } from "@/lib/auth";
 import { formatShortDate, localDate } from "@/lib/dates";
 import { plausibleTime, prefillSets, toKg } from "@/lib/engine";
+import { programSuggestions } from "@/lib/program";
 import { createClient } from "@/lib/supabase/server";
 import { Constants } from "@/lib/supabase/database.types";
 import { getCompletedSets, summarizeHistory } from "./data";
@@ -15,14 +16,34 @@ export type FormState = { error?: string };
 const id = z.uuid();
 const SAVE_ERROR = "La modification n'a pas été enregistrée. Vérifie ta connexion et réessaie.";
 
-/** Séries préremplies (dernière performance, sinon cible du modèle) prêtes à insérer. */
-async function plannedRows(
-  workoutId: string,
-  items: { exerciseId: string; order: number; sets?: number | null; repMin?: number | null; repMax?: number | null }[],
-) {
-  const history = summarizeHistory(await getCompletedSets(items.map((i) => i.exerciseId)));
-  return items.flatMap((item) =>
-    prefillSets(history[item.exerciseId]?.last ?? [], { sets: item.sets, repMin: item.repMin, repMax: item.repMax }).map((s) => ({
+type PlannedItem = {
+  exerciseId: string;
+  order: number;
+  sets?: number | null;
+  repMin?: number | null;
+  repMax?: number | null;
+  exercise?: { equipment: string; measure: string; primary_muscles: string[] } | null;
+};
+
+/**
+ * Séries préremplies prêtes à insérer : la dernière performance, sinon la cible du
+ * modèle. Dans une séance du programme en cours, la charge suggérée du jour
+ * (double progression, décharge).
+ */
+async function plannedRows(workoutId: string, items: PlannedItem[], program?: { starts_on: string; deload_every: number } | null, date?: string) {
+  const completed = await getCompletedSets(items.map((i) => i.exerciseId));
+  const history = summarizeHistory(completed);
+  const suggested =
+    program && date
+      ? programSuggestions(
+          completed,
+          items.map((i) => ({ exerciseId: i.exerciseId, sets: i.sets ?? 3, repMin: i.repMin ?? null, repMax: i.repMax ?? null, exercise: i.exercise ?? null })),
+          program,
+          date,
+        )
+      : [];
+  return items.flatMap((item, index) =>
+    (suggested[index]?.sets ?? prefillSets(history[item.exerciseId]?.last ?? [], { sets: item.sets, repMin: item.repMin, repMax: item.repMax })).map((s) => ({
       workout_id: workoutId,
       exercise_id: item.exerciseId,
       exercise_order: item.order,
@@ -44,31 +65,34 @@ export async function startWorkout(formData: FormData) {
   if (!profile) redirect("/connexion");
   const templateId = id.safeParse(formData.get("templateId"));
   const supabase = await createClient();
+  const today = localDate(profile.timezone);
 
   let name = "Séance libre";
-  let items: { exerciseId: string; order: number; sets: number; repMin: number | null; repMax: number | null }[] = [];
+  let items: PlannedItem[] = [];
+  let program: { starts_on: string; deload_every: number } | null = null;
   if (templateId.success) {
     const { data: template } = await supabase
       .from("workout_templates")
-      .select("name, template_items(exercise_id, position, sets, rep_min, rep_max)")
+      .select("name, programs(starts_on, deload_every, ended_on), template_items(exercise_id, position, sets, rep_min, rep_max, exercises(equipment, measure, primary_muscles))")
       .eq("id", templateId.data)
       .maybeSingle();
     if (template) {
       name = template.name;
+      program = template.programs && template.programs.ended_on === null ? template.programs : null;
       items = [...template.template_items]
         .sort((a, b) => a.position - b.position)
-        .map((i, order) => ({ exerciseId: i.exercise_id, order, sets: i.sets, repMin: i.rep_min, repMax: i.rep_max }));
+        .map((i, order) => ({ exerciseId: i.exercise_id, order, sets: i.sets, repMin: i.rep_min, repMax: i.rep_max, exercise: i.exercises }));
     }
   }
 
   const { data: workout, error } = await supabase
     .from("workouts")
-    .insert({ name, performed_on: localDate(profile.timezone), template_id: templateId.success ? templateId.data : null })
+    .insert({ name, performed_on: today, template_id: templateId.success ? templateId.data : null })
     .select("id")
     .single();
   if (error || !workout) throw new Error("workout_not_created");
 
-  if (items.length > 0) await supabase.from("workout_sets").insert(await plannedRows(workout.id, items));
+  if (items.length > 0) await supabase.from("workout_sets").insert(await plannedRows(workout.id, items, program, today));
 
   revalidatePath("/entrainement");
   redirect(`/entrainement/seance/${workout.id}`);

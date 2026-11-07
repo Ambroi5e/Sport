@@ -9,9 +9,11 @@ import { WorkoutLogger, type LoggerBlock } from "@/components/training/workout-l
 import { getProfile } from "@/lib/auth";
 import { formatLongDate } from "@/lib/dates";
 import { exerciseRecords, totalVolume, type SetEntry } from "@/lib/engine";
+import { programSuggestions, suggestionText } from "@/lib/program";
 import { formatElapsed, formatVolume, formatWeight } from "@/lib/training";
 import { deleteWorkout, finishWorkout, saveWorkoutAsTemplate } from "../../actions";
 import { getCompletedSets, getWorkout, summarizeHistory } from "../../data";
+import { getTemplateProgram } from "../../programme/data";
 
 export const metadata: Metadata = { title: "Séance" };
 
@@ -20,8 +22,27 @@ export default async function WorkoutPage({ params }: { params: Promise<{ id: st
   const [profile, workout] = await Promise.all([getProfile(), getWorkout(id)]);
   const unit = profile?.weight_unit === "lb" ? "lb" : "kg";
   const exerciseIds = [...new Set(workout.blocks.map((b) => b.exercise.id))];
-  const history = summarizeHistory(await getCompletedSets(exerciseIds, workout.id));
+  const [completed, program] = await Promise.all([
+    getCompletedSets(exerciseIds, workout.id),
+    workout.template_id && workout.ended_at === null ? getTemplateProgram(workout.template_id) : null,
+  ]);
+  const history = summarizeHistory(completed);
   const finished = workout.ended_at !== null;
+
+  // Séance du programme en cours : la charge suggérée et sa raison, sous chaque exercice.
+  const suggestions: Record<number, string> = {};
+  if (program) {
+    const lines = workout.blocks.map((b) => ({
+      exerciseId: b.exercise.id,
+      sets: b.sets.length,
+      repMin: b.sets.find((s) => s.rep_min !== null)?.rep_min ?? null,
+      repMax: b.sets.find((s) => s.rep_max !== null)?.rep_max ?? null,
+      exercise: b.exercise,
+    }));
+    programSuggestions(completed, lines, program, workout.performed_on).forEach((r, i) => {
+      if (r?.suggestion && lines[i].repMax !== null) suggestions[workout.blocks[i].order] = suggestionText(r.suggestion, unit, { repMax: lines[i].repMax! });
+    });
+  }
 
   const blocks: LoggerBlock[] = workout.blocks.map((b) => ({
     order: b.order,
@@ -113,6 +134,7 @@ export default async function WorkoutPage({ params }: { params: Promise<{ id: st
             { records: h.records, lastDate: h.lastDate, last: h.last.map((s) => ({ weightKg: s.weightKg, reps: s.reps, durationSeconds: s.durationSeconds })) },
           ]),
         )}
+        suggestions={suggestions}
         unit={unit}
         finished={finished}
       />

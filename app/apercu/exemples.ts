@@ -8,6 +8,7 @@ import {
   programWeek,
   projectE1RM,
   sumNutrients,
+  parseNutritionLabel,
   type AdaptiveTdee,
   type CatalogExercise,
   type DayType,
@@ -17,6 +18,7 @@ import {
 } from "@/lib/engine";
 import type { MeasurementRow, Photo, PhotoPose } from "@/lib/body";
 import type { Food, JournalEntry, Target } from "@/lib/nutrition";
+import { fromOpenFoodFacts } from "@/lib/openfoodfacts";
 import { PORTION_LABEL, recipeRow } from "@/lib/recipes";
 import type { ExerciseSummary } from "@/lib/training";
 
@@ -202,6 +204,30 @@ export const SAMPLE_REAL_TDEE_WAITING: AdaptiveTdee = {
   from: "2026-10-10",
   to: "2026-11-06",
 };
+
+// Code-barres et étiquette (v0.6.2) : une fiche Open Food Facts type, et le texte lu par Tesseract.
+export const SAMPLE_OFF = fromOpenFoodFacts({
+  product_name: "Flocons d'avoine complets",
+  brands: "Bjorg",
+  nutriments: { "energy-kcal_100g": 372, proteins_100g: 13.5, carbohydrates_100g: 58.7, fat_100g: 7 },
+  serving_quantity: 40,
+  serving_size: "40 g",
+})!;
+
+export const SAMPLE_OFF_PREFILL = {
+  name: SAMPLE_OFF.name,
+  brand: SAMPLE_OFF.brand ?? undefined,
+  kcal: "372",
+  proteinG: "13,5",
+  carbsG: "58,7",
+  fatG: "7",
+  portionLabel: SAMPLE_OFF.portion?.label,
+  portionG: "40",
+};
+
+export const SAMPLE_LABEL = parseNutritionLabel(
+  ["Énergie 1576 kJ 630 kJ", "374 kcal 150 kcal", "Matières grasses 6,9 g 2,89", "Glucides 58,7 g 239", "dont sucres 11g 04g", "Protéines 13,5g 5,4g", "Sel 0,02 g <0,01 g"].join("\n"),
+);
 
 const byId = Object.fromEntries(SAMPLE_FOODS.map((f) => [f.id, f]));
 const entry = (id: string, meal: Meal, foodId: string, grams: number): JournalEntry => ({

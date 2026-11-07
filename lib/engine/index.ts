@@ -3,3 +3,5 @@ export * from "./strength";
 export * from "./units";
 export * from "./weight";
 export * from "./training";
+export * from "./outbox";
+export * from "./rest";

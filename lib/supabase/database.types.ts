@@ -85,6 +85,110 @@ export type Database = {
         }
         Relationships: []
       }
+      food_logs: {
+        Row: {
+          created_at: string
+          eaten_on: string
+          food_id: string
+          grams: number
+          id: string
+          meal: Database["public"]["Enums"]["meal"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          eaten_on: string
+          food_id: string
+          grams: number
+          id?: string
+          meal: Database["public"]["Enums"]["meal"]
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          eaten_on?: string
+          food_id?: string
+          grams?: number
+          id?: string
+          meal?: Database["public"]["Enums"]["meal"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "food_logs_food_id_fkey"
+            columns: ["food_id"]
+            isOneToOne: false
+            referencedRelation: "foods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      foods: {
+        Row: {
+          archived_at: string | null
+          barcode: string | null
+          brand: string | null
+          carbs_g: number
+          created_at: string
+          fat_g: number
+          fiber_g: number | null
+          id: string
+          kcal: number
+          name: string
+          portion_g: number | null
+          portion_label: string | null
+          protein_g: number
+          salt_g: number | null
+          slug: string | null
+          sugar_g: number | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          archived_at?: string | null
+          barcode?: string | null
+          brand?: string | null
+          carbs_g: number
+          created_at?: string
+          fat_g: number
+          fiber_g?: number | null
+          id?: string
+          kcal: number
+          name: string
+          portion_g?: number | null
+          portion_label?: string | null
+          protein_g: number
+          salt_g?: number | null
+          slug?: string | null
+          sugar_g?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          archived_at?: string | null
+          barcode?: string | null
+          brand?: string | null
+          carbs_g?: number
+          created_at?: string
+          fat_g?: number
+          fiber_g?: number | null
+          id?: string
+          kcal?: number
+          name?: string
+          portion_g?: number | null
+          portion_label?: string | null
+          protein_g?: number
+          salt_g?: number | null
+          slug?: string | null
+          sugar_g?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       goals: {
         Row: {
           created_at: string
@@ -154,6 +258,36 @@ export type Database = {
         }
         Relationships: []
       }
+      nutrition_targets: {
+        Row: {
+          carbs_g: number | null
+          day_type: Database["public"]["Enums"]["day_type"]
+          fat_g: number | null
+          kcal: number
+          protein_g: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          carbs_g?: number | null
+          day_type: Database["public"]["Enums"]["day_type"]
+          fat_g?: number | null
+          kcal: number
+          protein_g: number
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          carbs_g?: number | null
+          day_type?: Database["public"]["Enums"]["day_type"]
+          fat_g?: number | null
+          kcal?: number
+          protein_g?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           birth_year: number | null
@@ -167,6 +301,7 @@ export type Database = {
           sessions_per_week: number | null
           sex: Database["public"]["Enums"]["sex"] | null
           timezone: string
+          training_days: number[]
           updated_at: string
           user_id: string
           weight_unit: string
@@ -183,6 +318,7 @@ export type Database = {
           sessions_per_week?: number | null
           sex?: Database["public"]["Enums"]["sex"] | null
           timezone?: string
+          training_days?: number[]
           updated_at?: string
           user_id: string
           weight_unit?: string
@@ -199,9 +335,85 @@ export type Database = {
           sessions_per_week?: number | null
           sex?: Database["public"]["Enums"]["sex"] | null
           timezone?: string
+          training_days?: number[]
           updated_at?: string
           user_id?: string
           weight_unit?: string
+        }
+        Relationships: []
+      }
+      saved_meal_items: {
+        Row: {
+          created_at: string
+          food_id: string
+          grams: number
+          id: string
+          position: number
+          saved_meal_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          food_id: string
+          grams: number
+          id?: string
+          position?: number
+          saved_meal_id: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          food_id?: string
+          grams?: number
+          id?: string
+          position?: number
+          saved_meal_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_meal_items_food_id_fkey"
+            columns: ["food_id"]
+            isOneToOne: false
+            referencedRelation: "foods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saved_meal_items_saved_meal_id_user_id_fkey"
+            columns: ["saved_meal_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "saved_meals"
+            referencedColumns: ["id", "user_id"]
+          },
+        ]
+      }
+      saved_meals: {
+        Row: {
+          created_at: string
+          id: string
+          meal: Database["public"]["Enums"]["meal"]
+          name: string
+          position: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          meal: Database["public"]["Enums"]["meal"]
+          name: string
+          position?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          meal?: Database["public"]["Enums"]["meal"]
+          name?: string
+          position?: number
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -462,6 +674,7 @@ export type Database = {
         }[]
       }
       exercise_is_usable: { Args: { p_exercise_id: string }; Returns: boolean }
+      food_is_usable: { Args: { p_food_id: string }; Returns: boolean }
       invitation_hash: { Args: { p_code: string }; Returns: string }
       is_admin: { Args: never; Returns: boolean }
       reserve_invitation: {
@@ -482,6 +695,7 @@ export type Database = {
         | "planning"
         | "amis"
       app_role: "admin"
+      day_type: "entrainement" | "repos"
       equipment:
         | "barre"
         | "halteres"
@@ -508,6 +722,7 @@ export type Database = {
         | "raquette"
         | "collectif"
         | "forme"
+      meal: "petit_dejeuner" | "dejeuner" | "collation" | "diner"
       muscle:
         | "pectoraux"
         | "dorsaux"
@@ -543,12 +758,14 @@ export const Constants = {
     Enums: {
       app_module: ["musculation", "endurance", "hyrox", "sports", "nutrition", "courses", "corps", "complements", "planning", "amis"],
       app_role: ["admin"],
+      day_type: ["entrainement", "repos"],
       equipment: ["barre", "halteres", "machine", "poulie", "poids_du_corps", "kettlebell", "elastique", "autre"],
       exercise_measure: ["charge", "poids_du_corps", "duree"],
       goal_type: [
         "prise_de_masse", "seche", "recomposition", "force", "hyrox", "course_10k", "semi_marathon", "marathon",
         "triathlon_s", "triathlon_m", "triathlon_70_3", "triathlon_ironman", "raquette", "collectif", "forme",
       ],
+      meal: ["petit_dejeuner", "dejeuner", "collation", "diner"],
       muscle: [
         "pectoraux", "dorsaux", "trapezes", "lombaires", "epaules_avant", "epaules_laterales", "epaules_arriere",
         "biceps", "triceps", "avant_bras", "abdominaux", "obliques", "quadriceps", "ischios", "fessiers", "adducteurs", "mollets",

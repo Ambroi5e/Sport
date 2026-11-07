@@ -1,10 +1,15 @@
-import { BarbellIcon, ForkKnifeIcon, ScalesIcon } from "@phosphor-icons/react/ssr";
+import { BarbellIcon, CaretRightIcon, ForkKnifeIcon, ScalesIcon } from "@phosphor-icons/react/ssr";
 import type { Metadata } from "next";
+import Link from "next/link";
+import type { ReactNode } from "react";
 import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { QuickWeigh } from "@/components/weight/quick-weigh";
 import { getProfile } from "@/lib/auth";
-import { kgTo } from "@/lib/engine";
+import { localTime } from "@/lib/dates";
+import { kgTo, mealForTime } from "@/lib/engine";
+import { MEAL_TO } from "@/lib/nutrition";
+import { getActiveWorkout } from "../entrainement/data";
 import { getWeightSummary } from "../weight-data";
 
 export const metadata: Metadata = { title: "Ajouter" };
@@ -12,7 +17,9 @@ export const metadata: Metadata = { title: "Ajouter" };
 export default async function QuickAddPage() {
   const profile = (await getProfile())!;
   const unit = profile.weight_unit === "lb" ? "lb" : "kg";
-  const weight = await getWeightSummary(profile.user_id, profile.timezone, null, 14);
+  const [weight, active] = await Promise.all([getWeightSummary(profile.user_id, profile.timezone, null, 14), getActiveWorkout()]);
+  const { hour, minute } = localTime(profile.timezone);
+  const meal = mealForTime(hour, minute);
 
   return (
     <>
@@ -28,19 +35,31 @@ export default async function QuickAddPage() {
             loggedToday={weight.loggedToday}
           />
         </Card>
-        <ul className="grid gap-2" aria-label="Bientôt disponible">
-          {[
-            { icon: BarbellIcon, label: "Séance de musculation" },
-            { icon: ForkKnifeIcon, label: "Repas" },
-          ].map(({ icon: Icon, label }) => (
-            <li key={label} className="flex items-center gap-3 rounded-control border border-dashed border-line px-4 py-3 text-muted">
-              <Icon size={22} aria-hidden="true" />
-              <span className="flex-1">{label}</span>
-              <span className="text-[12px]">bientôt</span>
-            </li>
-          ))}
-        </ul>
+        <nav aria-label="Raccourcis" className="grid divide-y divide-line overflow-hidden rounded-control border border-line bg-surface">
+          <Shortcut href="/nutrition/ajouter" icon={<ForkKnifeIcon size={22} />} label="Repas" detail={`Ajouter ${MEAL_TO[meal]} : favoris, fréquents, recherche`} />
+          <Shortcut
+            href={active ? `/entrainement/seance/${active.id}` : "/entrainement"}
+            icon={<BarbellIcon size={22} />}
+            label="Séance"
+            detail={active ? `Reprendre : ${active.name}` : "Démarrer depuis un modèle ou en libre"}
+          />
+        </nav>
       </div>
     </>
+  );
+}
+
+function Shortcut({ href, icon, label, detail }: { href: string; icon: ReactNode; label: string; detail: string }) {
+  return (
+    <Link href={href} className="flex min-h-16 items-center gap-3 px-4 py-3 hover:bg-surface-2">
+      <span className="grid size-10 shrink-0 place-items-center rounded-control bg-surface-2 text-accent-text" aria-hidden="true">
+        {icon}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-[16px] font-semibold">{label}</span>
+        <span className="block truncate text-[13px] text-muted">{detail}</span>
+      </span>
+      <CaretRightIcon size={18} className="shrink-0 text-muted" aria-hidden="true" />
+    </Link>
   );
 }

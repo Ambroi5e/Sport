@@ -1,13 +1,15 @@
 import { FlagIcon, GearSixIcon } from "@phosphor-icons/react/ssr";
 import Link from "next/link";
+import { TodayNutritionCard } from "@/components/nutrition/today-card";
 import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { QuickWeigh } from "@/components/weight/quick-weigh";
 import { WeightTrend } from "@/components/weight/trend";
 import { getProfile } from "@/lib/auth";
 import { daysBetween, formatShortDate } from "@/lib/dates";
-import { kgTo } from "@/lib/engine";
+import { kgTo, sumNutrients } from "@/lib/engine";
 import { GOAL_LABELS } from "@/lib/goals";
+import { getDayLogs, getDayType, getTargets } from "./nutrition/data";
 import { getPrimaryGoal, getWeightSummary } from "./weight-data";
 
 export default async function HomePage() {
@@ -15,6 +17,7 @@ export default async function HomePage() {
   const unit = profile.weight_unit === "lb" ? "lb" : "kg";
   const goal = await getPrimaryGoal(profile.user_id);
   const weight = await getWeightSummary(profile.user_id, profile.timezone, goal?.type ?? null);
+  const [meals, targets, dayType] = await Promise.all([getDayLogs(weight.today), getTargets(), getDayType(weight.today, profile.training_days)]);
   const daysLeft = goal?.target_date ? daysBetween(weight.today, goal.target_date) : null;
 
   return (
@@ -73,15 +76,7 @@ export default async function HomePage() {
             </Card>
           ) : null}
 
-          <Card aria-labelledby="semaine-titre" className="grid gap-2">
-            <h2 id="semaine-titre" className="text-lg font-semibold">
-              Cette semaine
-            </h2>
-            <p className="text-[15px] text-muted">
-              Les séances, les calories et les protéines du jour s&apos;afficheront ici dès que l&apos;entraînement et la nutrition seront
-              disponibles.
-            </p>
-          </Card>
+          <TodayNutritionCard totals={sumNutrients(meals.map((m) => m.nutrients))} target={targets[dayType] ?? null} dayType={dayType} />
         </div>
       </div>
     </>

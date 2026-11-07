@@ -1,4 +1,4 @@
-import { FlagIcon } from "@phosphor-icons/react/ssr";
+import { FlagIcon, GearSixIcon } from "@phosphor-icons/react/ssr";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
@@ -19,7 +19,20 @@ export default async function HomePage() {
 
   return (
     <>
-      <PageHeader eyebrow={formatShortDate(weight.today)} title={`Salut ${profile.display_name ?? ""}`.trim()} />
+      <PageHeader
+        eyebrow={formatShortDate(weight.today)}
+        title={`Salut ${profile.display_name ?? ""}`.trim()}
+        action={
+          // Sur ordinateur, Réglages est dans la sidebar ; sur mobile, on y accède d'ici.
+          <Link
+            href="/reglages"
+            aria-label="Réglages"
+            className="grid size-11 shrink-0 place-items-center rounded-full border border-line bg-surface text-text transition-colors hover:bg-surface-2 md:hidden"
+          >
+            <GearSixIcon size={22} aria-hidden="true" />
+          </Link>
+        }
+      />
 
       <div className="grid gap-4 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] md:gap-6">
         <Card aria-labelledby="poids-titre" className="grid gap-4">

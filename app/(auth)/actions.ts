@@ -1,5 +1,6 @@
 "use server";
 
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { env } from "@/lib/env";
@@ -79,6 +80,42 @@ export async function verifyCode(_prev: AuthState, formData: FormData): Promise<
     return { step: "code", email: email.data, error: error.status === 429 ? "tooMany" : "wrongCode" };
   }
   redirect("/");
+}
+
+export type GoogleState = { error?: AuthError; url?: string };
+
+/**
+ * Prépare le départ vers Google et renvoie l'adresse où aller. À l'inscription,
+ * l'invitation est d'abord réservée pour l'adresse saisie : le compte ne sera
+ * créé que si le compte Google choisi a cette adresse.
+ */
+export async function startGoogle(mode: "login" | "signup", _prev: GoogleState, formData: FormData): Promise<GoogleState> {
+  const supabase = await createClient();
+  let email: string | undefined;
+
+  if (mode === "signup") {
+    const invite = inviteSchema.safeParse(formData.get("invite"));
+    if (!invite.success) return { error: "invalidInvite" };
+    const parsed = emailSchema.safeParse(formData.get("email"));
+    if (!parsed.success) return { error: "invalidEmail" };
+    const { data: reserved, error } = await supabase.rpc("reserve_invitation", { p_code: invite.data, p_email: parsed.data });
+    if (error) return { error: "generic" };
+    if (!reserved) return { error: "invalidInvite" };
+    email = parsed.data;
+  }
+
+  // Revenir sur l'adresse d'où l'on part (production ou localhost), si Supabase l'autorise.
+  const origin = (await headers()).get("origin") ?? env.siteUrl;
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: `${origin}/auth/callback`,
+      skipBrowserRedirect: true,
+      queryParams: { prompt: "select_account", ...(email ? { login_hint: email } : {}) },
+    },
+  });
+  if (error || !data.url) return { error: "generic" };
+  return { url: data.url };
 }
 
 export async function signOut() {

@@ -16,7 +16,7 @@ export default function OfflinePage() {
       </p>
       {/* Rechargement complet voulu : la navigation côté client ne marche pas hors ligne. */}
       {/* oxlint-disable-next-line nextjs/no-html-link-for-pages */}
-      <a href="/" className="justify-self-start rounded-[6px] bg-accent px-5 py-3 font-semibold text-on-accent">
+      <a href="/" className="justify-self-start rounded-control bg-accent px-5 py-3 font-semibold text-on-accent">
         Réessayer
       </a>
     </main>

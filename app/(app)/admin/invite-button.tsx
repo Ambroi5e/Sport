@@ -17,7 +17,7 @@ export function InviteButton() {
         </Button>
       </form>
       {state.code ? (
-        <div className="grid gap-2 rounded-[6px] border border-accent/60 bg-accent/10 p-4">
+        <div className="grid gap-2 rounded-control border border-accent/60 bg-accent/10 p-4">
           <p className="text-sm text-muted">Code valable 14 jours, utilisable une seule fois. Il ne sera plus affiché ensuite.</p>
           <div className="flex items-center gap-3">
             <code className="font-numeric select-all text-[28px] tracking-wider">{state.code}</code>

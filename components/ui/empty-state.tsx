@@ -3,8 +3,8 @@ import type { ReactNode } from "react";
 /** État vide : ce qui apparaîtra ici, et quand. */
 export function EmptyState({ icon, title, children }: { icon: ReactNode; title: string; children: ReactNode }) {
   return (
-    <div className="grid justify-items-start gap-3 rounded-[6px] border border-dashed border-line p-5">
-      <span className="grid size-10 place-items-center rounded-[6px] bg-surface-2 text-accent-text" aria-hidden="true">
+    <div className="grid justify-items-start gap-3 rounded-control border border-dashed border-line p-5">
+      <span className="grid size-10 place-items-center rounded-control bg-surface-2 text-accent-text" aria-hidden="true">
         {icon}
       </span>
       <h2 className="text-base font-semibold">{title}</h2>

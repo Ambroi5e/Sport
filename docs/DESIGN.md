@@ -4,6 +4,25 @@ Direction choisie le 2026-11-06 : **Fonte**, le graphite des barres et l'orange 
 
 Les tokens vivent dans `app/globals.css` (variables CSS exposées à Tailwind v4 via `@theme`). Ce fichier en est la référence lisible ; toute modification passe par les deux.
 
+## Trois styles au choix (depuis la v0.1.1)
+
+Les trois directions proposées au cadrage sont devenues des styles que chacun choisit dans Réglages, chacun en sombre et en clair. Fonte reste le style par défaut ; les tableaux plus bas le décrivent. Les composants n'utilisent que les tokens, jamais une couleur, une police ou un rayon en dur : un nouveau style se réduit à un jeu de variables.
+
+| | Fonte | Couloir | Carnet |
+| --- | --- | --- | --- |
+| Idée | Salle de muscu, graphite et orange sécurité | Piste de nuit, afficheur du chrono | Carnet au stylo, surligneur |
+| Fond sombre / clair | #121315 / #F4F4F2 | #0B1220 / #F3F6FA | #17171A / #F6F6F2 |
+| Accent (fond de bouton) | #FF6B1A | #3DD6E8 (sombre), #0B6A84 (clair) | #F2CB3A |
+| Accent en texte, clair | #B23A0A | #0B6A84 | #7D6000 |
+| Titres | Archivo 800, largeur 75 % | Big Shoulders 800 | Instrument Sans 700, largeur 80 % |
+| Chiffres | Archivo 850, largeur 68 % | Big Shoulders 800 | JetBrains Mono 600 |
+| Texte courant | Public Sans | Figtree | Instrument Sans |
+| Rayon | 6 px | 14 px | 10 px |
+
+Mécanique : `data-style` et `data-theme` sur `<html>` (cookies `style` et `theme`, lus au rendu serveur). Un élément peut porter ses propres attributs pour s'afficher dans un autre style : c'est ainsi que Réglages montre un aperçu fidèle de chaque option. Les polices de Couloir et Carnet ne sont téléchargées que si le style est choisi. Le logo prend la couleur d'accent du style.
+
+Contrastes vérifiés pour chaque style et thème : texte, texte secondaire, accent en texte et couleurs de statut à 4,5:1 minimum sur `bg`, `surface` et `surface-2` ; texte sur accent à 5,4:1 minimum.
+
 ## Couleurs
 
 Contrastes mesurés selon WCAG 2.1 (texte normal : 4,5:1 minimum).
@@ -18,8 +37,8 @@ Contrastes mesurés selon WCAG 2.1 (texte normal : 4,5:1 minimum).
 | `muted` | #9A9DA3 | #5B5E64 | texte secondaire, libellés | 6,8 / 5,9 |
 | `accent` | #FF6B1A | #FF6B1A | fond du bouton principal, éléments actifs | |
 | `on-accent` | #121315 | #151618 | texte sur `accent` | 6,5 / 6,4 |
-| `accent-text` | #FF6B1A | #C2410C | texte et icônes en accent | 6,5 / 4,7 |
-| `success` | #3FBF7F | #1E7F4F | progression dans la cible | 7,9 / 4,5 |
+| `accent-text` | #FF6B1A | #B23A0A | texte et icônes en accent | 6,5 / 5,4 |
+| `success` | #3FBF7F | #1A7044 | progression dans la cible | 7,9 / 5,5 |
 | `warning` | #F2B53A | #8A5A00 | rythme hors cible | 10,1 / 5,4 |
 | `danger` | #FF6363 | #C62828 | erreurs, suppression | 6,4 / 5,1 |
 
@@ -45,7 +64,7 @@ Les deux polices sont auto-hébergées via `next/font/google` (téléchargées a
 
 - Grille de 4 px : 4, 8, 12, 16, 24, 32, 48.
 - Marge latérale mobile : 16 px.
-- Rayons : 6 px (boutons, champs, cartes), 999 px (pastilles). Angles volontairement peu arrondis.
+- Rayons : `rounded-control` (6 px dans Fonte : boutons, champs, cartes), `rounded-inner` pour un élément logé dans un autre, 999 px (pastilles). Angles volontairement peu arrondis dans Fonte.
 - Cible tactile : 48 px minimum, 56 px pour l'action principale sur mobile.
 
 ## Mise en page

@@ -1,11 +1,16 @@
 @import "tailwindcss";
 
 /*
- * Design system Fonte. Référence lisible : docs/DESIGN.md.
- * Mode sombre par défaut ; data-theme="light" sur <html> pour le mode clair.
+ * Design system de Fonte. Référence lisible : docs/DESIGN.md.
+ * Trois styles au choix (data-style sur <html>), chacun en sombre (défaut) et
+ * en clair (data-theme="light"). Un aperçu peut porter ses propres attributs
+ * data-style et data-theme : les variables se redéfinissent à son niveau.
  */
 
-:root {
+/* Fonte : graphite et orange sécurité ---------------------------------------- */
+
+:root,
+[data-style="fonte"] {
   --bg: #121315;
   --surface: #1c1d20;
   --surface-2: #25272b;
@@ -20,9 +25,20 @@
   --danger: #ff6363;
   --card-shadow: none;
   color-scheme: dark;
+
+  --font-body: var(--font-public-sans), ui-sans-serif, system-ui, sans-serif;
+  --title-font: var(--font-archivo), "Arial Narrow", ui-sans-serif, sans-serif;
+  --title-weight: 800;
+  --title-stretch: 75%;
+  --title-track: -0.005em;
+  --num-font: var(--font-archivo), "Arial Narrow", ui-sans-serif, sans-serif;
+  --num-weight: 850;
+  --num-stretch: 68%;
+  --num-track: 0;
+  --radius: 6px;
 }
 
-:root[data-theme="light"] {
+[data-style="fonte"][data-theme="light"] {
   --bg: #f4f4f2;
   --surface: #ffffff;
   --surface-2: #ebebe8;
@@ -31,12 +47,110 @@
   --muted: #5b5e64;
   --accent: #ff6b1a;
   --on-accent: #151618;
-  --accent-text: #c2410c;
-  --success: #1e7f4f;
+  --accent-text: #b23a0a;
+  --success: #1a7044;
   --warning: #8a5a00;
   --danger: #c62828;
   --card-shadow: 0 1px 2px rgb(0 0 0 / 0.06);
   color-scheme: light;
+}
+
+/* Couloir : piste de nuit et cyan du chrono ---------------------------------- */
+
+[data-style="couloir"] {
+  --bg: #0b1220;
+  --surface: #131c2e;
+  --surface-2: #1b263b;
+  --line: #22304a;
+  --text: #e6ecf5;
+  --muted: #8c9ab2;
+  --accent: #3dd6e8;
+  --on-accent: #0b1220;
+  --accent-text: #3dd6e8;
+  --success: #4ccf8f;
+  --warning: #f2b53a;
+  --danger: #ff6b6b;
+  --card-shadow: none;
+  color-scheme: dark;
+
+  --font-body: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
+  --title-font: var(--font-big-shoulders), "Arial Narrow", ui-sans-serif, sans-serif;
+  --title-weight: 800;
+  --title-stretch: 100%;
+  --title-track: 0.01em;
+  --num-font: var(--font-big-shoulders), "Arial Narrow", ui-sans-serif, sans-serif;
+  --num-weight: 800;
+  --num-stretch: 100%;
+  --num-track: 0.01em;
+  --radius: 14px;
+}
+
+[data-style="couloir"][data-theme="light"] {
+  --bg: #f3f6fa;
+  --surface: #ffffff;
+  --surface-2: #e6ecf4;
+  --line: #d3dbe6;
+  --text: #0b1220;
+  --muted: #4e5b72;
+  --accent: #0b6a84;
+  --on-accent: #ffffff;
+  --accent-text: #0b6a84;
+  --success: #1a7044;
+  --warning: #8a5a00;
+  --danger: #c62828;
+  --card-shadow: 0 1px 2px rgb(11 18 32 / 0.06);
+  color-scheme: light;
+}
+
+/* Carnet : carnet au stylo et surligneur ------------------------------------- */
+
+[data-style="carnet"] {
+  --bg: #17171a;
+  --surface: #212125;
+  --surface-2: #2a2a2f;
+  --line: #323237;
+  --text: #f0efea;
+  --muted: #a3a29c;
+  --accent: #f2cb3a;
+  --on-accent: #17171a;
+  --accent-text: #f2cb3a;
+  --success: #4cc38a;
+  --warning: #ff9f43;
+  --danger: #ff6b6b;
+  --card-shadow: none;
+  color-scheme: dark;
+
+  --font-body: var(--font-instrument-sans), ui-sans-serif, system-ui, sans-serif;
+  --title-font: var(--font-instrument-sans), ui-sans-serif, system-ui, sans-serif;
+  --title-weight: 700;
+  --title-stretch: 80%;
+  --title-track: -0.01em;
+  --num-font: var(--font-jetbrains-mono), ui-monospace, monospace;
+  --num-weight: 600;
+  --num-stretch: 100%;
+  --num-track: -0.02em;
+  --radius: 10px;
+}
+
+[data-style="carnet"][data-theme="light"] {
+  --bg: #f6f6f2;
+  --surface: #ffffff;
+  --surface-2: #ecece6;
+  --line: #dcdcd4;
+  --text: #1a1a1d;
+  --muted: #5e5d57;
+  --accent: #f2cb3a;
+  --on-accent: #1a1a1d;
+  --accent-text: #7d6000;
+  --success: #1a7044;
+  --warning: #a04a00;
+  --danger: #c62828;
+  --card-shadow: 0 1px 2px rgb(0 0 0 / 0.06);
+  color-scheme: light;
+}
+
+[data-style] {
+  font-family: var(--font-body);
 }
 
 @theme inline {
@@ -53,10 +167,10 @@
   --color-warning: var(--warning);
   --color-danger: var(--danger);
 
-  --font-sans: var(--font-public-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-archivo), "Arial Narrow", ui-sans-serif, sans-serif;
+  --font-sans: var(--font-body);
 
-  --radius-control: 6px;
+  --radius-control: var(--radius);
+  --radius-inner: calc(var(--radius) - 2px);
   --shadow-card: var(--card-shadow);
 
   --ease-out-fonte: cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -71,12 +185,12 @@
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: var(--font-sans);
+    font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
   }
 
   :focus-visible {
-    outline: 2px solid var(--accent);
+    outline: 2px solid var(--accent-text);
     outline-offset: 2px;
   }
 
@@ -88,18 +202,19 @@
 }
 
 @utility font-numeric {
-  font-family: var(--font-display);
-  font-weight: 850;
-  font-stretch: 68%;
+  font-family: var(--num-font);
+  font-weight: var(--num-weight);
+  font-stretch: var(--num-stretch);
+  letter-spacing: var(--num-track);
   font-variant-numeric: tabular-nums;
   line-height: 1;
 }
 
 @utility font-title {
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-stretch: 75%;
-  letter-spacing: -0.005em;
+  font-family: var(--title-font);
+  font-weight: var(--title-weight);
+  font-stretch: var(--title-stretch);
+  letter-spacing: var(--title-track);
   line-height: 1.05;
 }
 

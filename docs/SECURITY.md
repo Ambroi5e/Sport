@@ -14,7 +14,8 @@ Les données de santé (poids, mensurations, photos, forme, nutrition) sont des 
 
 - Inscription seulement avec un code d'invitation valide, vérifié par un déclencheur sur `auth.users` (contournement de l'interface impossible).
 - Codes stockés hachés (SHA-256), usage unique, date d'expiration.
-- Connexion par e-mail (lien magique ou code à 6 chiffres). Pas de mot de passe stocké.
+- Connexion par e-mail (code à 6 chiffres) ou Google (OAuth avec PKCE, géré par Supabase). Pas de mot de passe stocké.
+- Inscription avec Google : `reserve_invitation(code, e-mail)`, appelable sans être connecté, réserve un code valable 15 minutes pour une adresse ; le déclencheur ne crée le compte que si l'adresse Google correspond. La fonction ne révèle rien de plus que le formulaire d'inscription (code valable ou non), et l'espace des codes (31^8) rend l'essai systématique hors de portée.
 - Limitation de débit : celle de Supabase Auth sur l'envoi d'e-mails, plus une limite par IP sur les Server Actions d'authentification et d'import.
 
 ## Secrets

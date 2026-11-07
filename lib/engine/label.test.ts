@@ -52,6 +52,24 @@ describe("parseNutritionLabel", () => {
     expect(v.saltG).toBe(0);
   });
 
+  it("lit le texte réel de Tesseract sur une étiquette, « g » lu comme un 9 compris", () => {
+    // Sortie de Tesseract (français) sur une étiquette rendue puis photographiée.
+    const text = [
+      "Valeurs nutritionnelles moyennes Pour100g Par portion (40 g)",
+      "Énergie 1576 kJ 630 kJ",
+      "374 kcal 150 kcal",
+      "Matières grasses 6,9 g 2,89",
+      "dont acides gras saturés 129 0,5g",
+      "Glucides 589 239",
+      "dont sucres 11g 04g",
+      "Fibres alimentaires 9,79 3,9g",
+      "Protéines 13,5g 5,4g",
+      "Sel 0,02 g <0,01 g",
+    ].join("\n");
+    const v = parseNutritionLabel(text);
+    expect(v).toMatchObject({ kcal: 374, fatG: 6.9, carbsG: 58, fiberG: 9.7, proteinG: 13.5, saltG: 0.02 });
+  });
+
   it("lit le format kJ/kcal 1576/374, et convertit les kJ seuls", () => {
     expect(parseNutritionLabel("Energie (kJ/kcal) 1576/374 630/150").kcal).toBe(374);
     expect(parseNutritionLabel("Valeur énergétique 1 000 kJ").kcal).toBe(239);

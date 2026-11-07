@@ -40,12 +40,19 @@ function fixDigits(line: string): string {
 
 const NUMBER = /(<\s*)?(\d+(?:\s*[.,]\s*\d+)?)\s*(m?g)?\b/;
 
-/** Premier nombre après `from`, en grammes ; « < 0,5 g » compte pour 0. */
-function firstGrams(line: string, from: number): number | null {
+/**
+ * Premier nombre après `from`, en grammes ; « < 0,5 g » compte pour 0. Le « g »
+ * collé est souvent lu comme un 9 (« 2,8g » → « 2,89 », « 23g » → « 239 ») :
+ * sans unité, on retire ce 9 quand la valeur n'a pas la forme d'une étiquette.
+ */
+function firstGrams(line: string, from: number, trailingNine: boolean): number | null {
   const m = line.slice(from).match(NUMBER);
   if (!m) return null;
   if (m[1]) return 0;
-  const n = Number(m[2].replace(/\s/g, "").replace(",", "."));
+  let raw = m[2].replace(/\s/g, "").replace(",", ".");
+  const gluedG = /\.\d9$/.test(raw) || (/^\d{3,}$/.test(raw) && raw.endsWith("9") && Number(raw) > 100);
+  if (trailingNine && !m[3] && gluedG) raw = raw.slice(0, -1);
+  const n = Number(raw);
   if (!Number.isFinite(n)) return null;
   return m[3] === "mg" ? n / 1000 : n;
 }
@@ -77,7 +84,8 @@ export function parseNutritionLabel(text: string): LabelValues {
       const m = line.match(pattern);
       if (!m || m.index === undefined) continue;
       if (!sub && /^\W*dont\b/.test(line)) continue;
-      const grams = firstGrams(line, m.index + m[0].length);
+      // Le sel s'écrit souvent avec deux décimales (« 0,02 g ») : pas de correction du 9.
+      const grams = firstGrams(line, m.index + m[0].length, key !== "saltG");
       if (grams !== null && grams <= 100) {
         values[key] = grams;
         break;

@@ -259,3 +259,18 @@ export type Database = {
 
 export type Tables<T extends keyof Database["public"]["Tables"]> = Database["public"]["Tables"][T]["Row"]
 export type Enums<T extends keyof Database["public"]["Enums"]> = Database["public"]["Enums"][T]
+
+export const Constants = {
+  public: {
+    Enums: {
+      app_module: ["musculation", "endurance", "hyrox", "sports", "nutrition", "courses", "corps", "complements", "planning", "amis"],
+      app_role: ["admin"],
+      goal_type: [
+        "prise_de_masse", "seche", "recomposition", "force", "hyrox", "course_10k", "semi_marathon", "marathon",
+        "triathlon_s", "triathlon_m", "triathlon_70_3", "triathlon_ironman", "raquette", "collectif", "forme",
+      ],
+      sex: ["homme", "femme", "autre"],
+      training_level: ["debutant", "intermediaire", "avance"],
+    },
+  },
+} as const

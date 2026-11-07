@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { signOut } from "@/app/(auth)/actions";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/components/ui/cn";
+import { SessionSettings } from "@/components/settings/session-settings";
+import { SignOutButton } from "@/components/settings/sign-out-button";
 import { StylePicker } from "@/components/settings/style-picker";
 import { PageHeader } from "@/components/ui/page-header";
 import { getAppearance } from "@/lib/appearance";
@@ -81,17 +82,23 @@ export default async function SettingsPage() {
           </div>
         </Card>
 
+        <Card aria-labelledby="seance-titre" className="grid gap-4">
+          <div className="grid gap-1">
+            <h2 id="seance-titre" className="text-lg font-semibold">
+              Séance
+            </h2>
+            <p className="text-[15px] text-muted">Chrono de repos et écran. Ces réglages valent pour cet appareil.</p>
+          </div>
+          <SessionSettings />
+        </Card>
+
         {admin ? (
           <Link href="/admin" className="rounded-control border border-line bg-surface p-4 font-medium hover:bg-surface-2">
             Administration : codes d&apos;invitation
           </Link>
         ) : null}
 
-        <form action={signOut}>
-          <Button type="submit" variant="secondary" className="w-full">
-            Me déconnecter
-          </Button>
-        </form>
+        <SignOutButton action={signOut} />
       </div>
     </>
   );

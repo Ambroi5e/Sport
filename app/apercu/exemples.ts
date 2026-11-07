@@ -17,6 +17,7 @@ export const SAMPLE_BLOCKS: LoggerBlock[] = [
       repMax: 10,
       isWarmup: false,
       done: n <= 2,
+      completedAt: n <= 2 ? "2026-11-07T18:0" + n + ":00.000Z" : null,
     })),
   },
   {
@@ -32,12 +33,13 @@ export const SAMPLE_BLOCKS: LoggerBlock[] = [
       repMax: 15,
       isWarmup: false,
       done: false,
+      completedAt: null,
     })),
   },
   {
     order: 2,
     exercise: { id: "ex-gainage", name: "Gainage", measure: "duree" },
-    sets: [1, 2].map((n) => ({ id: `ga-${n}`, setNumber: n, weightKg: null, reps: null, durationSeconds: 45, repMin: null, repMax: null, isWarmup: false, done: false })),
+    sets: [1, 2].map((n) => ({ id: `ga-${n}`, setNumber: n, weightKg: null, reps: null, durationSeconds: 45, repMin: null, repMax: null, isWarmup: false, done: false, completedAt: null })),
   },
 ];
 

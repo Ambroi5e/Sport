@@ -23,7 +23,7 @@ components/            composants d'interface (boutons, champs, navigation)
 lib/engine/            moteur de calcul pur, testé
 lib/modules/           registre des modules activables par objectif
 lib/supabase/          clients serveur et navigateur, types générés
-lib/offline/           file Dexie et synchronisation idempotente (v0.3)
+lib/offline/           file d'attente des saisies (localStorage) et copie de la séance en cours (v0.3)
 lib/providers/         interfaces AIProvider, ImportProvider
 messages/              textes de l'interface (fr.json)
 supabase/migrations/   migrations non destructives
@@ -41,7 +41,7 @@ docs/  audit/  SPEC.md  CLAUDE.md  CHANGELOG.md
 - **Connexion** : code à 6 chiffres reçu par e-mail, ou Google (bouton affiché seulement si le fournisseur est activé dans Supabase ; retour par `/auth/callback`). À l'inscription avec Google, l'invitation est réservée pour l'adresse saisie avant le départ vers Google, puis consommée par le déclencheur. Le code est indispensable sur iPhone : un lien ouvre Safari, pas l'app installée, et la session n'y serait pas.
 - **Modules activables** : table `user_modules` et registre `lib/modules`. L'objectif choisi active un jeu de modules par défaut, modifiable ensuite.
 - **Moteur pur** : fonctions déterministes, sans effet de bord, testées. Le plan prédictif et le planning seront des règles explicables (double progression, décharge toutes les 4 à 6 semaines, 48 à 72 h de récupération par muscle).
-- **Hors ligne** : service worker écrit à la main (`public/sw.js`, sans Serwist tant qu'il reste simple) : fichiers statiques en cache, pages toujours demandées au réseau avec repli sur `/hors-ligne`, jamais de HTML personnel en cache ; à partir de la v0.3, chaque saisie reçoit un identifiant généré sur le téléphone, part dans une file Dexie et est envoyée au retour du réseau, sans doublon possible.
+- **Hors ligne** : service worker écrit à la main (`public/sw.js`, sans Serwist tant qu'il reste simple) : fichiers statiques en cache, pages toujours demandées au réseau avec repli sur `/hors-ligne`. Une seule page personnelle gardée : la séance en cours (voir « Séance en direct »). Chaque saisie reçoit un identifiant généré sur le téléphone, passe par une file d'attente et est envoyée dès que possible, sans doublon possible.
 - **Temps réel** : Supabase Realtime seulement pour les séances communes, un canal privé par séance.
 - **Gros imports** (Apple Santé, FIT, GPX) : lus dans un Web Worker sur le téléphone, seuls les résumés utiles partent au serveur.
 
@@ -79,6 +79,16 @@ Chaque table porte un `user_id`. Les catalogues communs (exercices, aliments de 
 
 - **Muscles** : `primary_muscles` et `secondary_muscles` sont des tableaux sur `exercises`, au lieu d'une table de liaison. Le calcul du volume par muscle reste dans le moteur.
 - **Séries prévues** : démarrer depuis un modèle crée les séries à l'avance, sans `completed_at`. Valider une série la complète ; terminer la séance retire les séries non validées.
-- **Enregistrement idempotent** : chaque série reçoit son identifiant dans le navigateur et s'enregistre par upsert. La file hors ligne de la v0.3 s'appuiera dessus sans doublon.
+- **Enregistrement idempotent** : chaque série reçoit son identifiant dans le navigateur et s'enregistre par upsert. La file d'attente de la v0.3 s'appuie dessus : renvoyer une série ne crée pas de doublon, et la série garde l'heure de validation du téléphone.
 - **Records** : calculés à la volée par `lib/engine/training.ts` à partir des séries, sans table. Le record battu s'affiche dès la validation, comparé aux records d'avant la séance.
 - **Cohérence** : clés étrangères composites `(workout_id, user_id)` et `(template_id, user_id)`, et `exercise_is_usable()` dans les politiques : impossible d'écrire dans la séance d'un autre ou d'utiliser son exercice personnel.
+
+## Séance en direct (v0.3)
+
+- **File d'attente** (`lib/offline/outbox.ts`) : toute saisie de séance est d'abord écrite dans `localStorage`, l'écran se met à jour, puis les opérations partent une par une, dans l'ordre, par les Server Actions habituelles. Deux opérations sur la même série se remplacent. Nouvel essai au retour du réseau, au retour dans l'app et après un délai croissant (2 s à 1 min). Une réponse `retry: false` (valeur hors limites, contrainte, RLS) retire l'opération et affiche l'erreur sur la série. La logique de fusion est pure et testée (`lib/engine/outbox.ts`).
+- **Pourquoi pas Dexie** : quelques dizaines de petites opérations au plus ; `localStorage` est synchrone, survit à la fermeture de l'app et n'ajoute pas de dépendance. IndexedDB reviendra pour des photos ou de gros volumes.
+- **Opérations par compte** : chaque opération porte l'identifiant de son auteur et ne part qu'avec sa session. Une session expirée garde la file et propose de se reconnecter.
+- **Rouvrir sans réseau** : la page de séance demande au service worker de garder sa copie (à l'ouverture et chaque fois que la file se vide), avec les scripts qu'elle référence. Rouverte hors ligne, elle réapplique les opérations encore en file. Ajouter un exercice et terminer la séance demandent du réseau et le disent.
+- **Chrono de repos** (`components/training/rest-timer.tsx`) : heure de fin gardée dans `localStorage`, visible sur toutes les pages connectées, durée retenue par exercice. Fin signalée par vibration (Android), son court en mode « ambiant » et annonce pour les lecteurs d'écran.
+- **Écran allumé** : `Screen Wake Lock` pendant une séance en cours, repris au retour dans l'app.
+- **Réglages de séance** (`lib/session-prefs.ts`) : repos par défaut, son, écran allumé, gardés sur l'appareil.

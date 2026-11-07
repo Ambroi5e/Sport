@@ -13,7 +13,9 @@ import { ExerciseList } from "@/components/training/exercise-list";
 import { MuscleVolume } from "@/components/training/muscle-volume";
 import { RecordTiles, recordTiles } from "@/components/training/record-tiles";
 import { TemplateItems } from "@/components/training/template-forms";
+import { RestTimerDock } from "@/components/training/rest-timer";
 import { WorkoutLogger } from "@/components/training/workout-logger";
+import { SessionSettings } from "@/components/settings/session-settings";
 import { SAMPLE_BLOCKS, SAMPLE_EXERCISES, SAMPLE_HISTORY, SAMPLE_ITEMS, SAMPLE_VOLUME } from "./exemples";
 import { getAppearance } from "@/lib/appearance";
 
@@ -37,14 +39,20 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
   return (
     <div className="flex min-h-dvh">
       <AppNav isAdmin={false} />
-      <main className="pt-safe mx-auto w-full max-w-5xl min-w-0 flex-1 px-4 pb-[calc(152px+env(safe-area-inset-bottom,0px))] md:px-8 md:pb-12">
+      <main className="pt-safe mx-auto w-full max-w-5xl min-w-0 flex-1 px-4 pb-[calc(152px+env(safe-area-inset-bottom,0px))] md:px-8 md:pb-28">
         {ecran === "reglages" ? (
           <>
             <PageHeader title="Réglages" back="/apercu" />
-            <Card className="grid gap-4 md:max-w-xl">
-              <h2 className="text-lg font-semibold">Style</h2>
-              <StylePicker current={appearance.style} theme={appearance.theme} unit="kg" />
-            </Card>
+            <div className="grid gap-4 md:max-w-xl">
+              <Card className="grid gap-4">
+                <h2 className="text-lg font-semibold">Style</h2>
+                <StylePicker current={appearance.style} theme={appearance.theme} unit="kg" />
+              </Card>
+              <Card className="grid gap-4">
+                <h2 className="text-lg font-semibold">Séance</h2>
+                <SessionSettings />
+              </Card>
+            </div>
           </>
         ) : ecran === "entrainement" ? (
           <>
@@ -62,7 +70,7 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
         ) : ecran === "seance" ? (
           <>
             <PageHeader back="/apercu" eyebrow="vendredi 7 novembre" title="Push A" />
-            <WorkoutLogger workoutId="apercu" blocks={SAMPLE_BLOCKS} history={SAMPLE_HISTORY} unit="kg" finished={false} />
+            <WorkoutLogger userId="apercu" workoutId="apercu" blocks={SAMPLE_BLOCKS} history={SAMPLE_HISTORY} unit="kg" finished={false} />
           </>
         ) : ecran === "modele" ? (
           <>
@@ -116,6 +124,7 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
           </>
         )}
       </main>
+      <RestTimerDock />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { ConfirmAction } from "@/components/ui/confirm-action";
 import { PageHeader } from "@/components/ui/page-header";
 import { SubmitButton } from "@/components/ui/submit-button";
+import { FinishWorkoutButton } from "@/components/training/finish-workout-button";
 import { WorkoutLogger, type LoggerBlock } from "@/components/training/workout-logger";
 import { getProfile } from "@/lib/auth";
 import { formatLongDate } from "@/lib/dates";
@@ -35,6 +36,7 @@ export default async function WorkoutPage({ params }: { params: Promise<{ id: st
       repMax: s.rep_max,
       isWarmup: s.is_warmup,
       done: s.completed_at !== null,
+      completedAt: s.completed_at,
     })),
   }));
 
@@ -101,6 +103,7 @@ export default async function WorkoutPage({ params }: { params: Promise<{ id: st
       ) : null}
 
       <WorkoutLogger
+        userId={profile?.user_id ?? ""}
         key={blocks.map((b) => `${b.order}:${b.sets.length}`).join(",")}
         workoutId={workout.id}
         blocks={blocks}
@@ -130,11 +133,7 @@ export default async function WorkoutPage({ params }: { params: Promise<{ id: st
             />
           </>
         ) : (
-          <form action={finishWorkout.bind(null, workout.id)}>
-            <SubmitButton size="lg" className="w-full" pendingLabel="Enregistrement…">
-              Terminer la séance
-            </SubmitButton>
-          </form>
+          <FinishWorkoutButton userId={profile?.user_id ?? ""} workoutId={workout.id} action={finishWorkout.bind(null, workout.id)} />
         )}
       </div>
     </>

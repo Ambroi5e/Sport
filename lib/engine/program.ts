@@ -66,8 +66,9 @@ const SMALL_MUSCLES: ReadonlySet<string> = new Set([
 /** Muscles visés par chaque type de séance, dans l'ordre où on les travaille. */
 const SLOTS: Record<SessionKind, string[]> = {
   full: ["quadriceps", "pectoraux", "dorsaux", "ischios", "epaules_laterales", "biceps", "triceps", "abdominaux"],
-  haut: ["pectoraux", "dorsaux", "epaules_avant", "dorsaux", "epaules_laterales", "triceps", "biceps", "epaules_arriere"],
-  bas: ["quadriceps", "ischios", "fessiers", "quadriceps", "mollets", "abdominaux", "adducteurs"],
+  haut: ["pectoraux", "dorsaux", "pectoraux", "dorsaux", "epaules_laterales", "triceps", "biceps", "epaules_avant", "epaules_arriere"],
+  // Les fessiers travaillent déjà en principal au squat, au soulevé de terre et à la presse : leur place vient tard.
+  bas: ["quadriceps", "ischios", "quadriceps", "ischios", "mollets", "abdominaux", "fessiers", "adducteurs"],
   push: ["pectoraux", "epaules_avant", "pectoraux", "epaules_laterales", "triceps", "triceps", "abdominaux"],
   pull: ["dorsaux", "dorsaux", "epaules_arriere", "biceps", "trapezes", "biceps", "abdominaux"],
   jambes: ["quadriceps", "ischios", "fessiers", "quadriceps", "mollets", "ischios", "abdominaux"],

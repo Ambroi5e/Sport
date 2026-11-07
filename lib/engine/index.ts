@@ -6,3 +6,4 @@ export * from "./training";
 export * from "./outbox";
 export * from "./rest";
 export * from "./nutrition";
+export * from "./body";

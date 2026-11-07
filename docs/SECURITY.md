@@ -8,7 +8,7 @@ Les données de santé (poids, mensurations, photos, forme, nutrition) sont des 
 - Le partage entre amis passe uniquement par `public.can_view(owner, catégorie)` : amitié acceptée des deux côtés et permission active. Lecture seule.
 - Un test vérifie qu'aucune table de `public` n'a la RLS désactivée. Chaque table a ses tests : A ne lit, ne modifie ni ne supprime les lignes de B.
 - Fonctions `security definer` : `search_path` fixé à vide, noms entièrement qualifiés, droits `execute` retirés à `public` et `anon` quand ils ne sont pas nécessaires.
-- Rattachements entre tables d'un même utilisateur par clés étrangères composites `(id, user_id)` : un élément de modèle ne peut pas viser le modèle d'un autre, un modèle ne peut pas rejoindre le programme d'un autre (v0.6). Les exercices visés (objectif d'un programme, préférences) doivent être du catalogue commun ou à soi (`exercise_is_usable`).
+- Rattachements entre tables d'un même utilisateur par clés étrangères composites `(id, user_id)` : un élément de modèle ne peut pas viser le modèle d'un autre, un modèle ne peut pas rejoindre le programme d'un autre (v0.6), un ingrédient ne peut pas viser la recette d'un autre (v0.6.1). Les exercices visés (objectif d'un programme, préférences) doivent être du catalogue commun ou à soi (`exercise_is_usable`).
 - Page admin : uniquement des compteurs via une fonction réservée au rôle admin, jamais le contenu.
 
 ## Comptes

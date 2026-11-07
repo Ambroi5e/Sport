@@ -4,6 +4,13 @@ Format : une entrée par version (semver), du plus récent au plus ancien. Les m
 
 ## [Non publié]
 
+### v0.6.1 : dépense réelle et recettes
+
+- Page Cibles : « Ta dépense réelle », mesurée sur 28 jours d'après ce que tu manges et l'évolution de ton poids, face à la formule. Les jours visiblement incomplets sont écartés ; sans assez de données, la carte dit ce qui manque. Le repère suggéré part de cette mesure quand elle est fiable et ne s'applique que sur un tap.
+- Recettes : ingrédients ajoutés depuis une recherche, grammes modifiables, nombre de parts et poids cuit facultatif, valeurs d'une part en direct. Une recette se note comme un aliment, à la part ou au poids, et se retrouve dans la recherche, les favoris et « comme hier ».
+- Corriger un aliment recalcule les recettes qui l'utilisent ; les jours passés suivent.
+- Migration non destructive appliquée : `20261112000000_recettes.sql` (colonnes `foods.is_recipe`, `recipe_total_g`, `recipe_portions`, table `recipe_items`), avec 8 tests RLS. Pas de table `tdee_estimates` : la dépense se calcule à la lecture.
+
 ### v0.6 : plan prédictif et charge suggérée
 
 - Programme généré : séances par semaine, durée, matériel, muscles prioritaires et objectif chiffré facultatif (« développé couché à 100 kg en mai »). Fonte répartit les séances, choisit les exercices selon le matériel, les préférences et les habitudes, et fixe séries et fourchettes. Les séances sont des modèles : tout reste modifiable.

@@ -1,9 +1,7 @@
 import "server-only";
 import { requireUserId } from "@/lib/auth";
-import { isSite, PHOTO_BUCKET, SIGNED_URL_SECONDS, type BodySite, type PhotoPose } from "@/lib/body";
+import { isSite, PHOTO_BUCKET, SIGNED_URL_SECONDS, type MeasurementRow, type Photo } from "@/lib/body";
 import { createClient } from "@/lib/supabase/server";
-
-export type MeasurementRow = { date: string; site: BodySite; cm: number };
 
 /** Toutes les mensurations de l'utilisateur, de la plus ancienne à la plus récente. */
 export async function getMeasurements(): Promise<MeasurementRow[]> {
@@ -17,8 +15,6 @@ export async function getMeasurements(): Promise<MeasurementRow[]> {
     .limit(5000);
   return (data ?? []).filter((r) => isSite(r.site)).map((r) => ({ date: r.measured_on, site: r.site, cm: Number(r.value_cm) }));
 }
-
-export type Photo = { id: string; takenOn: string; pose: PhotoPose; path: string; url: string | null };
 
 /** Liens d'affichage signés, valables 10 minutes, générés côté serveur. */
 async function signedUrls(paths: string[]): Promise<Map<string, string>> {

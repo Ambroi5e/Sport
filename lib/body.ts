@@ -6,6 +6,11 @@ export type BodySite = Enums<"body_site">;
 export type PhotoPose = Enums<"photo_pose">;
 
 export const BODY_SITES = Constants.public.Enums.body_site;
+
+export type MeasurementRow = { date: string; site: BodySite; cm: number };
+
+/** Une photo de progression et son lien signé (null si la signature a échoué). */
+export type Photo = { id: string; takenOn: string; pose: PhotoPose; path: string; url: string | null };
 export const PHOTO_POSES = Constants.public.Enums.photo_pose;
 
 export const SITE_LABELS: Record<BodySite, string> = {

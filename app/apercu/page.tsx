@@ -26,18 +26,37 @@ import { QuickPicks } from "@/components/nutrition/quick-picks";
 import { TargetsForm } from "@/components/nutrition/targets-form";
 import { TodayNutritionCard } from "@/components/nutrition/today-card";
 import { addFoodLog, createFood } from "@/app/(app)/nutrition/actions";
-import { sumNutrients } from "@/lib/engine";
+import { saveMeasurements, uploadPhoto } from "@/app/(app)/progres/actions";
+import { CompareView } from "@/components/progress/compare-view";
+import { MeasurementsForm } from "@/components/progress/measurements-form";
+import { MeasurementsView, MeasurementTips } from "@/components/progress/measurements-view";
+import { PaceAlertNotice } from "@/components/progress/pace-alert";
+import { PhotoForm } from "@/components/progress/photo-form";
+import { PhotosView } from "@/components/progress/photos-view";
+import { ProgressTabs } from "@/components/progress/progress-tabs";
+import { StrengthView } from "@/components/progress/strength-view";
+import { WeekCard } from "@/components/progress/week-card";
+import { WeeklyVolume } from "@/components/progress/weekly-volume";
+import { WeightView } from "@/components/progress/weight-view";
+import { addDays, weekStart } from "@/lib/dates";
+import { currentWeek, movingAverage, paceAlert, rateStatus, sumNutrients, weeklyRate, weeklyVolume } from "@/lib/engine";
 import {
   SAMPLE_BLOCKS,
+  SAMPLE_DAY,
+  SAMPLE_EXERCISE_NAMES,
   SAMPLE_EXERCISES,
   SAMPLE_FAVORITES,
   SAMPLE_FOODS,
   SAMPLE_FREQUENT,
   SAMPLE_HISTORY,
   SAMPLE_ITEMS,
+  SAMPLE_MEASUREMENTS,
+  SAMPLE_PHOTOS,
+  SAMPLE_SETS,
   SAMPLE_TARGETS,
   SAMPLE_TODAY,
   SAMPLE_VOLUME,
+  SAMPLE_WEIGHTS,
   SAMPLE_YESTERDAY,
 } from "./exemples";
 import { getAppearance } from "@/lib/appearance";
@@ -50,6 +69,18 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
   if (process.env.NODE_ENV === "production") notFound();
   const { ecran = "accueil" } = await searchParams;
   const appearance = await getAppearance();
+  const target = { min: 0.25, max: 0.5 };
+  const rate = weeklyRate(SAMPLE_WEIGHTS, SAMPLE_DAY);
+  const weight = {
+    today: SAMPLE_DAY,
+    entries: SAMPLE_WEIGHTS,
+    average7: movingAverage(SAMPLE_WEIGHTS, SAMPLE_DAY),
+    rate,
+    status: rateStatus(rate, target),
+    target,
+    alert: paceAlert(SAMPLE_WEIGHTS, SAMPLE_DAY, target),
+  };
+  const week = currentWeek(SAMPLE_DAY, SAMPLE_SETS.filter((x, i, all) => all.findIndex((y) => y.workoutId === x.workoutId) === i).map((x) => x.date), [1, 3, 5]);
 
   if (ecran === "onboarding") {
     return (
@@ -76,6 +107,60 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
                 <SessionSettings />
               </Card>
             </div>
+          </>
+        ) : ecran === "progres" ? (
+          <>
+            <PageHeader title="Progrès" />
+            <ProgressTabs current="/progres" />
+            <WeightView weight={weight} period="3m" unit="kg" />
+          </>
+        ) : ecran === "progres-mensurations" ? (
+          <>
+            <PageHeader title="Progrès" />
+            <ProgressTabs current="/progres/mensurations" />
+            <MeasurementsView rows={SAMPLE_MEASUREMENTS} />
+          </>
+        ) : ecran === "progres-saisie" ? (
+          <>
+            <PageHeader back="/apercu?ecran=progres-mensurations" title="Mensurations" />
+            <div className="grid gap-4 md:max-w-2xl">
+              <MeasurementTips />
+              <MeasurementsForm
+                action={saveMeasurements}
+                date={SAMPLE_DAY}
+                today={SAMPLE_DAY}
+                minDate={addDays(SAMPLE_DAY, -730)}
+                current={{ bras: 38.2 }}
+                latest={Object.fromEntries(SAMPLE_MEASUREMENTS.map((m) => [m.site, m.cm]))}
+              />
+            </div>
+          </>
+        ) : ecran === "progres-photos" ? (
+          <>
+            <PageHeader title="Progrès" />
+            <ProgressTabs current="/progres/photos" />
+            <PhotosView photos={SAMPLE_PHOTOS} />
+          </>
+        ) : ecran === "progres-photo-ajout" ? (
+          <>
+            <PageHeader back="/apercu?ecran=progres-photos" title="Ajouter une photo" />
+            <div className="grid gap-4 md:max-w-xl">
+              <p className="text-[14px] text-muted">
+                Pour comparer d&apos;une fois sur l&apos;autre : même lumière, même endroit, même distance, de préférence le matin.
+              </p>
+              <PhotoForm action={uploadPhoto} today={SAMPLE_DAY} minDate={addDays(SAMPLE_DAY, -730)} />
+            </div>
+          </>
+        ) : ecran === "progres-comparer" ? (
+          <>
+            <PageHeader back="/apercu?ecran=progres-photos" title="Comparer" />
+            <CompareView pose="face" all={SAMPLE_PHOTOS} />
+          </>
+        ) : ecran === "progres-force" ? (
+          <>
+            <PageHeader title="Progrès" />
+            <ProgressTabs current="/progres/force" />
+            <StrengthView sets={SAMPLE_SETS} names={SAMPLE_EXERCISE_NAMES} start={addDays(weekStart(SAMPLE_DAY), -77)} today={SAMPLE_DAY} unit="kg" />
           </>
         ) : ecran === "entrainement" ? (
           <>
@@ -165,14 +250,18 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
           <>
             <PageHeader eyebrow="ven. 7 nov." title="Salut Exemple" />
             <div className="grid gap-4 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] md:gap-6">
-              <Card className="grid gap-4">
-                <div className="flex items-baseline justify-between">
-                  <h2 className="text-lg font-semibold">Pesée du jour</h2>
-                  <span className="text-sm font-medium text-accent-text">Historique</span>
-                </div>
-                <QuickWeigh initial={85.2} unit="kg" loggedToday={false} />
-                <WeightTrend average7={84.86} rate={0.38} status="dans_la_cible" target={{ min: 0.25, max: 0.5 }} unit="kg" />
-              </Card>
+              <div className="grid content-start gap-4">
+                <Card className="grid gap-4">
+                  <div className="flex items-baseline justify-between">
+                    <h2 className="text-lg font-semibold">Pesée du jour</h2>
+                    <span className="text-sm font-medium text-accent-text">Courbe</span>
+                  </div>
+                  <QuickWeigh initial={weight.entries[0].kg} unit="kg" loggedToday={false} />
+                  <WeightTrend average7={weight.average7} rate={weight.rate} status={weight.status} target={target} unit="kg" />
+                  {weight.alert ? <PaceAlertNotice alert={weight.alert} target={target} unit="kg" /> : null}
+                </Card>
+                <WeekCard days={week.days} done={week.done} planned={4} />
+              </div>
               <div className="grid content-start gap-4">
                 <Card className="grid gap-2">
                   <p className="label-caps flex items-center gap-1.5">
@@ -182,6 +271,13 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
                   <p className="text-[15px] text-muted">Rythme visé : 0,25 à 0,5 kg par semaine.</p>
                 </Card>
                 <TodayNutritionCard totals={sumNutrients(SAMPLE_TODAY.map((e) => e.nutrients))} target={SAMPLE_TARGETS.entrainement} dayType="entrainement" />
+                <Card className="grid gap-3">
+                  <div className="flex items-baseline justify-between">
+                    <h2 className="text-lg font-semibold">Volume, 8 semaines</h2>
+                    <span className="text-sm font-medium text-accent-text">Force</span>
+                  </div>
+                  <WeeklyVolume weeks={weeklyVolume(SAMPLE_SETS, SAMPLE_DAY, 8)} unit="kg" table={false} className="h-28" />
+                </Card>
               </div>
             </div>
           </>

@@ -1,5 +1,6 @@
 import type { LoggerBlock, LoggerHistory } from "@/components/training/workout-logger";
-import { nutrientsFor, sumNutrients, type DayType, type Meal } from "@/lib/engine";
+import { nutrientsFor, sumNutrients, type DayType, type Meal, type SetEntry, type WeighIn } from "@/lib/engine";
+import type { MeasurementRow, Photo, PhotoPose } from "@/lib/body";
 import type { Food, JournalEntry, Target } from "@/lib/nutrition";
 import type { ExerciseSummary } from "@/lib/training";
 
@@ -149,3 +150,103 @@ export const SAMPLE_FREQUENT = [
   { food: byId["f-riz"], grams: 250 },
   { food: byId["f-whey"], grams: 30 },
 ];
+
+// Progrès (v0.5) ------------------------------------------------------------------
+
+export const SAMPLE_DAY = "2026-11-07";
+
+function shiftDay(date: string, days: number): string {
+  const d = new Date(`${date}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+/** Bruit déterministe entre -1 et 1. */
+function wobble(i: number): number {
+  return Math.sin(i * 12.9898) * 0.6 + Math.sin(i * 4.1) * 0.4;
+}
+
+/**
+ * 110 jours de pesées (quelques oublis) : prise de masse dans la cible, puis
+ * trois semaines trop rapides pour montrer l'alerte.
+ */
+export const SAMPLE_WEIGHTS: WeighIn[] = Array.from({ length: 110 }, (_, i) => {
+  const daysAgo = 109 - i;
+  const slow = Math.min(i, 89) * (0.32 / 7);
+  const fast = Math.max(0, i - 89) * (0.75 / 7);
+  return { date: shiftDay(SAMPLE_DAY, -daysAgo), kg: Math.round((80.2 + slow + fast + wobble(i) * 0.35) * 10) / 10 };
+})
+  .filter((_, i) => i % 9 !== 4)
+  .reverse();
+
+export const SAMPLE_MEASUREMENTS: MeasurementRow[] = [
+  ...(
+    [
+      ["2026-09-05", { cou: 39, epaules: 118, poitrine: 101, bras: 36.5, avant_bras: 29.5, taille: 81, hanches: 96, cuisse: 57, mollet: 37.5 }],
+      ["2026-10-04", { cou: 39.5, epaules: 119.5, poitrine: 102.5, bras: 37.2, avant_bras: 30, taille: 81.5, hanches: 96.5, cuisse: 58, mollet: 37.5 }],
+      ["2026-11-02", { epaules: 120.5, poitrine: 103.5, bras: 38, avant_bras: 30.2, taille: 82.5, cuisse: 58.8, mollet: 38 }],
+    ] as const
+  ).flatMap(([date, values]) => Object.entries(values).map(([site, cm]) => ({ date, site: site as MeasurementRow["site"], cm }))),
+];
+
+/** Silhouette d'exemple en SVG : aucune vraie photo dans le dépôt. */
+function silhouette(pose: PhotoPose, shade: number, width: number): string {
+  const body =
+    pose === "profil"
+      ? `<ellipse cx="150" cy="95" rx="34" ry="40"/><path d="M128 140h44c10 40 14 90 8 140l-6 120h-46l-8-120c-6-50-2-100 8-140z"/>`
+      : `<ellipse cx="150" cy="95" rx="38" ry="44"/><path d="M${150 - width} 150c-14 0-24 10-26 24l-8 116h${width * 0.5}l6 110h${width * 1.5 + 12}l6-110h${width * 0.5}l-8-116c-2-14-12-24-26-24z"/>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400"><rect width="300" height="400" fill="hsl(30 8% ${18 + shade}%)"/><g fill="hsl(30 10% ${42 + shade}%)">${body}</g></svg>`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
+
+export const SAMPLE_PHOTOS: Photo[] = (
+  [
+    ["2026-11-02", 6, 64],
+    ["2026-10-04", 3, 60],
+    ["2026-09-05", 0, 56],
+  ] as const
+).flatMap(([date, shade, width], d) =>
+  (["face", "profil", "dos"] as const).map((pose, i) => ({
+    id: `00000000-0000-4000-8000-00000000${d}${i}00`,
+    takenOn: date,
+    pose,
+    path: `exemple/${date}-${pose}.jpg`,
+    url: silhouette(pose, shade, width),
+  })),
+);
+
+export const SAMPLE_EXERCISE_NAMES: Record<string, string> = {
+  "ex-dc": "Développé couché",
+  "ex-squat": "Squat",
+  "ex-sdt": "Soulevé de terre",
+  "ex-rowing": "Rowing barre",
+  "ex-ecarte": "Écarté à la poulie",
+};
+
+/** Douze semaines de séances : trois par semaine, charges en progression lente. */
+export const SAMPLE_SETS: SetEntry[] = Array.from({ length: 12 * 3 }, (_, n) => {
+  const week = Math.floor(n / 3);
+  const slot = n % 3;
+  const date = shiftDay("2026-08-17", week * 7 + [0, 2, 4][slot]);
+  return { n, week, slot, date };
+})
+  .filter(({ date }) => date <= SAMPLE_DAY && !(date >= "2026-10-05" && date <= "2026-10-11" && date !== "2026-10-05"))
+  .flatMap(({ n, week, slot, date }) => {
+    const workoutId = `w-${n}`;
+    const lifts =
+      slot === 0
+        ? [["ex-dc", 70 + week * 1.25, 8], ["ex-ecarte", 15, 12]]
+        : slot === 1
+          ? [["ex-squat", 95 + week * 2.5, 6], ["ex-rowing", 60 + week, 10]]
+          : [["ex-sdt", 120 + week * 2.5, 5], ["ex-dc", 65 + week, 10]];
+    return lifts.flatMap(([exerciseId, kg, reps]) =>
+      [1, 2, 3, 4].map((s) => ({
+        exerciseId: exerciseId as string,
+        workoutId,
+        date,
+        weightKg: Math.round((kg as number) * 2) / 2,
+        reps: (reps as number) - (s === 4 ? 1 : 0),
+        isWarmup: false,
+      })),
+    );
+  });

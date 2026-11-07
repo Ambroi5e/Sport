@@ -11,7 +11,8 @@ const securityHeaders = [
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   {
     key: "Permissions-Policy",
-    value: "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()",
+    // Caméra pour Fonte seule : scanner un code-barres (v0.6.2).
+    value: "camera=(self), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()",
   },
 ];
 

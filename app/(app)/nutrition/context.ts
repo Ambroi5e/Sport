@@ -18,3 +18,21 @@ export async function addContext(search: { repas?: string; jour?: string }) {
   const meal = isMeal(search.repas) ? search.repas : mealForTime(hour, minute);
   return { profile, today, day, meal, params: addParams(meal, day, today) };
 }
+
+/**
+ * Création d'un aliment (formulaire, scan, étiquette) : venue d'un repas, elle
+ * enchaîne ensuite sur la quantité ; sinon elle revient à « Mes aliments ».
+ */
+export async function creationContext(search: { repas?: string; jour?: string }) {
+  const fromMeal = isMeal(search.repas);
+  const { day, meal, params } = await addContext(search);
+  return {
+    fromMeal,
+    /** Champs cachés du formulaire d'aliment. */
+    hidden: fromMeal ? { meal, day } : ({} as Record<string, string>),
+    /** Paramètres à reporter de page en page (`repas`, `jour`), vides hors repas. */
+    query: fromMeal ? params : "",
+    back: fromMeal ? `/nutrition/ajouter?${params}` : "/nutrition/aliments",
+    submitLabel: fromMeal ? "Créer et choisir la quantité" : "Créer l'aliment",
+  };
+}

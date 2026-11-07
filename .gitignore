@@ -20,6 +20,9 @@
 # production
 /build
 
+# fichiers de lecture (code-barres, étiquette) copiés au build
+/public/scan/
+
 # misc
 .DS_Store
 *.pem

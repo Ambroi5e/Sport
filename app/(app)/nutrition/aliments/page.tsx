@@ -1,4 +1,4 @@
-import { CaretRightIcon, CookieIcon, PlusIcon } from "@phosphor-icons/react/ssr";
+import { BarcodeIcon, CaretRightIcon, CookieIcon, PlusIcon } from "@phosphor-icons/react/ssr";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { buttonClasses } from "@/components/ui/button";
@@ -34,13 +34,18 @@ export default async function PersonalFoodsPage() {
           </ul>
         ) : (
           <EmptyState icon={<CookieIcon size={22} />} title="Aucun aliment perso pour l'instant">
-            Le catalogue couvre les aliments de base. Pour un produit précis (ta whey, ton granola), crée-le avec les valeurs pour 100 g de
-            l&apos;étiquette.
+            Le catalogue couvre les aliments de base. Pour un produit précis (ta whey, ton granola), scanne son code-barres ou crée-le avec
+            les valeurs pour 100 g de l&apos;étiquette.
           </EmptyState>
         )}
-        <Link href="/nutrition/aliments/nouveau" className={buttonClasses("secondary", "md", "w-full")}>
-          <PlusIcon size={18} weight="bold" aria-hidden="true" /> Créer un aliment
-        </Link>
+        <div className="grid grid-cols-2 gap-2">
+          <Link href="/nutrition/scanner" className={buttonClasses("secondary", "md", "w-full")}>
+            <BarcodeIcon size={18} aria-hidden="true" /> Scanner
+          </Link>
+          <Link href="/nutrition/aliments/nouveau" className={buttonClasses("secondary", "md", "w-full")}>
+            <PlusIcon size={18} weight="bold" aria-hidden="true" /> Créer
+          </Link>
+        </div>
       </div>
     </>
   );

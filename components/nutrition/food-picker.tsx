@@ -1,8 +1,9 @@
 "use client";
 
-import { CaretRightIcon, MagnifyingGlassIcon, PlusIcon } from "@phosphor-icons/react";
+import { BarcodeIcon, CaretRightIcon, MagnifyingGlassIcon, PlusIcon } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useDeferredValue, useState, type ReactNode } from "react";
+import { buttonClasses } from "@/components/ui/button";
 import { formatKcal, formatMacro, matchFoods, type Food } from "@/lib/nutrition";
 
 const MAX_RESULTS = 40;
@@ -19,19 +20,25 @@ export function FoodPicker({ foods, params, children }: { foods: Food[]; params:
 
   return (
     <div className="grid gap-5">
-      <label className="relative block">
-        <span className="sr-only">Rechercher un aliment</span>
-        <MagnifyingGlassIcon size={20} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted" aria-hidden="true" />
-        <input
-          type="search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Rechercher : avoine, poulet, skyr…"
-          enterKeyHint="search"
-          autoComplete="off"
-          className="h-12 w-full rounded-control border border-line bg-surface-2 pr-3 pl-10 text-base text-text placeholder:text-muted focus:border-accent focus:outline-none"
-        />
-      </label>
+      <div className="flex gap-2">
+        <label className="relative block min-w-0 flex-1">
+          <span className="sr-only">Rechercher un aliment</span>
+          <MagnifyingGlassIcon size={20} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted" aria-hidden="true" />
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Rechercher"
+            enterKeyHint="search"
+            autoComplete="off"
+            className="h-12 w-full rounded-control border border-line bg-surface-2 pr-3 pl-10 text-base text-text placeholder:text-muted focus:border-accent focus:outline-none"
+          />
+        </label>
+        <Link href={`/nutrition/scanner?${params}`} className={buttonClasses("secondary", "md", "shrink-0 px-3.5")}>
+          <BarcodeIcon size={20} aria-hidden="true" />
+          <span className="max-[359px]:sr-only">Scanner</span>
+        </Link>
+      </div>
 
       {q ? (
         <section aria-label="Résultats" className="grid gap-2">

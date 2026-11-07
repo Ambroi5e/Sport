@@ -37,7 +37,7 @@ export function BarChart({
     <div className={cn("grid grid-cols-[2.75rem_minmax(0,1fr)] gap-x-2", labelKey ? "pt-5" : "pt-2")} aria-hidden="true">
       <div className={cn("relative", className)}>
         {ticks.map((t) => (
-          <span key={t} className="font-numeric absolute right-0 translate-y-1/2 text-[12px] text-muted tabular-nums" style={{ bottom: `${pct(t)}%` }}>
+          <span key={t} className="absolute right-0 translate-y-1/2 text-[12px] text-muted tabular-nums" style={{ bottom: `${pct(t)}%` }}>
             {format(t)}
           </span>
         ))}
@@ -49,10 +49,10 @@ export function BarChart({
         ))}
         <div className="absolute inset-0 flex items-end">
           {bars.map((b) => (
-            <div key={b.key} title={b.title} className="relative flex h-full flex-1 items-end justify-center px-[12%]">
+            <div key={b.key} title={b.title} className="relative flex h-full min-w-0 flex-1 items-end justify-center px-1">
               {b.value > 0 ? (
                 <span
-                  className={cn("w-full max-w-6 rounded-t-[4px] bg-accent", b.partial && "opacity-50")}
+                  className={cn("w-full max-w-6 rounded-t-[4px] bg-chart", b.partial && "opacity-50")}
                   style={{ height: `${pct(b.value)}%` }}
                 />
               ) : null}
@@ -72,7 +72,7 @@ export function BarChart({
       <span />
       <div className="mt-1.5 flex text-[12px] text-muted">
         {bars.map((b) => (
-          <span key={b.key} className="flex-1 truncate text-center">
+          <span key={b.key} className="min-w-0 flex-1 truncate text-center">
             {b.label}
           </span>
         ))}

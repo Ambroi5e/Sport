@@ -149,8 +149,18 @@
   color-scheme: light;
 }
 
+/* Courbes : la couleur d'accent, foncée en clair quand elle n'atteint pas 3:1 sur la carte. */
 [data-style] {
   font-family: var(--font-body);
+  --chart: var(--accent);
+}
+
+[data-style="fonte"][data-theme="light"] {
+  --chart: #e0550a;
+}
+
+[data-style="carnet"][data-theme="light"] {
+  --chart: #a87f00;
 }
 
 @theme inline {
@@ -163,6 +173,7 @@
   --color-accent: var(--accent);
   --color-on-accent: var(--on-accent);
   --color-accent-text: var(--accent-text);
+  --color-chart: var(--chart);
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-danger: var(--danger);

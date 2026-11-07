@@ -44,7 +44,7 @@ export function LineChart({
     <div className="grid grid-cols-[2.75rem_minmax(0,1fr)] gap-x-2 pt-2" aria-hidden="true">
       <div className={cn("relative", className)}>
         {ticks.map((t) => (
-          <span key={t} className="font-numeric absolute right-0 -translate-y-1/2 text-[12px] text-muted tabular-nums" style={{ top: `${y(t)}%` }}>
+          <span key={t} className="absolute right-0 -translate-y-1/2 text-[12px] text-muted tabular-nums" style={{ top: `${y(t)}%` }}>
             {format(t)}
           </span>
         ))}
@@ -56,7 +56,7 @@ export function LineChart({
         ))}
         {line.length > 1 ? (
           <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 size-full overflow-visible">
-            <path d={path} fill="none" className="stroke-accent" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+            <path d={path} fill="none" className="stroke-chart" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
           </svg>
         ) : null}
         {points.map((p) => (
@@ -75,7 +75,7 @@ export function LineChart({
             className="absolute grid size-6 -translate-x-1/2 -translate-y-1/2 place-items-center"
             style={{ left: `${x(end.date)}%`, top: `${y(end.value)}%` }}
           >
-            <span className="size-2.5 rounded-full bg-accent ring-2 ring-surface" />
+            <span className="size-2.5 rounded-full bg-chart ring-2 ring-surface" />
           </span>
         ) : null}
       </div>
@@ -105,7 +105,7 @@ export function LineLegend({ points, line }: { points: string; line: string }) {
         {points}
       </li>
       <li className="flex items-center gap-1.5">
-        <span className="h-0.5 w-4 rounded-full bg-accent" aria-hidden="true" />
+        <span className="h-0.5 w-4 rounded-full bg-chart" aria-hidden="true" />
         {line}
       </li>
     </ul>

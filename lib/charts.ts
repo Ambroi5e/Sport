@@ -8,7 +8,7 @@ export function niceTicks(min: number, max: number, target = 4): number[] {
   let lo = min;
   let hi = max;
   if (!(hi > lo)) {
-    const pad = Math.abs(lo) * 0.02 || 1;
+    const pad = Math.abs(lo) * 0.05 || 1;
     lo -= pad;
     hi += pad;
   }

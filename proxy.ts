@@ -6,6 +6,8 @@ import { updateSession } from "@/lib/supabase/proxy";
 const PUBLIC_PATHS = ["/connexion", "/inscription", "/auth/confirm", "/hors-ligne"];
 
 function isPublic(pathname: string) {
+  // Aperçu avec données d'exemple, réservé au développement (la page renvoie 404 en production).
+  if (process.env.NODE_ENV !== "production" && pathname === "/apercu") return true;
   return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
 

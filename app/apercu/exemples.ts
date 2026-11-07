@@ -104,6 +104,7 @@ const food = (id: string, name: string, kcal: number, proteinG: number, carbsG: 
   portionG: portion?.[0] ?? null,
   portionLabel: portion?.[1] ?? null,
   personal,
+  recipe: false,
 });
 
 export const SAMPLE_FOODS: Food[] = [

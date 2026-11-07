@@ -39,8 +39,11 @@ export default async function FoodQuantityPage({
           submitLabel={`Ajouter ${MEAL_TO[meal]}`}
         />
         {food.personal ? (
-          <Link href={`/nutrition/aliments/${food.id}`} className="justify-self-start text-[14px] font-medium text-accent-text underline-offset-4 hover:underline">
-            Corriger les valeurs de cet aliment
+          <Link
+            href={food.recipe ? `/nutrition/recettes/${food.id}` : `/nutrition/aliments/${food.id}`}
+            className="justify-self-start text-[14px] font-medium text-accent-text underline-offset-4 hover:underline"
+          >
+            {food.recipe ? "Modifier la recette" : "Corriger les valeurs de cet aliment"}
           </Link>
         ) : null}
       </div>

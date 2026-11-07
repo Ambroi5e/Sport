@@ -123,12 +123,63 @@ export async function getSavedMeals(): Promise<SavedMeal[]> {
   });
 }
 
-/** Aliments créés par l'utilisateur, non archivés. */
+/** Aliments créés par l'utilisateur, non archivés ; les recettes ont leur propre liste. */
 export async function getPersonalFoods(): Promise<Food[]> {
   const userId = await requireUserId();
   const supabase = await createClient();
-  const { data } = await supabase.from("foods").select(FOOD_COLUMNS).eq("user_id", userId).is("archived_at", null).order("name");
+  const { data } = await supabase.from("foods").select(FOOD_COLUMNS).eq("user_id", userId).eq("is_recipe", false).is("archived_at", null).order("name");
   return (data ?? []).map(toFood);
+}
+
+/** Ingrédients possibles d'une recette : tout aliment non archivé, sauf les recettes. */
+export async function getIngredients(): Promise<Food[]> {
+  await requireUserId();
+  const supabase = await createClient();
+  const { data } = await supabase.from("foods").select(FOOD_COLUMNS).eq("is_recipe", false).is("archived_at", null).order("name");
+  return (data ?? []).map(toFood);
+}
+
+export type RecipeSummary = { food: Food; portions: number };
+
+export async function getRecipes(): Promise<RecipeSummary[]> {
+  const userId = await requireUserId();
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("foods")
+    .select(`${FOOD_COLUMNS}, recipe_portions`)
+    .eq("user_id", userId)
+    .eq("is_recipe", true)
+    .is("archived_at", null)
+    .order("name");
+  return (data ?? []).map((r) => ({ food: toFood(r), portions: r.recipe_portions ?? 1 }));
+}
+
+export type Recipe = { food: Food; cookedG: number | null; portions: number; items: { food: Food; grams: number }[] };
+
+/** Une recette et ses ingrédients, dans l'ordre de saisie. */
+export async function getRecipe(id: string): Promise<Recipe> {
+  const userId = await requireUserId();
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("foods")
+    .select(
+      `${FOOD_COLUMNS}, recipe_total_g, recipe_portions, recipe_items!recipe_items_recipe_id_user_id_fkey(grams, position, foods!recipe_items_food_id_fkey(${FOOD_COLUMNS}))`,
+    )
+    .eq("id", id)
+    .eq("user_id", userId)
+    .eq("is_recipe", true)
+    .is("archived_at", null)
+    .maybeSingle();
+  if (!data) notFound();
+  const items = [...data.recipe_items]
+    .sort((a, b) => a.position - b.position)
+    .flatMap((i) => (i.foods ? [{ food: toFood(i.foods), grams: Number(i.grams) }] : []));
+  return {
+    food: toFood(data),
+    cookedG: data.recipe_total_g === null ? null : Number(data.recipe_total_g),
+    portions: data.recipe_portions ?? 1,
+    items,
+  };
 }
 
 /** Dernière pesée, pour la cible suggérée. */

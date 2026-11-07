@@ -35,7 +35,7 @@ export function ChoiceGroup({
             />
             <span
               className={cn(
-                "flex min-h-12 cursor-pointer items-center justify-center rounded-[6px] border bg-surface-2 px-3 py-2 text-center text-[15px] font-medium",
+                "flex min-h-12 cursor-pointer items-center justify-center rounded-control border bg-surface-2 px-3 py-2 text-center text-[15px] font-medium",
                 "transition-colors duration-[120ms] peer-checked:border-accent peer-checked:bg-accent/15 peer-checked:text-text",
                 "peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent",
                 invalid ? "border-danger" : "border-line",

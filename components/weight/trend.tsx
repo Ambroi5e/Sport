@@ -32,14 +32,14 @@ export function WeightTrend({
 
   return (
     <dl className="grid grid-cols-2 gap-3">
-      <div className="rounded-[6px] bg-surface-2 p-3">
+      <div className="rounded-control bg-surface-2 p-3">
         <dt className="text-[12px] text-muted">Moyenne 7 jours</dt>
         <dd className="font-numeric mt-1 text-[28px]">
           {average7 === null ? "--" : fmt(kgTo(unit, average7))}
           <span className="ml-1 font-sans text-sm font-semibold text-muted">{unit}</span>
         </dd>
       </div>
-      <div className="rounded-[6px] bg-surface-2 p-3">
+      <div className="rounded-control bg-surface-2 p-3">
         <dt className="text-[12px] text-muted">Rythme par semaine</dt>
         <dd className="font-numeric mt-1 text-[28px]">
           {rate === null ? "--" : `${rate > 0 ? "+" : ""}${fmt(kgTo(unit, rate), 2)}`}

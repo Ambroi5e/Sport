@@ -7,6 +7,8 @@ import { PageHeader } from "@/components/ui/page-header";
 import { QuickWeigh } from "@/components/weight/quick-weigh";
 import { WeightTrend } from "@/components/weight/trend";
 import { OnboardingForm } from "@/app/onboarding/onboarding-form";
+import { StylePicker } from "@/components/settings/style-picker";
+import { getAppearance } from "@/lib/appearance";
 
 /**
  * Aperçu des écrans connectés avec des données d'exemple, pour les captures
@@ -15,6 +17,7 @@ import { OnboardingForm } from "@/app/onboarding/onboarding-form";
 export default async function PreviewPage({ searchParams }: { searchParams: Promise<{ ecran?: string }> }) {
   if (process.env.NODE_ENV === "production") notFound();
   const { ecran = "accueil" } = await searchParams;
+  const appearance = await getAppearance();
 
   if (ecran === "onboarding") {
     return (
@@ -28,7 +31,15 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
     <div className="flex min-h-dvh">
       <AppNav isAdmin={false} />
       <main className="pt-safe mx-auto w-full max-w-5xl min-w-0 flex-1 px-4 pb-[calc(152px+env(safe-area-inset-bottom,0px))] md:px-8 md:pb-12">
-        {ecran === "entrainement" ? (
+        {ecran === "reglages" ? (
+          <>
+            <PageHeader title="Réglages" back="/apercu" />
+            <Card className="grid gap-4 md:max-w-xl">
+              <h2 className="text-lg font-semibold">Style</h2>
+              <StylePicker current={appearance.style} theme={appearance.theme} unit="kg" />
+            </Card>
+          </>
+        ) : ecran === "entrainement" ? (
           <>
             <PageHeader title="Entraînement" />
             <EmptyState icon={<BarbellIcon size={22} />} title="Tes séances arrivent dans la prochaine version">

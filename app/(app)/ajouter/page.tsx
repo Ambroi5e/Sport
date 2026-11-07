@@ -33,7 +33,7 @@ export default async function QuickAddPage() {
             { icon: BarbellIcon, label: "Séance de musculation" },
             { icon: ForkKnifeIcon, label: "Repas" },
           ].map(({ icon: Icon, label }) => (
-            <li key={label} className="flex items-center gap-3 rounded-[6px] border border-dashed border-line px-4 py-3 text-muted">
+            <li key={label} className="flex items-center gap-3 rounded-control border border-dashed border-line px-4 py-3 text-muted">
               <Icon size={22} aria-hidden="true" />
               <span className="flex-1">{label}</span>
               <span className="text-[12px]">bientôt</span>

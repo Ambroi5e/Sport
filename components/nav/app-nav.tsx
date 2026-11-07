@@ -50,7 +50,7 @@ export function AppNav({ isAdmin }: { isAdmin: boolean }) {
                 href={href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex h-11 items-center gap-3 rounded-[6px] px-3 text-[15px] font-medium transition-colors",
+                  "flex h-11 items-center gap-3 rounded-control px-3 text-[15px] font-medium transition-colors",
                   active ? "bg-surface-2 text-text" : "text-muted hover:bg-surface-2 hover:text-text",
                 )}
               >
@@ -62,7 +62,7 @@ export function AppNav({ isAdmin }: { isAdmin: boolean }) {
         </nav>
         <div className="mt-auto grid gap-1">
           {isAdmin ? (
-            <Link href="/admin" className="flex h-11 items-center gap-3 rounded-[6px] px-3 text-[15px] text-muted hover:bg-surface-2 hover:text-text">
+            <Link href="/admin" className="flex h-11 items-center gap-3 rounded-control px-3 text-[15px] text-muted hover:bg-surface-2 hover:text-text">
               <span className="grid size-[22px] place-items-center text-[11px] font-bold" aria-hidden="true">A</span>
               Admin
             </Link>
@@ -70,7 +70,7 @@ export function AppNav({ isAdmin }: { isAdmin: boolean }) {
           <Link
             href="/reglages"
             aria-current={isActive(pathname, "/reglages") ? "page" : undefined}
-            className="flex h-11 items-center gap-3 rounded-[6px] px-3 text-[15px] text-muted hover:bg-surface-2 hover:text-text"
+            className="flex h-11 items-center gap-3 rounded-control px-3 text-[15px] text-muted hover:bg-surface-2 hover:text-text"
           >
             <GearSixIcon size={22} aria-hidden="true" />
             Réglages

@@ -29,7 +29,7 @@ export function Field({
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy || undefined}
           className={cn(
-            "h-12 w-full rounded-[6px] border bg-surface-2 px-3 text-base text-text placeholder:text-muted",
+            "h-12 w-full rounded-control border bg-surface-2 px-3 text-base text-text placeholder:text-muted",
             "transition-colors duration-[120ms] focus:border-accent focus:outline-none",
             error ? "border-danger" : "border-line",
             suffix && "pr-12",

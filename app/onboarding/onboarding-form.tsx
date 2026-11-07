@@ -111,7 +111,7 @@ export function OnboardingForm() {
         />
         <div className="grid grid-cols-[1fr_auto] items-end gap-3">
           <Field id="weight" name="weight" label="Poids actuel" inputMode="decimal" type="number" min={20} max={900} step="0.1" suffix={unit} required error={bad("weight") ? "Poids invalide." : null} />
-          <fieldset className="flex h-12 rounded-[6px] border border-line bg-surface-2 p-1">
+          <fieldset className="flex h-12 rounded-control border border-line bg-surface-2 p-1">
             <legend className="sr-only">Unité de poids</legend>
             {(["kg", "lb"] as const).map((u) => (
               <button
@@ -119,7 +119,7 @@ export function OnboardingForm() {
                 type="button"
                 aria-pressed={unit === u}
                 onClick={() => setUnit(u)}
-                className={cn("w-12 rounded-[4px] text-sm font-semibold", unit === u ? "bg-accent text-on-accent" : "text-muted")}
+                className={cn("w-12 rounded-inner text-sm font-semibold", unit === u ? "bg-accent text-on-accent" : "text-muted")}
               >
                 {u}
               </button>
@@ -146,7 +146,7 @@ export function OnboardingForm() {
                     className="peer sr-only"
                     onChange={() => setGoal(g.value)}
                   />
-                  <span className="flex min-h-12 cursor-pointer items-center rounded-[6px] border border-line bg-surface-2 px-3 py-2 text-[15px] font-medium transition-colors peer-checked:border-accent peer-checked:bg-accent/15 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent">
+                  <span className="flex min-h-12 cursor-pointer items-center rounded-control border border-line bg-surface-2 px-3 py-2 text-[15px] font-medium transition-colors peer-checked:border-accent peer-checked:bg-accent/15 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent">
                     {g.label}
                   </span>
                 </label>
@@ -174,15 +174,15 @@ export function OnboardingForm() {
       <fieldset ref={(el) => { stepRefs.current[2] = el; }} hidden={step !== 2} className="grid gap-5">
         <legend className="sr-only">Ton rythme</legend>
         <p className="text-[15px] text-muted">Combien de séances par semaine peux-tu faire, tous sports confondus ?</p>
-        <div className="flex items-center justify-between rounded-[6px] border border-line bg-surface p-4">
-          <button type="button" onClick={() => setSessions((s) => Math.max(0, s - 1))} aria-label="Une séance de moins" className="grid size-14 place-items-center rounded-[6px] border border-line bg-surface-2 text-2xl font-semibold">
+        <div className="flex items-center justify-between rounded-control border border-line bg-surface p-4">
+          <button type="button" onClick={() => setSessions((s) => Math.max(0, s - 1))} aria-label="Une séance de moins" className="grid size-14 place-items-center rounded-control border border-line bg-surface-2 text-2xl font-semibold">
             −
           </button>
           <p className="text-center">
             <span className="font-numeric block text-[56px]" aria-live="polite">{sessions}</span>
             <span className="text-sm text-muted">séance{sessions > 1 ? "s" : ""} par semaine</span>
           </p>
-          <button type="button" onClick={() => setSessions((s) => Math.min(14, s + 1))} aria-label="Une séance de plus" className="grid size-14 place-items-center rounded-[6px] border border-line bg-surface-2 text-2xl font-semibold">
+          <button type="button" onClick={() => setSessions((s) => Math.min(14, s + 1))} aria-label="Une séance de plus" className="grid size-14 place-items-center rounded-control border border-line bg-surface-2 text-2xl font-semibold">
             +
           </button>
         </div>
@@ -192,7 +192,7 @@ export function OnboardingForm() {
       </fieldset>
 
       {state.error ? (
-        <p role="alert" className="rounded-[6px] border border-danger/50 bg-danger/10 p-3 text-[14px] text-text">
+        <p role="alert" className="rounded-control border border-danger/50 bg-danger/10 p-3 text-[14px] text-text">
           {state.error}
         </p>
       ) : null}

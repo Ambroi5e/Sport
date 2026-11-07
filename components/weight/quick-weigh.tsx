@@ -55,7 +55,7 @@ export function QuickWeigh({
           onClick={() => nudge(-STEP)}
           disabled={value === null}
           aria-label={`Retirer 0,1 ${unit}`}
-          className="grid size-14 shrink-0 place-items-center rounded-[6px] border border-line bg-surface-2 transition-transform active:scale-95 disabled:opacity-40"
+          className="grid size-14 shrink-0 place-items-center rounded-control border border-line bg-surface-2 transition-transform active:scale-95 disabled:opacity-40"
         >
           <MinusIcon size={22} weight="bold" aria-hidden="true" />
         </button>
@@ -77,7 +77,7 @@ export function QuickWeigh({
           onClick={() => nudge(STEP)}
           disabled={value === null}
           aria-label={`Ajouter 0,1 ${unit}`}
-          className="grid size-14 shrink-0 place-items-center rounded-[6px] border border-line bg-surface-2 transition-transform active:scale-95 disabled:opacity-40"
+          className="grid size-14 shrink-0 place-items-center rounded-control border border-line bg-surface-2 transition-transform active:scale-95 disabled:opacity-40"
         >
           <PlusIcon size={22} weight="bold" aria-hidden="true" />
         </button>

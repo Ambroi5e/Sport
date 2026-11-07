@@ -15,4 +15,4 @@ Format : une entrée par version (semver), du plus récent au plus ancien. Les m
 - Onboarding en trois écrans, accueil avec pesée rapide, tendance sur 7 jours et objectif.
 - App installable : manifest, icônes, service worker et page hors ligne.
 - Sécurité : CSP avec nonce, en-têtes stricts, scan des secrets et audit des dépendances en CI.
-- Migration destructive en attente de validation : `supabase/pending-destructive/20261107010000_revoke_execute_fonctions.sql` (retire l'exécution publique de quatre fonctions internes).
+- Migration destructive validée par Ambroise et appliquée : `20261107010000_revoke_execute_fonctions.sql` (retire l'exécution publique de quatre fonctions internes).

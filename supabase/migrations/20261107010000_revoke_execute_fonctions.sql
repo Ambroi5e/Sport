@@ -1,4 +1,5 @@
--- À VALIDER PAR AMBROISE avant application (retire des droits).
+-- Migration destructive (retire des droits) : validée par Ambroise le 2026-11-07,
+-- appliquée le même jour.
 --
 -- Pourquoi : l'outil d'audit Supabase signale que des fonctions SECURITY DEFINER
 -- sont appelables par les visiteurs non connectés (rôle anon). Aucune n'est

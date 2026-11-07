@@ -72,4 +72,5 @@ Chaque table porte un `user_id`. Les catalogues communs (exercices, aliments de 
 ## Interfaces prévues
 
 - `AIProvider` : désactivée par défaut (`FEATURE_AI=false`). Si elle est activée un jour : clé côté serveur uniquement, quota par personne, file d'attente, nom du modèle jamais affiché.
+- `LabelReader` : lit une photo d'étiquette nutritionnelle et renvoie des valeurs pour 100 g à vérifier. Implémentation v0.6 : Tesseract.js dans un Web Worker, sur le téléphone, photo jamais envoyée au serveur. Implémentation future possible via `AIProvider`.
 - `ImportProvider` : un format d'entrée (Strong, Hevy, CSV générique, GPX, FIT, Apple Santé) produit des lignes validées par zod.

@@ -29,7 +29,9 @@ Les données de santé (poids, mensurations, photos, forme, nutrition) sont des 
 ## Navigateur
 
 - CSP stricte avec nonce par requête (générée dans `proxy.ts`), `frame-ancestors 'none'`.
-- HSTS, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy` restrictive.
+- HSTS, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy` restrictive (caméra pour Fonte seule depuis la v0.6.2, pour scanner un code-barres ; micro, position, paiement et USB fermés).
+- CSP : `'wasm-unsafe-eval'` ajouté en v0.6.2 pour compiler le lecteur de codes-barres en WebAssembly ; il n'autorise ni `eval` ni les scripts en ligne.
+- Open Food Facts est interrogé par le serveur : seul le code-barres sort, jamais l'identité ni l'adresse IP de la personne. La photo d'étiquette est lue sur le téléphone, jamais envoyée ni gardée.
 - Cache du service worker : fichiers statiques seulement, plus une exception assumée depuis la v0.3, la copie de la séance en cours (une seule page) pour la rouvrir sans réseau. Elle est remplacée à chaque nouvelle séance et effacée à la fin de la séance et à la déconnexion.
 - `localStorage` : file des saisies pas encore envoyées, chrono et réglages de séance. Chaque opération en file porte l'identifiant de son auteur et ne part qu'avec sa session ; la RLS refuse de toute façon d'écrire chez un autre. La déconnexion efface tout ce que l'app a gardé sur l'appareil, après avoir prévenu s'il reste des saisies non envoyées.
 

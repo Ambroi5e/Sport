@@ -4,6 +4,16 @@ Format : une entrée par version (semver), du plus récent au plus ancien. Les m
 
 ## [Non publié]
 
+### v0.6.2 : code-barres et photo d'étiquette
+
+- Scanner un code-barres depuis l'ajout d'un repas ou Mes aliments : un produit déjà enregistré passe directement à la quantité, sinon Fonte cherche sur Open Food Facts et préremplit l'aliment (nom, marque, valeurs pour 100 g, portion), à vérifier avant d'enregistrer.
+- Produit inconnu ou fiche incomplète : photographier l'étiquette. Fonte lit le tableau sur le téléphone, sans IA ; la photo n'est ni envoyée ni gardée. Aussi possible sans code-barres, depuis Nouvel aliment.
+- Caméra refusée ou absente : les chiffres du code se tapent.
+- Le code-barres reste sur l'aliment : le scan suivant le retrouve.
+- Dépendances ajoutées, avec leur raison dans `docs/plans/v0.6.2.md` : `tesseract.js`, `barcode-detector`, et `@tesseract.js-data/fra` en développement.
+- Sécurité : `Permissions-Policy` ouvre la caméra à Fonte seule, la CSP autorise la compilation WebAssembly (`'wasm-unsafe-eval'`).
+- Migration non destructive appliquée : `20261113000000_codes_barres.sql` (index unique par personne et par code-barres), avec 4 tests.
+
 ### v0.6.1 : dépense réelle et recettes
 
 - Page Cibles : « Ta dépense réelle », mesurée sur 28 jours d'après ce que tu manges et l'évolution de ton poids, face à la formule. Les jours visiblement incomplets sont écartés ; sans assez de données, la carte dit ce qui manque. Le repère suggéré part de cette mesure quand elle est fiable et ne s'applique que sur un tap.

@@ -41,7 +41,7 @@ docs/  audit/  SPEC.md  CLAUDE.md  CHANGELOG.md
 - **Connexion** : e-mail avec lien magique et code à 6 chiffres. Le code est indispensable sur iPhone : un lien ouvre Safari, pas l'app installée, et la session n'y serait pas.
 - **Modules activables** : table `user_modules` et registre `lib/modules`. L'objectif choisi active un jeu de modules par défaut, modifiable ensuite.
 - **Moteur pur** : fonctions déterministes, sans effet de bord, testées. Le plan prédictif et le planning seront des règles explicables (double progression, décharge toutes les 4 à 6 semaines, 48 à 72 h de récupération par muscle).
-- **Hors ligne** : service worker pour l'app et une page hors ligne ; à partir de la v0.3, chaque saisie reçoit un identifiant généré sur le téléphone, part dans une file Dexie et est envoyée au retour du réseau, sans doublon possible.
+- **Hors ligne** : service worker écrit à la main (`public/sw.js`, sans Serwist tant qu'il reste simple) : fichiers statiques en cache, pages toujours demandées au réseau avec repli sur `/hors-ligne`, jamais de HTML personnel en cache ; à partir de la v0.3, chaque saisie reçoit un identifiant généré sur le téléphone, part dans une file Dexie et est envoyée au retour du réseau, sans doublon possible.
 - **Temps réel** : Supabase Realtime seulement pour les séances communes, un canal privé par séance.
 - **Gros imports** (Apple Santé, FIT, GPX) : lus dans un Web Worker sur le téléphone, seuls les résumés utiles partent au serveur.
 

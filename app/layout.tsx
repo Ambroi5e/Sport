@@ -16,6 +16,7 @@ export const metadata: Metadata = {
   appleWebApp: { capable: true, title: "Fonte", statusBarStyle: "black-translucent" },
   formatDetection: { telephone: false },
   robots: { index: false, follow: false },
+  icons: { apple: "/icons/apple-touch-icon.png" },
 };
 
 export const viewport: Viewport = {

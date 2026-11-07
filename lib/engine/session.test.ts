@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { clampRest, enqueue, formatClock, pendingFor, restRemaining, retryDelay, settle, type OutboxEntry } from ".";
+import { clampRest, enqueue, formatClock, pendingFor, plausibleTime, restRemaining, retryDelay, settle, type OutboxEntry } from ".";
 
 function entry(partial: Partial<OutboxEntry<{ reps: number }>>): OutboxEntry<{ reps: number }> {
   return { id: "1", key: "set:a", userId: "u1", scope: "w1", payload: { reps: 8 }, queuedAt: "2026-11-08T10:00:00Z", ...partial };
@@ -31,6 +31,15 @@ describe("file d'attente", () => {
     const q = [entry({ id: "1", scope: "w1" }), entry({ id: "2", key: "set:b", scope: "w2" }), entry({ id: "3", key: "set:c", userId: "u2" })];
     expect(pendingFor(q, "u1").map((e) => e.id)).toEqual(["1", "2"]);
     expect(pendingFor(q, "u1", "w2").map((e) => e.id)).toEqual(["2"]);
+  });
+
+  it("garde l'heure de validation du téléphone si elle est plausible", () => {
+    const now = Date.parse("2026-11-08T12:00:00Z");
+    expect(plausibleTime("2026-11-08T10:30:00+01:00", now)).toBe("2026-11-08T09:30:00.000Z");
+    expect(plausibleTime("2026-11-08T12:03:00Z", now)).toBe("2026-11-08T12:03:00.000Z");
+    expect(plausibleTime("2026-11-08T13:00:00Z", now)).toBe("2026-11-08T12:00:00.000Z");
+    expect(plausibleTime("2026-10-01T12:00:00Z", now)).toBe("2026-11-08T12:00:00.000Z");
+    expect(plausibleTime(null, now)).toBe("2026-11-08T12:00:00.000Z");
   });
 
   it("espace les nouveaux essais jusqu'à une minute", () => {

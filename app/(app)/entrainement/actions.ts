@@ -3,9 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { getProfile, requireUserId } from "@/lib/auth";
+import { getProfile, getUserId, requireUserId } from "@/lib/auth";
 import { formatShortDate, localDate } from "@/lib/dates";
-import { prefillSets, toKg } from "@/lib/engine";
+import { plausibleTime, prefillSets, toKg } from "@/lib/engine";
 import { createClient } from "@/lib/supabase/server";
 import { Constants } from "@/lib/supabase/database.types";
 import { getCompletedSets, summarizeHistory } from "./data";
@@ -108,21 +108,45 @@ const setSchema = z.object({
   repMax: z.number().int().min(1).max(100).nullable(),
   isWarmup: z.boolean(),
   done: z.boolean(),
+  /** Heure de validation sur le téléphone : la série peut arriver bien plus tard. */
+  completedAt: z.iso.datetime({ offset: true }).nullable(),
 });
 
 export type SetInput = z.infer<typeof setSchema>;
 
 /**
+ * Réponse des enregistrements de séance. `retry` dit si un nouvel essai a une
+ * chance d'aboutir (réseau, session expirée, panne passagère) ou si la saisie
+ * est refusée pour de bon (valeur hors limites, règle de la base).
+ */
+export type SyncResult = { ok: true } | { ok: false; retry: boolean; error: string; reconnect?: boolean };
+
+const SESSION_EXPIRED: SyncResult = {
+  ok: false,
+  retry: true,
+  reconnect: true,
+  error: "Ta session a expiré : tes séries attendent sur le téléphone et partiront une fois reconnecté.",
+};
+
+function syncError(error: { code?: string } | null): SyncResult {
+  if (!error) return { ok: true };
+  // Classes Postgres 22 (donnée invalide), 23 (contrainte) et 42 (droits, RLS) : rien ne changera en réessayant.
+  const permanent = /^(22|23|42)/.test(error.code ?? "");
+  return { ok: false, retry: !permanent, error: SAVE_ERROR };
+}
+
+
+/**
  * Enregistre une série (création ou mise à jour). L'identifiant vient du
  * téléphone : renvoyer deux fois la même série ne crée pas de doublon.
  */
-export async function saveSet(input: SetInput): Promise<{ ok: boolean; error?: string }> {
+export async function saveSet(input: SetInput): Promise<SyncResult> {
+  if (!(await getUserId())) return SESSION_EXPIRED;
   const profile = await getProfile();
-  if (!profile) return { ok: false, error: "Ta session a expiré. Reconnecte-toi." };
   const parsed = setSchema.safeParse(input);
-  if (!parsed.success) return { ok: false, error: "Ces valeurs sortent des limites possibles." };
+  if (!parsed.success) return { ok: false, retry: false, error: "Ces valeurs sortent des limites possibles." };
   const s = parsed.data;
-  const unit = profile.weight_unit === "lb" ? "lb" : "kg";
+  const unit = profile?.weight_unit === "lb" ? "lb" : "kg";
 
   const supabase = await createClient();
   const { error } = await supabase.from("workout_sets").upsert({
@@ -137,27 +161,28 @@ export async function saveSet(input: SetInput): Promise<{ ok: boolean; error?: s
     rep_min: s.repMin,
     rep_max: s.repMax,
     is_warmup: s.isWarmup,
-    completed_at: s.done ? new Date().toISOString() : null,
+    completed_at: s.done ? plausibleTime(s.completedAt, Date.now()) : null,
   });
-  return error ? { ok: false, error: SAVE_ERROR } : { ok: true };
+  return syncError(error);
 }
 
-export async function deleteSet(setId: string): Promise<{ ok: boolean }> {
-  await requireUserId();
+export async function deleteSet(setId: string): Promise<SyncResult> {
+  if (!(await getUserId())) return SESSION_EXPIRED;
+  const parsed = id.safeParse(setId);
+  if (!parsed.success) return { ok: false, retry: false, error: SAVE_ERROR };
   const supabase = await createClient();
-  const { error } = await supabase.from("workout_sets").delete().eq("id", id.parse(setId));
-  return { ok: !error };
+  const { error } = await supabase.from("workout_sets").delete().eq("id", parsed.data);
+  return syncError(error);
 }
 
-export async function removeExerciseFromWorkout(workoutId: string, exerciseOrder: number): Promise<{ ok: boolean }> {
-  await requireUserId();
+export async function removeExerciseFromWorkout(workoutId: string, exerciseOrder: number): Promise<SyncResult> {
+  if (!(await getUserId())) return SESSION_EXPIRED;
+  const wid = id.safeParse(workoutId);
+  const order = z.number().int().min(0).max(99).safeParse(exerciseOrder);
+  if (!wid.success || !order.success) return { ok: false, retry: false, error: SAVE_ERROR };
   const supabase = await createClient();
-  const { error } = await supabase
-    .from("workout_sets")
-    .delete()
-    .eq("workout_id", id.parse(workoutId))
-    .eq("exercise_order", z.number().int().min(0).parse(exerciseOrder));
-  return { ok: !error };
+  const { error } = await supabase.from("workout_sets").delete().eq("workout_id", wid.data).eq("exercise_order", order.data);
+  return syncError(error);
 }
 
 /** Termine la séance : les séries non validées disparaissent ; une séance vide est supprimée. */

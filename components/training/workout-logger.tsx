@@ -1,11 +1,17 @@
 "use client";
 
-import { CheckIcon, MinusIcon, PlusIcon, TrophyIcon } from "@phosphor-icons/react";
+import { CheckIcon, CloudSlashIcon, MinusIcon, PlusIcon, SunIcon, TrophyIcon } from "@phosphor-icons/react";
 import Link from "next/link";
-import { useState } from "react";
-import { deleteSet, removeExerciseFromWorkout, saveSet } from "@/app/(app)/entrainement/actions";
+import { useEffect, useState } from "react";
+import type { SetInput } from "@/app/(app)/entrainement/actions";
+import { startRest, stopRest } from "@/components/training/rest-timer";
+import { queueDeleteSet, queueRemoveExercise, queueSaveSet, registerSessionSenders, setKey, type SessionOp } from "@/components/training/set-sync";
+import { useWakeLock, useWakeLockSupported } from "@/components/training/use-wake-lock";
 import { cn } from "@/components/ui/cn";
 import { kgTo, newRecords, toKg, type ExerciseRecords, type RecordKind, type WeightUnit } from "@/lib/engine";
+import { onDrained, pendingIn, useOnline, useOutbox, type Entry, type Notice } from "@/lib/offline/outbox";
+import { forgetSessionCopy, keepSessionCopy } from "@/lib/offline/session-copy";
+import { setPrefs, usePrefs } from "@/lib/session-prefs";
 import { formatSet, type ExerciseMeasure } from "@/lib/training";
 
 export type LoggerSet = {
@@ -18,6 +24,8 @@ export type LoggerSet = {
   repMax: number | null;
   isWarmup: boolean;
   done: boolean;
+  /** Heure de validation, ISO. */
+  completedAt: string | null;
 };
 
 export type LoggerBlock = {
@@ -41,8 +49,9 @@ type Row = {
   repMax: number | null;
   isWarmup: boolean;
   done: boolean;
+  completedAt: string | null;
+  /** Déjà enregistrée ou mise en file : la retirer demande une suppression. */
   persisted: boolean;
-  saving: boolean;
   error: string | null;
   records: RecordKind[];
 };
@@ -79,25 +88,61 @@ function toRow(s: LoggerSet, unit: WeightUnit): Row {
     repMax: s.repMax,
     isWarmup: s.isWarmup,
     done: s.done,
+    completedAt: s.completedAt ? new Date(s.completedAt).toISOString() : null,
     persisted: true,
-    saving: false,
     error: null,
     records: [],
   };
 }
 
 /**
+ * Réapplique les opérations encore en attente sur le téléphone, pour qu'une
+ * séance rouverte (ou rechargée hors ligne) montre ce qui a vraiment été saisi.
+ */
+function applyPending(blocks: Block[], entries: Entry[]): Block[] {
+  let out = blocks;
+  for (const entry of entries) {
+    const op = entry.payload as SessionOp;
+    if (op.kind === "exercise.remove") {
+      out = out.filter((b) => b.order !== op.data.order);
+    } else if (op.kind === "set.delete") {
+      out = out.map((b) => ({ ...b, rows: b.rows.filter((r) => r.id !== op.data.id) }));
+    } else if (op.kind === "set.save") {
+      const d = op.data;
+      const values = {
+        weight: d.weight === null ? "" : display(d.weight, 2),
+        reps: d.reps === null ? "" : String(d.reps),
+        duration: d.durationSeconds === null ? "" : String(d.durationSeconds),
+        done: d.done,
+        completedAt: d.completedAt,
+        persisted: true,
+      };
+      out = out.map((b) => {
+        if (b.order !== d.exerciseOrder) return b;
+        if (b.rows.some((r) => r.id === d.id)) return { ...b, rows: b.rows.map((r) => (r.id === d.id ? { ...r, ...values } : r)) };
+        const row: Row = { id: d.id, setNumber: d.setNumber, repMin: d.repMin, repMax: d.repMax, isWarmup: d.isWarmup, error: null, records: [], ...values };
+        return { ...b, rows: [...b.rows, row].sort((x, y) => x.setNumber - y.setNumber) };
+      });
+    }
+  }
+  return out;
+}
+
+/**
  * Saisie d'une séance : chaque série est préremplie et se valide en un tap.
- * Chaque validation est enregistrée tout de suite, avec un identifiant créé
- * sur le téléphone (pas de doublon si on renvoie).
+ * Chaque saisie passe par la file d'attente du téléphone : l'écran se met à
+ * jour tout de suite, et l'envoi se fait dès que le réseau le permet, avec un
+ * identifiant créé sur le téléphone (pas de doublon si on renvoie).
  */
 export function WorkoutLogger({
+  userId,
   workoutId,
   blocks: initialBlocks,
   history,
   unit,
   finished,
 }: {
+  userId: string;
   workoutId: string;
   blocks: LoggerBlock[];
   history: LoggerHistory;
@@ -108,6 +153,43 @@ export function WorkoutLogger({
     initialBlocks.map((b) => ({ order: b.order, exercise: b.exercise, rows: b.sets.map((s) => toRow(s, unit)), confirmRemove: false })),
   );
   const [announce, setAnnounce] = useState("");
+  const outbox = useOutbox();
+  const online = useOnline();
+  const prefs = usePrefs();
+  const wakeLockSupported = useWakeLockSupported();
+  useWakeLock(!finished && prefs.keepAwake);
+
+  useEffect(() => {
+    registerSessionSenders();
+    const pending = pendingIn(userId, workoutId);
+    // Synchronisation avec le stockage du téléphone, lisible seulement après le rendu serveur.
+    // oxlint-disable-next-line react/set-state-in-effect
+    if (pending.length) setBlocks((prev) => applyPending(prev, pending));
+  }, [userId, workoutId]);
+
+  // Copie hors ligne de la séance en cours, rafraîchie quand tout est parti ; effacée une fois la séance terminée.
+  useEffect(() => {
+    const path = `/entrainement/seance/${workoutId}`;
+    if (finished) {
+      forgetSessionCopy(path);
+      stopRest(workoutId);
+      return;
+    }
+    // Rechargée à l'ouverture : un exercice ajouté depuis la dernière copie doit y figurer.
+    keepSessionCopy(path, true);
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const unsubscribe = onDrained(() => {
+      clearTimeout(timer);
+      timer = setTimeout(() => keepSessionCopy(path, true), 1500);
+    });
+    return () => {
+      clearTimeout(timer);
+      unsubscribe();
+    };
+  }, [workoutId, finished]);
+
+  const pendingKeys = new Set(outbox.pending.filter((e) => e.scope === workoutId).map((e) => e.key));
+  const pendingSets = blocks.reduce((n, b) => n + b.rows.filter((r) => pendingKeys.has(setKey(r.id))).length, 0);
 
   function patchRow(order: number, rowId: string, patch: Partial<Row>) {
     setBlocks((prev) =>
@@ -119,7 +201,7 @@ export function WorkoutLogger({
     setBlocks((prev) => prev.map((b) => (b.order === order ? { ...b, ...patch } : b)));
   }
 
-  async function persist(block: Block, row: Row, done: boolean) {
+  function persist(block: Block, row: Row, done: boolean) {
     const measure = block.exercise.measure;
     const reps = measure === "duree" ? null : parse(row.reps);
     const duration = measure === "duree" ? parse(row.duration) : null;
@@ -145,12 +227,17 @@ export function WorkoutLogger({
           isWarmup: row.isWarmup,
         })
       : [];
+    // Une série modifiée après validation garde son heure de validation.
+    const completedAt = done ? (row.done && row.completedAt ? row.completedAt : new Date().toISOString()) : null;
 
-    patchRow(block.order, row.id, { done, saving: true, error: null, records });
+    patchRow(block.order, row.id, { done, completedAt, persisted: true, error: null, records });
     if (records.length > 0) setAnnounce(`${block.exercise.name} : ${RECORD_TEXT[records[0]].toLowerCase()} !`);
-    if (done && typeof navigator !== "undefined" && "vibrate" in navigator) navigator.vibrate(records.length ? [20, 60, 20] : 15);
+    if (done && !row.done) {
+      if ("vibrate" in navigator) navigator.vibrate(records.length ? [20, 60, 20] : 15);
+      if (!finished) startRest({ workoutId, exerciseId: block.exercise.id, exerciseName: block.exercise.name });
+    }
 
-    const result = await saveSet({
+    const input: SetInput = {
       id: row.id,
       workoutId,
       exerciseId: block.exercise.id,
@@ -163,8 +250,9 @@ export function WorkoutLogger({
       repMax: row.repMax,
       isWarmup: row.isWarmup,
       done,
-    });
-    patchRow(block.order, row.id, result.ok ? { saving: false, persisted: true } : { saving: false, done: row.done, records: row.records, error: result.error ?? null });
+      completedAt,
+    };
+    queueSaveSet(userId, input);
   }
 
   function addRow(block: Block) {
@@ -179,24 +267,24 @@ export function WorkoutLogger({
       repMax: last?.repMax ?? null,
       isWarmup: false,
       done: false,
+      completedAt: null,
       persisted: false,
-      saving: false,
       error: null,
       records: [],
     };
     patchBlock(block.order, { rows: [...block.rows, row] });
   }
 
-  async function removeLastRow(block: Block) {
+  function removeLastRow(block: Block) {
     const last = block.rows.at(-1);
     if (!last) return;
     patchBlock(block.order, { rows: block.rows.slice(0, -1) });
-    if (last.persisted) await deleteSet(last.id);
+    if (last.persisted) queueDeleteSet(userId, workoutId, last.id);
   }
 
-  async function removeBlock(block: Block) {
+  function removeBlock(block: Block) {
     setBlocks((prev) => prev.filter((b) => b.order !== block.order));
-    await removeExerciseFromWorkout(workoutId, block.order);
+    queueRemoveExercise(userId, workoutId, block.order);
   }
 
   const doneRows = blocks.flatMap((b) => b.rows.filter((r) => r.done && !r.isWarmup));
@@ -206,10 +294,27 @@ export function WorkoutLogger({
       <p className="sr-only" aria-live="assertive">
         {announce}
       </p>
-      <p className="text-[15px] text-muted">
-        <span className="font-numeric text-[22px] text-text">{doneRows.length}</span> série{doneRows.length > 1 ? "s" : ""} validée
-        {doneRows.length > 1 ? "s" : ""}
-      </p>
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-[15px] text-muted">
+          <span className="font-numeric text-[22px] text-text">{doneRows.length}</span> série{doneRows.length > 1 ? "s" : ""} validée
+          {doneRows.length > 1 ? "s" : ""}
+        </p>
+        {!finished && wakeLockSupported ? (
+          <button
+            type="button"
+            onClick={() => setPrefs({ keepAwake: !prefs.keepAwake })}
+            aria-pressed={prefs.keepAwake}
+            className={cn(
+              "inline-flex h-10 items-center gap-1.5 rounded-control border px-3 text-[13px] font-medium",
+              prefs.keepAwake ? "border-accent-text/60 text-text" : "border-line text-muted",
+            )}
+          >
+            <SunIcon size={16} weight={prefs.keepAwake ? "fill" : "regular"} className={prefs.keepAwake ? "text-accent-text" : undefined} aria-hidden="true" />
+            Écran allumé
+          </button>
+        ) : null}
+      </div>
+      <SyncStatus online={online} pending={pendingSets} notice={outbox.notice} />
 
       {blocks.map((block) => {
         const h = history[block.exercise.id];
@@ -285,11 +390,14 @@ export function WorkoutLogger({
                       type="button"
                       onClick={() => persist(block, row, !row.done)}
                       aria-pressed={row.done}
-                      aria-label={row.done ? `Annuler la validation de la série ${row.setNumber}` : `Valider la série ${row.setNumber}`}
+                      aria-label={
+                        row.done
+                          ? `Annuler la validation de la série ${row.setNumber}${pendingKeys.has(setKey(row.id)) ? " (en attente d'envoi)" : ""}`
+                          : `Valider la série ${row.setNumber}`
+                      }
                       className={cn(
                         "grid size-12 place-items-center rounded-control border transition-[transform,background-color] duration-[120ms] active:scale-95",
                         row.done ? "border-success bg-success text-bg" : "border-line bg-surface-2 text-muted hover:text-text",
-                        row.saving && "opacity-70",
                       )}
                     >
                       <CheckIcon size={22} weight="bold" aria-hidden="true" />
@@ -298,9 +406,9 @@ export function WorkoutLogger({
                   {row.records.length ? (
                     <p className="pl-9 text-[13px] font-medium text-warning">{RECORD_TEXT[row.records[0]]}</p>
                   ) : null}
-                  {row.error ? (
+                  {row.error || outbox.rejected[setKey(row.id)] ? (
                     <p role="alert" className="pl-9 text-[13px] text-danger">
-                      {row.error}
+                      {row.error ?? outbox.rejected[setKey(row.id)]}
                     </p>
                   ) : null}
                 </div>
@@ -345,14 +453,62 @@ export function WorkoutLogger({
         );
       })}
 
-      <Link
-        href={`/entrainement/seance/${workoutId}/ajouter`}
-        className="flex h-14 items-center justify-center gap-2 rounded-control border border-dashed border-line text-[15px] font-semibold text-text hover:bg-surface"
-      >
-        <PlusIcon size={20} weight="bold" aria-hidden="true" /> Ajouter un exercice
-      </Link>
-      {finished ? null : <p className="text-center text-[13px] text-muted">Chaque série validée est enregistrée tout de suite.</p>}
+      {online ? (
+        <Link
+          href={`/entrainement/seance/${workoutId}/ajouter`}
+          className="flex h-14 items-center justify-center gap-2 rounded-control border border-dashed border-line text-[15px] font-semibold text-text hover:bg-surface"
+        >
+          <PlusIcon size={20} weight="bold" aria-hidden="true" /> Ajouter un exercice
+        </Link>
+      ) : (
+        <p className="flex h-14 items-center justify-center gap-2 rounded-control border border-dashed border-line px-3 text-center text-[14px] text-muted">
+          Ajouter un exercice demande du réseau.
+        </p>
+      )}
+      {finished ? null : (
+        <p className="text-center text-[13px] text-muted">Chaque série validée est gardée sur le téléphone puis envoyée, même sans réseau.</p>
+      )}
     </div>
+  );
+}
+
+/** Ce qui n'est pas encore parti, dit seulement quand ça dure (pas à chaque tap). */
+function SyncStatus({ online, pending, notice }: { online: boolean; pending: number; notice: Notice | null }) {
+  const [lingering, setLingering] = useState(false);
+  useEffect(() => {
+    if (pending === 0) return;
+    const timer = setTimeout(() => setLingering(true), 2000);
+    return () => {
+      clearTimeout(timer);
+      setLingering(false);
+    };
+  }, [pending]);
+
+  const series = `${pending} série${pending > 1 ? "s" : ""}`;
+  let text: string | null = null;
+  if (!online) text = pending ? `Hors ligne : ${series} gardée${pending > 1 ? "s" : ""} sur le téléphone, envoi au retour du réseau.` : "Hors ligne : tes séries seront gardées sur le téléphone.";
+  else if (pending && notice) text = notice.text;
+  else if (pending && lingering) text = `${series} en attente d'envoi…`;
+
+  return (
+    <p role="status" className={cn("flex items-start gap-2 rounded-control text-[14px]", text ? "border border-line bg-surface-2 px-3 py-2.5 text-text" : "sr-only")}>
+      {text ? (
+        <>
+          <CloudSlashIcon size={18} className="mt-0.5 shrink-0 text-muted" aria-hidden="true" />
+          <span>
+            {text}
+            {online && pending && notice?.reconnect ? (
+              <>
+                {" "}
+                <Link href="/connexion" className="font-semibold text-accent-text underline underline-offset-2">
+                  Me reconnecter
+                </Link>
+              </>
+            ) : null}
+          </span>
+        </>
+      ) : null}
+    </p>
   );
 }
 

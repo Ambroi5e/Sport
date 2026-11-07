@@ -42,3 +42,18 @@ export function pendingFor<P>(queue: OutboxEntry<P>[], userId: string, scope?: s
 export function retryDelay(failures: number): number {
   return Math.min(60_000, 2_000 * 2 ** Math.max(0, failures - 1));
 }
+
+/** Écart accepté entre l'horloge du téléphone et celle du serveur. */
+const CLOCK_SKEW_MS = 5 * 60_000;
+/** Une saisie plus ancienne vient d'une horloge fausse ou d'une file oubliée. */
+const MAX_DELAY_MS = 7 * 86_400_000;
+
+/**
+ * Heure de validation d'une saisie faite sur le téléphone, si elle est
+ * plausible (ni dans le futur, ni vieille de plus de 7 jours) ; sinon `now`.
+ */
+export function plausibleTime(sent: string | null, now: number): string {
+  const at = sent ? Date.parse(sent) : Number.NaN;
+  const ok = Number.isFinite(at) && at <= now + CLOCK_SKEW_MS && at >= now - MAX_DELAY_MS;
+  return new Date(ok ? at : now).toISOString();
+}

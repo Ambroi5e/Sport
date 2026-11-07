@@ -4,7 +4,15 @@ Format : une entrée par version (semver), du plus récent au plus ancien. Les m
 
 ## [Non publié]
 
-### v0.1 : le socle (en relecture)
+### v0.1.1 : styles au choix et connexion Google
+
+- Trois styles au choix dans Réglages : Fonte (graphite et orange), Couloir (nuit et cyan), Carnet (encre et surligneur), chacun en sombre et en clair, avec leurs polices et leurs angles. Choix gardé sur l'appareil.
+- Réglages accessibles sur mobile depuis l'accueil (roue dentée).
+- Connexion avec Google pour les comptes existants, et inscription avec Google sur invitation (code réservé 15 minutes pour l'adresse saisie). Le bouton n'apparaît qu'une fois Google activé dans Supabase.
+- Accessibilité : accent et vert du mode clair Fonte un peu plus foncés (4,5:1 sur tous les fonds), contour de focus plus visible.
+- Migration non destructive appliquée : `20261107020000_inscription_google.sql`.
+
+### v0.1 : le socle (en ligne le 2026-11-07)
 
 - Documentation de base : spécification, architecture, sécurité, design system Fonte, guide d'auto-hébergement.
 - Cadrage : photo d'étiquette nutritionnelle ajoutée à la v0.6, avec le scan de code-barres.

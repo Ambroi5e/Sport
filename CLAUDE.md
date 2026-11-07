@@ -17,7 +17,7 @@ Fonte est une application web (PWA) de suivi musculation, endurance, nutrition, 
 
 - Next.js 16 App Router + TypeScript strict, Server Components et Server Actions. Next 16 diffère des versions connues : lire `node_modules/next/dist/docs/` avant d'utiliser une API (Middleware s'appelle désormais `proxy.ts`).
 - Tailwind CSS v4 (tokens dans `app/globals.css`), composants maison dans l'esprit shadcn/ui, icônes Phosphor, polices Archivo + Public Sans auto-hébergées via `next/font`.
-- Supabase : Postgres + RLS sur toutes les tables, Auth par e-mail (lien magique et code à 6 chiffres), Storage privé, Realtime, Edge Functions. Projet `sport`, région Paris (eu-west-3).
+- Supabase : Postgres + RLS sur toutes les tables, Auth par e-mail (code à 6 chiffres) et Google, toujours sur invitation, Storage privé, Realtime, Edge Functions. Projet `sport`, région Paris (eu-west-3).
 - zod pour toute validation, react-hook-form pour les formulaires, next-intl (français seul jusqu'à v1.0).
 - Moteur de calcul pur dans `lib/engine` : aucun import de React, Next ou Supabase. Testé avec Vitest.
 - Qualité : oxlint, `tsc --noEmit`, Vitest, tests RLS sur Postgres local, Playwright (`--trace off`).
@@ -31,7 +31,7 @@ Fonte est une application web (PWA) de suivi musculation, endurance, nutrition, 
 - Migrations dans `supabase/migrations/` : les non destructives sont appliquées par Claude ; tout `drop`, `delete`, `revoke` ou `truncate` va dans `supabase/pending-destructive/` et attend la validation d'Ambroise.
 - Les données personnelles d'Ambroise (seed) restent hors du dépôt (`supabase/seed/personal*.sql` est ignoré).
 - Mobile pensé à part : barre d'onglets en bas (Accueil, Entraînement, Nutrition, Courses, Progrès), bouton + flottant, saisie en 2 ou 3 taps. Ordinateur : sidebar. Flèche retour sur chaque écran qui n'est pas un onglet racine.
-- Contraste AA minimum, mode sombre par défaut, mode clair disponible.
+- Contraste AA minimum, mode sombre par défaut, mode clair disponible. Trois styles au choix dans Réglages (Fonte par défaut, Couloir, Carnet) : tout passe par les tokens de `app/globals.css`, jamais de couleur, police ou rayon codés en dur.
 
 ## Commandes
 
@@ -47,5 +47,4 @@ npm run build
 ## Périmètre retiré
 
 - Mini-lecteur de musique (Spotify, Apple Music, Deezer) : retiré le 2026-11-06, trop compliqué pour le gain.
-- Connexion Google : retirée, l'e-mail suffit pour une app non commerciale.
 - Strava : option tardive (v0.12), import GPX/FIT en voie principale ; données Strava jamais montrées aux amis.

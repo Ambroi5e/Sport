@@ -27,6 +27,7 @@ Tableau de bord, musculation, endurance, Hyrox, sports additionnels, planning in
 | Version | Contenu |
 | --- | --- |
 | v0.1 | Socle : CI, design system, connexion par e-mail, invitations, schéma de base + RLS + tests, PWA, onboarding, pesée rapide |
+| v0.1.1 | Trois styles au choix dans Réglages (Fonte, Couloir, Carnet), connexion et inscription avec Google sur invitation |
 | v0.2 | Musculation : saisie, bibliothèque, modèles, historique, records, 1RM, volume par muscle |
 | v0.3 | Mode séance en direct (un tap par série, chrono, écran allumé, hors ligne) |
 | v0.4 | Nutrition rapide : aliments pour 100 g et quantité en grammes, favoris, « refaire comme hier », cibles par type de jour |
@@ -52,4 +53,4 @@ Ambroise veut photographier l'étiquette d'un emballage pour que l'app récupèr
 
 ## Hors périmètre
 
-Mini-lecteur de musique, connexion Google, paiement, IA (v1), application native.
+Mini-lecteur de musique, paiement, IA (v1), application native.

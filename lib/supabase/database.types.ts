@@ -43,6 +43,48 @@ export type Database = {
         }
         Relationships: []
       }
+      exercises: {
+        Row: {
+          archived_at: string | null
+          created_at: string
+          equipment: Database["public"]["Enums"]["equipment"]
+          id: string
+          measure: Database["public"]["Enums"]["exercise_measure"]
+          name: string
+          primary_muscles: Database["public"]["Enums"]["muscle"][]
+          secondary_muscles: Database["public"]["Enums"]["muscle"][]
+          slug: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          archived_at?: string | null
+          created_at?: string
+          equipment?: Database["public"]["Enums"]["equipment"]
+          id?: string
+          measure?: Database["public"]["Enums"]["exercise_measure"]
+          name: string
+          primary_muscles: Database["public"]["Enums"]["muscle"][]
+          secondary_muscles?: Database["public"]["Enums"]["muscle"][]
+          slug?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          archived_at?: string | null
+          created_at?: string
+          equipment?: Database["public"]["Enums"]["equipment"]
+          id?: string
+          measure?: Database["public"]["Enums"]["exercise_measure"]
+          name?: string
+          primary_muscles?: Database["public"]["Enums"]["muscle"][]
+          secondary_muscles?: Database["public"]["Enums"]["muscle"][]
+          slug?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       goals: {
         Row: {
           created_at: string
@@ -163,6 +205,60 @@ export type Database = {
         }
         Relationships: []
       }
+      template_items: {
+        Row: {
+          created_at: string
+          exercise_id: string
+          id: string
+          position: number
+          rep_max: number | null
+          rep_min: number | null
+          rest_seconds: number | null
+          sets: number
+          template_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          exercise_id: string
+          id?: string
+          position?: number
+          rep_max?: number | null
+          rep_min?: number | null
+          rest_seconds?: number | null
+          sets?: number
+          template_id: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          exercise_id?: string
+          id?: string
+          position?: number
+          rep_max?: number | null
+          rep_min?: number | null
+          rest_seconds?: number | null
+          sets?: number
+          template_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "template_items_exercise_id_fkey"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "exercises"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "template_items_template_id_user_id_fkey"
+            columns: ["template_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "workout_templates"
+            referencedColumns: ["id", "user_id"]
+          },
+        ]
+      }
       user_modules: {
         Row: {
           enabled: boolean
@@ -202,6 +298,149 @@ export type Database = {
         }
         Relationships: []
       }
+      workout_sets: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          duration_seconds: number | null
+          exercise_id: string
+          exercise_order: number
+          id: string
+          is_warmup: boolean
+          rep_max: number | null
+          rep_min: number | null
+          reps: number | null
+          set_number: number
+          updated_at: string
+          user_id: string
+          weight_kg: number | null
+          workout_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          exercise_id: string
+          exercise_order?: number
+          id?: string
+          is_warmup?: boolean
+          rep_max?: number | null
+          rep_min?: number | null
+          reps?: number | null
+          set_number: number
+          updated_at?: string
+          user_id?: string
+          weight_kg?: number | null
+          workout_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          exercise_id?: string
+          exercise_order?: number
+          id?: string
+          is_warmup?: boolean
+          rep_max?: number | null
+          rep_min?: number | null
+          reps?: number | null
+          set_number?: number
+          updated_at?: string
+          user_id?: string
+          weight_kg?: number | null
+          workout_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workout_sets_exercise_id_fkey"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "exercises"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workout_sets_workout_id_user_id_fkey"
+            columns: ["workout_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "workouts"
+            referencedColumns: ["id", "user_id"]
+          },
+        ]
+      }
+      workout_templates: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          position: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          position?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          position?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      workouts: {
+        Row: {
+          created_at: string
+          ended_at: string | null
+          id: string
+          name: string
+          notes: string | null
+          performed_on: string
+          started_at: string
+          template_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          performed_on: string
+          started_at?: string
+          template_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          performed_on?: string
+          started_at?: string
+          template_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workouts_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "workout_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -222,6 +461,7 @@ export type Database = {
           expires_at: string
         }[]
       }
+      exercise_is_usable: { Args: { p_exercise_id: string }; Returns: boolean }
       invitation_hash: { Args: { p_code: string }; Returns: string }
       is_admin: { Args: never; Returns: boolean }
       reserve_invitation: {
@@ -242,6 +482,16 @@ export type Database = {
         | "planning"
         | "amis"
       app_role: "admin"
+      equipment:
+        | "barre"
+        | "halteres"
+        | "machine"
+        | "poulie"
+        | "poids_du_corps"
+        | "kettlebell"
+        | "elastique"
+        | "autre"
+      exercise_measure: "charge" | "poids_du_corps" | "duree"
       goal_type:
         | "prise_de_masse"
         | "seche"
@@ -258,6 +508,24 @@ export type Database = {
         | "raquette"
         | "collectif"
         | "forme"
+      muscle:
+        | "pectoraux"
+        | "dorsaux"
+        | "trapezes"
+        | "lombaires"
+        | "epaules_avant"
+        | "epaules_laterales"
+        | "epaules_arriere"
+        | "biceps"
+        | "triceps"
+        | "avant_bras"
+        | "abdominaux"
+        | "obliques"
+        | "quadriceps"
+        | "ischios"
+        | "fessiers"
+        | "adducteurs"
+        | "mollets"
       sex: "homme" | "femme" | "autre"
       training_level: "debutant" | "intermediaire" | "avance"
     }
@@ -275,9 +543,15 @@ export const Constants = {
     Enums: {
       app_module: ["musculation", "endurance", "hyrox", "sports", "nutrition", "courses", "corps", "complements", "planning", "amis"],
       app_role: ["admin"],
+      equipment: ["barre", "halteres", "machine", "poulie", "poids_du_corps", "kettlebell", "elastique", "autre"],
+      exercise_measure: ["charge", "poids_du_corps", "duree"],
       goal_type: [
         "prise_de_masse", "seche", "recomposition", "force", "hyrox", "course_10k", "semi_marathon", "marathon",
         "triathlon_s", "triathlon_m", "triathlon_70_3", "triathlon_ironman", "raquette", "collectif", "forme",
+      ],
+      muscle: [
+        "pectoraux", "dorsaux", "trapezes", "lombaires", "epaules_avant", "epaules_laterales", "epaules_arriere",
+        "biceps", "triceps", "avant_bras", "abdominaux", "obliques", "quadriceps", "ischios", "fessiers", "adducteurs", "mollets",
       ],
       sex: ["homme", "femme", "autre"],
       training_level: ["debutant", "intermediaire", "avance"],

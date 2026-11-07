@@ -1,6 +1,6 @@
 import type { Client } from "pg";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { asUser, createTestDatabase, seedInvitation, signUp } from "./db";
+import { asUser, asUserCommit, createTestDatabase, seedInvitation, signUp } from "./db";
 
 const adminUrl = process.env.DATABASE_URL_TEST;
 
@@ -128,21 +128,12 @@ describe.skipIf(!adminUrl)("RLS et inscription", () => {
     const ownTables = ["profiles", "goals", "user_modules", "body_weights"] as const;
 
     beforeAll(async () => {
-      await asUserCommit(alice, async () => {
+      await asUserCommit(client, alice, async () => {
         await client.query("insert into public.goals (type, is_primary) values ('prise_de_masse', true)");
         await client.query("insert into public.user_modules (module) values ('musculation')");
         await client.query("insert into public.body_weights (measured_on, weight_kg) values ('2026-11-06', 85.2)");
       });
     });
-
-    // Écrit réellement (sans rollback) pour préparer les données d'Alice.
-    async function asUserCommit(userId: string, fn: () => Promise<void>) {
-      await client.query("begin");
-      await client.query("set local role authenticated");
-      await client.query("select set_config('request.jwt.claim.sub', $1, true)", [userId]);
-      await fn();
-      await client.query("commit");
-    }
 
     it.each(ownTables)("Alice voit ses propres lignes de %s", async (table) => {
       const n = await asUser(client, alice, async () => {

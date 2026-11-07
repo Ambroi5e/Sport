@@ -8,6 +8,7 @@ import {
   programWeek,
   projectE1RM,
   sumNutrients,
+  type AdaptiveTdee,
   type CatalogExercise,
   type DayType,
   type Meal,
@@ -16,6 +17,7 @@ import {
 } from "@/lib/engine";
 import type { MeasurementRow, Photo, PhotoPose } from "@/lib/body";
 import type { Food, JournalEntry, Target } from "@/lib/nutrition";
+import { PORTION_LABEL, recipeRow } from "@/lib/recipes";
 import type { ExerciseSummary } from "@/lib/training";
 
 /** Données d'exemple de l'aperçu de développement (captures Playwright). */
@@ -121,6 +123,85 @@ export const SAMPLE_FOODS: Food[] = [
   food("f-whey", "Whey vanille", 380, 78, 7, 5, [30, "1 dose (30 g)"], true),
   food("f-granola", "Granola maison", 450, 12, 55, 18, [50, "1 bol (50 g)"], true),
 ];
+
+// Recettes (v0.6.1) : ingrédients crus, valeurs calculées comme à l'enregistrement.
+const RAW = {
+  poulet: food("f-poulet-cru", "Blanc de poulet cru", 110, 23, 0, 1.5),
+  riz: food("f-riz-cru", "Riz basmati cru", 350, 7.5, 78, 0.9),
+  coco: food("f-coco", "Lait de coco", 180, 1.8, 3, 18),
+  oignon: food("f-oignon", "Oignon", 40, 1.2, 8, 0.1),
+  tomates: food("f-tomates", "Tomates concassées", 25, 1.2, 4, 0.2),
+  huile: SAMPLE_FOODS.find((f) => f.id === "f-huile")!,
+};
+
+export const SAMPLE_INGREDIENTS: Food[] = [...SAMPLE_FOODS.filter((f) => f.id !== "f-granola"), ...Object.values(RAW).filter((f) => f.id !== "f-huile")];
+
+export const SAMPLE_RECIPE = {
+  name: "Poulet curry du dimanche",
+  portions: 5,
+  cookedG: 2600,
+  items: [
+    { food: RAW.poulet, grams: 800 },
+    { food: RAW.riz, grams: 400 },
+    { food: RAW.coco, grams: 400 },
+    { food: RAW.tomates, grams: 400 },
+    { food: RAW.oignon, grams: 150 },
+    { food: RAW.huile, grams: 20 },
+  ],
+};
+
+function recipeFood(id: string, name: string, items: { food: Food; grams: number }[], cookedG: number | null, portions: number): Food {
+  const r = recipeRow(items.map((i) => ({ grams: i.grams, per100: i.food.per100 })), cookedG, portions);
+  if (!r.ok) throw new Error(r.error);
+  return {
+    id,
+    name,
+    brand: null,
+    per100: { kcal: r.row.kcal, proteinG: r.row.protein_g, carbsG: r.row.carbs_g, fatG: r.row.fat_g },
+    portionG: r.row.portion_g,
+    portionLabel: PORTION_LABEL,
+    personal: true,
+    recipe: true,
+  };
+}
+
+const CURRY = recipeFood("r-curry", SAMPLE_RECIPE.name, SAMPLE_RECIPE.items, SAMPLE_RECIPE.cookedG, SAMPLE_RECIPE.portions);
+
+export const SAMPLE_RECIPES = [
+  { food: CURRY, portions: 5 },
+  {
+    food: recipeFood("r-chili", "Chili con carne", [{ food: food("x-boeuf", "Bœuf haché 5 %", 125, 21, 0, 5), grams: 600 }, { food: food("x-haricots", "Haricots rouges cuits", 115, 8, 16, 0.5), grams: 500 }, { food: RAW.tomates, grams: 800 }, { food: RAW.oignon, grams: 200 }], 1900, 6),
+    portions: 6,
+  },
+  {
+    food: recipeFood("r-oats", "Overnight oats protéinés", [{ food: SAMPLE_FOODS[0], grams: 80 }, { food: SAMPLE_FOODS[1], grams: 150 }, { food: SAMPLE_FOODS.find((f) => f.id === "f-whey")!, grams: 30 }], null, 1),
+    portions: 1,
+  },
+];
+
+export const SAMPLE_REAL_TDEE: AdaptiveTdee = {
+  ok: true,
+  kcal: 3180,
+  intake: 2950,
+  weeklyChangeKg: -0.21,
+  countedDays: 25,
+  loggedDays: 26,
+  weighIns: 18,
+  weightSpanDays: 27,
+  from: "2026-10-10",
+  to: "2026-11-06",
+};
+
+export const SAMPLE_REAL_TDEE_WAITING: AdaptiveTdee = {
+  ok: false,
+  reason: "jours",
+  countedDays: 9,
+  loggedDays: 11,
+  weighIns: 3,
+  weightSpanDays: 12,
+  from: "2026-10-10",
+  to: "2026-11-06",
+};
 
 const byId = Object.fromEntries(SAMPLE_FOODS.map((f) => [f.id, f]));
 const entry = (id: string, meal: Meal, foodId: string, grams: number): JournalEntry => ({

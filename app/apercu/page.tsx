@@ -1,4 +1,4 @@
-import { BarbellIcon, CalendarCheckIcon, FlagIcon } from "@phosphor-icons/react/ssr";
+import { BarbellIcon, CalendarCheckIcon, FlagIcon, PlusIcon } from "@phosphor-icons/react/ssr";
 import { notFound } from "next/navigation";
 import { AppNav } from "@/components/nav/app-nav";
 import { Card } from "@/components/ui/card";
@@ -33,7 +33,11 @@ import { Per100 } from "@/components/nutrition/per-100";
 import { QuickPicks } from "@/components/nutrition/quick-picks";
 import { TargetsForm } from "@/components/nutrition/targets-form";
 import { TodayNutritionCard } from "@/components/nutrition/today-card";
-import { addFoodLog, createFood } from "@/app/(app)/nutrition/actions";
+import { addFoodLog, createFood, saveRecipe } from "@/app/(app)/nutrition/actions";
+import { RealTdeeCard } from "@/components/nutrition/real-tdee-card";
+import { RecipeEditor } from "@/components/nutrition/recipe-editor";
+import { RecipeList } from "@/components/nutrition/recipe-list";
+import { buttonClasses } from "@/components/ui/button";
 import { saveMeasurements, uploadPhoto } from "@/app/(app)/progres/actions";
 import { CompareView } from "@/components/progress/compare-view";
 import { MeasurementsForm } from "@/components/progress/measurements-form";
@@ -60,7 +64,12 @@ import {
   SAMPLE_ITEMS,
   SAMPLE_MEASUREMENTS,
   SAMPLE_PHOTOS,
+  SAMPLE_INGREDIENTS,
   SAMPLE_PROGRAM,
+  SAMPLE_REAL_TDEE,
+  SAMPLE_REAL_TDEE_WAITING,
+  SAMPLE_RECIPE,
+  SAMPLE_RECIPES,
   SAMPLE_REPLACE,
   SAMPLE_SETS,
   SAMPLE_TARGETS,
@@ -261,10 +270,71 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
           <>
             <PageHeader title="Cibles" back="/apercu?ecran=nutrition" />
             <div className="grid gap-4 md:max-w-xl">
+              <RealTdeeCard real={SAMPLE_REAL_TDEE} formulaKcal={2750} unit="kg" />
               <TargetsForm
                 current={{}}
                 trainingDays={[1, 3, 5]}
+                suggestion={{ maintenance: 3200, entrainement: { kcal: 3350, proteinG: 150 }, repos: { kcal: 3000, proteinG: 150 } }}
+                source="D'après ta dépense réelle"
+              />
+            </div>
+          </>
+        ) : ecran === "nutrition-cibles-attente" ? (
+          <>
+            <PageHeader title="Cibles" back="/apercu?ecran=nutrition" />
+            <div className="grid gap-4 md:max-w-xl">
+              <RealTdeeCard real={SAMPLE_REAL_TDEE_WAITING} formulaKcal={2750} unit="kg" />
+              <TargetsForm
+                current={SAMPLE_TARGETS}
+                trainingDays={[1, 3, 5]}
                 suggestion={{ maintenance: 2750, entrainement: { kcal: 3150, proteinG: 150 }, repos: { kcal: 2850, proteinG: 150 } }}
+                source="D'après la formule de ton profil"
+              />
+            </div>
+          </>
+        ) : ecran === "nutrition-recettes" || ecran === "nutrition-recettes-vide" ? (
+          <>
+            <PageHeader title="Recettes" back="/apercu?ecran=nutrition" />
+            <div className="grid gap-4 md:max-w-xl">
+              <RecipeList recipes={ecran === "nutrition-recettes" ? SAMPLE_RECIPES : []} />
+              <span className={buttonClasses(ecran === "nutrition-recettes" ? "secondary" : "primary", "md", "w-full")}>
+                <PlusIcon size={18} weight="bold" aria-hidden="true" /> Créer une recette
+              </span>
+              <p className="text-[13px] text-muted">Une recette se retrouve aussi dans la recherche d&apos;aliments, et se note à la part ou au poids.</p>
+            </div>
+          </>
+        ) : ecran === "nutrition-recette" ? (
+          <>
+            <PageHeader title={SAMPLE_RECIPE.name} eyebrow="Recette" back="/apercu?ecran=nutrition-recettes" />
+            <div className="grid gap-6 md:max-w-4xl">
+              <div className="grid gap-3 sm:flex sm:items-center sm:justify-between">
+                <p className="text-[14px] text-muted">Une correction s&apos;applique aussi aux jours où tu as déjà noté cette recette.</p>
+                <span className={buttonClasses("primary", "md", "shrink-0")}>
+                  <PlusIcon size={18} weight="bold" aria-hidden="true" /> Noter une part
+                </span>
+              </div>
+              <RecipeEditor action={saveRecipe.bind(null, null)} ingredients={SAMPLE_INGREDIENTS} initial={SAMPLE_RECIPE} submitLabel="Enregistrer" />
+            </div>
+          </>
+        ) : ecran === "nutrition-recette-nouvelle" ? (
+          <>
+            <PageHeader title="Nouvelle recette" back="/apercu?ecran=nutrition-recettes" />
+            <div className="md:max-w-4xl">
+              <RecipeEditor action={saveRecipe.bind(null, null)} ingredients={SAMPLE_INGREDIENTS} submitLabel="Créer la recette" />
+            </div>
+          </>
+        ) : ecran === "nutrition-quantite-recette" ? (
+          <>
+            <PageHeader title={SAMPLE_RECIPES[0].food.name} eyebrow="Déjeuner" back="/apercu?ecran=nutrition-ajouter" />
+            <div className="grid gap-5 md:max-w-xl">
+              <Per100 food={SAMPLE_RECIPES[0].food} />
+              <GramsForm
+                food={SAMPLE_RECIPES[0].food}
+                defaultGrams={SAMPLE_RECIPES[0].food.portionG!}
+                lastGrams={null}
+                action={addFoodLog}
+                hidden={{}}
+                submitLabel="Ajouter au déjeuner"
               />
             </div>
           </>

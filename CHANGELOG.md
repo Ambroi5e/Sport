@@ -4,6 +4,18 @@ Format : une entrée par version (semver), du plus récent au plus ancien. Les m
 
 ## [Non publié]
 
+### v0.4 : nutrition rapide
+
+- Onglet Nutrition : jour affiché et jours précédents, calories et protéines face à la cible du jour (entraînement ou repos), glucides et lipides, quatre repas avec leurs aliments.
+- Ajout en 2 ou 3 taps : repas favori ou aliment fréquent ajouté en un tap avec la dernière quantité, sinon recherche sans accents puis quantité préremplie (dernière fois, portion ou 100 g) avec raccourcis de portion et apports en direct. Repas proposé selon l'heure.
+- « Comme hier » : un repas vide reprend le même repas de la veille en un tap.
+- Repas favoris : enregistrer un repas du journal, le rajouter en un tap, le supprimer.
+- Aliments personnels : création avec les valeurs de l'étiquette pour 100 g, correction (les jours passés suivent), retrait de la liste.
+- Page Cibles : jours habituels d'entraînement, cibles par type de jour, repère suggéré selon le profil, jamais imposé, avec le rappel de consulter un professionnel.
+- Accueil : carte « Nutrition du jour ». Bouton + : « Repas » et « Séance » deviennent de vrais raccourcis.
+- Catalogue commun de 88 aliments de base (valeurs moyennes Ciqual et USDA).
+- Migration non destructive appliquée : `20261109000000_nutrition.sql`, avec 26 tests RLS.
+
 ### v0.3 : séance en direct
 
 - Saisie sans réseau : chaque série validée est gardée sur le téléphone puis envoyée dès que possible, sans doublon, avec son heure de validation. État visible quand l'envoi tarde (« 2 séries en attente d'envoi »), session expirée signalée avec un lien pour se reconnecter.

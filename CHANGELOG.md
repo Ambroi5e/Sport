@@ -12,6 +12,7 @@ Format : une entrée par version (semver), du plus récent au plus ancien. Les m
 - Écran gardé allumé pendant la séance, avec un bouton pour le couper.
 - Réglages : carte « Séance » (repos par défaut, son, écran allumé), propre à l'appareil.
 - Déconnexion : efface la file, le chrono et les réglages de séance du téléphone, après avertissement s'il reste des saisies non envoyées.
+- Correction : le service worker n'était jamais enregistré en production (script lancé après l'événement « load »). La page hors ligne et le cache des fichiers statiques fonctionnent enfin.
 - Pas de migration.
 
 ### v0.2 : musculation

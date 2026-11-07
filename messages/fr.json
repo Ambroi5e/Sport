@@ -1,0 +1,44 @@
+{
+  "app": {
+    "name": "Fonte",
+    "tagline": "Ton carnet d'entraînement, de nutrition et de courses."
+  },
+  "nav": {
+    "home": "Accueil",
+    "training": "Entraînement",
+    "nutrition": "Nutrition",
+    "groceries": "Courses",
+    "progress": "Progrès",
+    "settings": "Réglages",
+    "admin": "Admin",
+    "quickAdd": "Ajouter",
+    "back": "Retour"
+  },
+  "auth": {
+    "loginTitle": "Connexion",
+    "loginIntro": "Entre ton e-mail, on t'envoie un code à 6 chiffres.",
+    "signupTitle": "Inscription",
+    "signupIntro": "Fonte fonctionne sur invitation. Entre le code reçu et ton e-mail.",
+    "email": "E-mail",
+    "inviteCode": "Code d'invitation",
+    "inviteHint": "Format FONTE-XXXX-XXXX",
+    "sendCode": "Recevoir le code",
+    "code": "Code reçu par e-mail",
+    "codeHint": "Le code est valable une heure. Tu peux aussi cliquer sur le lien de l'e-mail.",
+    "verify": "Me connecter",
+    "changeEmail": "Changer d'e-mail",
+    "codeSentTo": "Code envoyé à {email}.",
+    "toSignup": "Tu as un code d'invitation ? Créer un compte",
+    "toLogin": "Déjà un compte ? Se connecter",
+    "logout": "Me déconnecter",
+    "errors": {
+      "invalidEmail": "Cette adresse e-mail n'a pas l'air complète.",
+      "invalidCode": "Le code doit contenir 6 chiffres.",
+      "invalidInvite": "Ce code d'invitation n'est pas valable ou a déjà servi. Demande-en un nouveau à la personne qui t'a invité.",
+      "unknownAccount": "Aucun compte avec cet e-mail. Si tu as un code d'invitation, crée ton compte.",
+      "wrongCode": "Ce code ne correspond pas ou a expiré. Demande-en un nouveau.",
+      "tooMany": "Trop de demandes d'affilée. Réessaie dans quelques minutes.",
+      "generic": "La connexion n'a pas abouti. Vérifie ta connexion internet et réessaie."
+    }
+  }
+}

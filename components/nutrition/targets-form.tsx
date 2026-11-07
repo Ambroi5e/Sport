@@ -20,10 +20,13 @@ export function TargetsForm({
   current,
   trainingDays,
   suggestion,
+  source,
 }: {
   current: Partial<Record<DayType, Target>>;
   trainingDays: readonly number[];
   suggestion: TargetSuggestion | null;
+  /** D'où vient le repère : « D'après ta dépense réelle » ou « D'après la formule ». */
+  source?: string;
 }) {
   const [state, formAction] = useActionState(saveTargets, {} as FormState);
   const [values, setValues] = useState<Values>(() => ({
@@ -52,7 +55,10 @@ export function TargetsForm({
     <form action={formAction} className="grid gap-6" noValidate>
       {suggestion ? (
         <div className="grid gap-3 rounded-control border border-line bg-surface-2 p-4">
-          <p className="label-caps">Repère suggéré</p>
+          <div className="grid gap-0.5">
+            <p className="label-caps">Repère suggéré</p>
+            {source ? <p className="text-[13px] text-muted">{source}</p> : null}
+          </div>
           <dl className="grid grid-cols-2 gap-3">
             {DAY_TYPES.map((t) => (
               <div key={t} className="grid gap-0.5">

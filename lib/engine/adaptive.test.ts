@@ -39,10 +39,10 @@ describe("adaptiveTdee", () => {
   it("dit ce qui manque : des jours notés, puis des pesées étalées", () => {
     const few = Array.from({ length: 10 }, (_, i) => ({ date: day(i), kcal: 2500 }));
     const weights = Array.from({ length: 5 }, (_, k) => ({ date: day(k * 7), kg: 70 }));
-    expect(adaptiveTdee({ intake: few, weights, asOf: AS_OF })).toMatchObject({ ok: false, reason: "jours", countedDays: 10 });
+    expect(adaptiveTdee({ intake: few, weights, asOf: AS_OF })).toMatchObject({ ok: false, reason: "jours", countedDays: 10, weighIns: 5, weightSpanDays: 28 });
     const intake = Array.from({ length: 28 }, (_, i) => ({ date: day(i), kcal: 2500 }));
     const close = Array.from({ length: 6 }, (_, k) => ({ date: day(20 + k), kg: 70 }));
-    expect(adaptiveTdee({ intake, weights: close, asOf: AS_OF })).toMatchObject({ ok: false, reason: "pesees", weighIns: 6 });
+    expect(adaptiveTdee({ intake, weights: close, asOf: AS_OF })).toMatchObject({ ok: false, reason: "pesees", weighIns: 6, weightSpanDays: 5 });
   });
 
   it("refuse un résultat hors des bornes plausibles", () => {

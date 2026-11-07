@@ -12,6 +12,8 @@ export const ADAPTIVE_DAYS = 28;
 /** Jours notés qui comptent, au minimum, sur la période. */
 export const MIN_COUNTED_DAYS = 14;
 export const MIN_WEIGH_INS = 4;
+/** Écart minimal, en jours, entre la première et la dernière pesée. */
+export const MIN_WEIGHT_SPAN = 14;
 /** Un jour noté à moins de 60 % du jour habituel est sans doute un oubli. */
 export const LOGGED_SHARE = 0.6;
 const BOUNDS = { min: 1200, max: 6000 };
@@ -32,10 +34,21 @@ export type AdaptiveTdee =
       countedDays: number;
       loggedDays: number;
       weighIns: number;
+      weightSpanDays: number;
       from: string;
       to: string;
     }
-  | { ok: false; reason: "jours" | "pesees" | "incoherent"; countedDays: number; loggedDays: number; weighIns: number; from: string; to: string };
+  | {
+      ok: false;
+      /** Le premier manque rencontré ; les compteurs disent où en est chaque condition. */
+      reason: "jours" | "pesees" | "incoherent";
+      countedDays: number;
+      loggedDays: number;
+      weighIns: number;
+      weightSpanDays: number;
+      from: string;
+      to: string;
+    };
 
 function median(values: number[]): number {
   const s = [...values].sort((a, b) => a - b);
@@ -72,10 +85,10 @@ export function adaptiveTdee(p: { intake: readonly { date: string; kcal: number 
   const counted = logged.filter((d) => d.kcal >= usual * LOGGED_SHARE);
   const weights = p.weights.filter((w) => w.date >= from && w.date <= p.asOf);
   const spread = weights.length ? Math.max(...weights.map((w) => dayIndex(w.date))) - Math.min(...weights.map((w) => dayIndex(w.date))) : 0;
-  const base = { countedDays: counted.length, loggedDays: logged.length, weighIns: weights.length, from, to };
+  const base = { countedDays: counted.length, loggedDays: logged.length, weighIns: weights.length, weightSpanDays: spread, from, to };
 
   if (counted.length < MIN_COUNTED_DAYS) return { ok: false, reason: "jours", ...base };
-  if (weights.length < MIN_WEIGH_INS || spread < 14) return { ok: false, reason: "pesees", ...base };
+  if (weights.length < MIN_WEIGH_INS || spread < MIN_WEIGHT_SPAN) return { ok: false, reason: "pesees", ...base };
 
   const intake = counted.reduce((sum, d) => sum + d.kcal, 0) / counted.length;
   const perDay = slope(weights);

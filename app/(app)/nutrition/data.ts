@@ -2,7 +2,7 @@ import "server-only";
 import { notFound } from "next/navigation";
 import { requireUserId } from "@/lib/auth";
 import { addDays } from "@/lib/dates";
-import { dayTypeFor, frequentFoods, nutrientsFor, sumNutrients, type DayType, type Meal, type Nutrients } from "@/lib/engine";
+import { dayTypeFor, frequentFoods, nutrientsFor, sumNutrients, type DayType, type Meal, type Nutrients, type WeighIn } from "@/lib/engine";
 import { FOOD_COLUMNS, toFood, type Food, type JournalEntry, type Target } from "@/lib/nutrition";
 import { createClient } from "@/lib/supabase/server";
 
@@ -180,6 +180,33 @@ export async function getRecipe(id: string): Promise<Recipe> {
     portions: data.recipe_portions ?? 1,
     items,
   };
+}
+
+/** Calories notées par jour entre deux dates incluses (jours sans rien noté absents). */
+export async function getDailyIntake(from: string, to: string): Promise<{ date: string; kcal: number }[]> {
+  const userId = await requireUserId();
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("food_logs")
+    .select("eaten_on, grams, foods(kcal)")
+    .eq("user_id", userId)
+    .gte("eaten_on", from)
+    .lte("eaten_on", to)
+    .limit(5000);
+  const days = new Map<string, number>();
+  for (const row of data ?? []) {
+    if (!row.foods) continue;
+    days.set(row.eaten_on, (days.get(row.eaten_on) ?? 0) + (Number(row.foods.kcal) * Number(row.grams)) / 100);
+  }
+  return [...days].map(([date, kcal]) => ({ date, kcal }));
+}
+
+/** Pesées depuis une date, pour la dépense réelle. */
+export async function getWeightsSince(from: string): Promise<WeighIn[]> {
+  const userId = await requireUserId();
+  const supabase = await createClient();
+  const { data } = await supabase.from("body_weights").select("measured_on, weight_kg").eq("user_id", userId).gte("measured_on", from).order("measured_on");
+  return (data ?? []).map((w) => ({ date: w.measured_on, kg: Number(w.weight_kg) }));
 }
 
 /** Dernière pesée, pour la cible suggérée. */

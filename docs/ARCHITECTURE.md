@@ -55,7 +55,7 @@ Chaque table porte un `user_id`. Les catalogues communs (exercices, aliments de 
 | Accès | `invitations`, `user_roles` | v0.1 |
 | Corps | `body_weights` (v0.1), `body_measurements`, `progress_photos` | v0.1, v0.5 |
 | Musculation | `exercises` (muscles en tableaux sur l'exercice), `workout_templates`, `template_items`, `workouts`, `workout_sets` (une série prévue n'a pas encore de `completed_at`) | v0.2 |
-| Nutrition | `foods`, `recipes`, `recipe_items`, `food_logs`, `nutrition_targets`, `tdee_estimates` | v0.4, v0.6 |
+| Nutrition | `foods`, `food_logs`, `nutrition_targets`, `saved_meals`, `saved_meal_items` (v0.4), `recipes`, `recipe_items`, `tdee_estimates` (v0.6) | v0.4, v0.6 |
 | Plan prédictif | `programs`, `program_goals`, `planned_sessions`, `planned_sets`, `exercise_preferences` | v0.6 |
 | Activités | `activities`, `activity_segments`, `hr_zones`, `race_plans` | v0.8, v0.11 |
 | Forme et bilans | `daily_checkins`, `weekly_reviews`, `review_adjustments` | v0.8, v0.10 |
@@ -92,3 +92,14 @@ Chaque table porte un `user_id`. Les catalogues communs (exercices, aliments de 
 - **Chrono de repos** (`components/training/rest-timer.tsx`) : heure de fin gardée dans `localStorage`, visible sur toutes les pages connectées, durée retenue par exercice. Fin signalée par vibration (Android), son court en mode « ambiant » et annonce pour les lecteurs d'écran.
 - **Écran allumé** : `Screen Wake Lock` pendant une séance en cours, repris au retour dans l'app.
 - **Réglages de séance** (`lib/session-prefs.ts`) : repos par défaut, son, écran allumé, gardés sur l'appareil.
+
+## Nutrition rapide (v0.4)
+
+- **Aliments pour 100 g** : `foods` porte les valeurs pour 100 g et une portion nommée facultative. Catalogue commun de 88 aliments (`user_id` vide, valeurs moyennes Ciqual et USDA arrondies), aliments personnels pour le reste. Un aliment personnel s'archive au lieu de se supprimer : il reste dans les jours où il a été noté.
+- **Journal sans copie** : `food_logs` garde l'aliment, le jour, le repas et les grammes. Les apports se calculent à la lecture (`nutrientsFor` du moteur). Corriger un aliment personnel corrige donc aussi les jours passés.
+- **Ajout en un tap** : l'écran d'ajout propose d'abord les repas favoris (`saved_meals`, `saved_meal_items`) et les aliments les plus notés sur 30 jours avec leur dernière quantité (`frequentFoods`). La recherche se fait dans le navigateur, sans accents (`lib/text.ts`), sur la liste des aliments chargée une fois.
+- **Repas proposé** : selon l'heure locale du profil (avant 10 h 30, 15 h, 18 h 30, ensuite), corrigeable d'un tap.
+- **Type de jour** : entraînement si le jour fait partie de `profiles.training_days` (1 = lundi) ou si une séance y est enregistrée, repos sinon. Chaque type a sa cible (`nutrition_targets`, clé `(user_id, day_type)`, enregistrée par upsert).
+- **Cible suggérée** (`suggestTargets`) : Mifflin-St Jeor × activité selon les séances, ajustée à l'objectif (+10 % prise de masse, −20 % sèche), ±5 % selon le type de jour, protéines à 2 g/kg (musculation, force) ou 1,6 g/kg. Affichée comme repère, recopiée seulement sur demande, avec le rappel de consulter un professionnel.
+- **Cohérence** : `food_is_usable()` dans les politiques de `food_logs` et `saved_meal_items`, clé composite `(saved_meal_id, user_id)` : impossible de noter l'aliment personnel d'un autre ou de remplir son favori.
+- **Pas de saisie hors ligne** pour les repas en v0.4 : les actions passent par le réseau. La file d'attente de la v0.3 pourra les accueillir.

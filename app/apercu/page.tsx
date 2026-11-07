@@ -16,7 +16,30 @@ import { TemplateItems } from "@/components/training/template-forms";
 import { RestTimerDock } from "@/components/training/rest-timer";
 import { WorkoutLogger } from "@/components/training/workout-logger";
 import { SessionSettings } from "@/components/settings/session-settings";
-import { SAMPLE_BLOCKS, SAMPLE_EXERCISES, SAMPLE_HISTORY, SAMPLE_ITEMS, SAMPLE_VOLUME } from "./exemples";
+import { FoodForm } from "@/components/nutrition/food-form";
+import { FoodPicker } from "@/components/nutrition/food-picker";
+import { MealTabs } from "@/components/nutrition/meal-tabs";
+import { GramsForm } from "@/components/nutrition/grams-form";
+import { NutritionDay } from "@/components/nutrition/nutrition-day";
+import { Per100 } from "@/components/nutrition/per-100";
+import { QuickPicks } from "@/components/nutrition/quick-picks";
+import { TargetsForm } from "@/components/nutrition/targets-form";
+import { TodayNutritionCard } from "@/components/nutrition/today-card";
+import { addFoodLog, createFood } from "@/app/(app)/nutrition/actions";
+import { sumNutrients } from "@/lib/engine";
+import {
+  SAMPLE_BLOCKS,
+  SAMPLE_EXERCISES,
+  SAMPLE_FAVORITES,
+  SAMPLE_FOODS,
+  SAMPLE_FREQUENT,
+  SAMPLE_HISTORY,
+  SAMPLE_ITEMS,
+  SAMPLE_TARGETS,
+  SAMPLE_TODAY,
+  SAMPLE_VOLUME,
+  SAMPLE_YESTERDAY,
+} from "./exemples";
 import { getAppearance } from "@/lib/appearance";
 
 /**
@@ -67,6 +90,52 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
               </EmptyState>
             </div>
           </>
+        ) : ecran === "nutrition" ? (
+          <>
+            <PageHeader title="Nutrition" />
+            <NutritionDay day="2026-11-07" today="2026-11-07" dayType="entrainement" entries={SAMPLE_TODAY} previous={SAMPLE_YESTERDAY} targets={SAMPLE_TARGETS} />
+          </>
+        ) : ecran === "nutrition-vide" ? (
+          <>
+            <PageHeader title="Nutrition" />
+            <NutritionDay day="2026-11-05" today="2026-11-07" dayType="repos" entries={[]} previous={[]} targets={{}} />
+          </>
+        ) : ecran === "nutrition-ajouter" ? (
+          <>
+            <PageHeader title="Ajouter" back="/apercu?ecran=nutrition" />
+            <div className="grid gap-5 md:max-w-xl">
+              <MealTabs meal="diner" day="2026-11-07" today="2026-11-07" basePath="/apercu" />
+              <FoodPicker foods={SAMPLE_FOODS} params="repas=diner">
+                <QuickPicks favorites={SAMPLE_FAVORITES} frequent={SAMPLE_FREQUENT} meal="diner" day="2026-11-07" params="repas=diner" />
+              </FoodPicker>
+            </div>
+          </>
+        ) : ecran === "nutrition-quantite" ? (
+          <>
+            <PageHeader title="Flocons d'avoine" eyebrow="Petit-déjeuner" back="/apercu?ecran=nutrition-ajouter" />
+            <div className="grid gap-5 md:max-w-xl">
+              <Per100 food={SAMPLE_FOODS[0]} />
+              <GramsForm food={SAMPLE_FOODS[0]} defaultGrams={80} lastGrams={80} action={addFoodLog} hidden={{}} submitLabel="Ajouter au petit-déjeuner" />
+            </div>
+          </>
+        ) : ecran === "nutrition-cibles" ? (
+          <>
+            <PageHeader title="Cibles" back="/apercu?ecran=nutrition" />
+            <div className="grid gap-4 md:max-w-xl">
+              <TargetsForm
+                current={{}}
+                trainingDays={[1, 3, 5]}
+                suggestion={{ maintenance: 2750, entrainement: { kcal: 3150, proteinG: 150 }, repos: { kcal: 2850, proteinG: 150 } }}
+              />
+            </div>
+          </>
+        ) : ecran === "nutrition-aliment" ? (
+          <>
+            <PageHeader title="Nouvel aliment" back="/apercu?ecran=nutrition-ajouter" />
+            <div className="md:max-w-xl">
+              <FoodForm action={createFood} defaultName="Granola" submitLabel="Créer et choisir la quantité" />
+            </div>
+          </>
         ) : ecran === "seance" ? (
           <>
             <PageHeader back="/apercu" eyebrow="vendredi 7 novembre" title="Push A" />
@@ -112,13 +181,7 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
                   <h2 className="font-title text-[26px]">Prise de masse</h2>
                   <p className="text-[15px] text-muted">Rythme visé : 0,25 à 0,5 kg par semaine.</p>
                 </Card>
-                <Card className="grid gap-2">
-                  <h2 className="text-lg font-semibold">Cette semaine</h2>
-                  <p className="text-[15px] text-muted">
-                    Les séances, les calories et les protéines du jour s&apos;afficheront ici dès que l&apos;entraînement et la nutrition
-                    seront disponibles.
-                  </p>
-                </Card>
+                <TodayNutritionCard totals={sumNutrients(SAMPLE_TODAY.map((e) => e.nutrients))} target={SAMPLE_TARGETS.entrainement} dayType="entrainement" />
               </div>
             </div>
           </>

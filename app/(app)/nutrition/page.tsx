@@ -1,17 +1,28 @@
-import { ForkKnifeIcon } from "@phosphor-icons/react/ssr";
 import type { Metadata } from "next";
-import { EmptyState } from "@/components/ui/empty-state";
+import { NutritionDay } from "@/components/nutrition/nutrition-day";
 import { PageHeader } from "@/components/ui/page-header";
+import { getProfile } from "@/lib/auth";
+import { addDays, localDate } from "@/lib/dates";
+import { pickDay } from "./context";
+import { getDayLogs, getDayType, getTargets } from "./data";
 
 export const metadata: Metadata = { title: "Nutrition" };
 
-export default function NutritionPage() {
+export default async function NutritionPage({ searchParams }: { searchParams: Promise<{ jour?: string }> }) {
+  const profile = (await getProfile())!;
+  const today = localDate(profile.timezone);
+  const day = pickDay((await searchParams).jour, today);
+  const [entries, previous, targets, dayType] = await Promise.all([
+    getDayLogs(day),
+    getDayLogs(addDays(day, -1)),
+    getTargets(),
+    getDayType(day, profile.training_days),
+  ]);
+
   return (
     <>
       <PageHeader title="Nutrition" />
-      <EmptyState icon={<ForkKnifeIcon size={22} />} title="Le suivi des repas arrive bientôt">
-        Repas favoris, « refaire comme hier » et calories et protéines du jour face à tes objectifs.
-      </EmptyState>
+      <NutritionDay day={day} today={today} dayType={dayType} entries={entries} previous={previous} targets={targets} />
     </>
   );
 }

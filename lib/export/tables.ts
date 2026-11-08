@@ -48,6 +48,7 @@ export const EXPORT_TABLES: ExportTable[] = [
     order: ["workout_id", "exercise_order", "set_number", "id"],
     refs: [{ column: "workout_id", from: "workouts", field: "performed_on", as: "workout_date" }, exercise()],
   },
+  { table: "activities", file: "activites", label: "Sports notés (durée en minutes)", order: ["performed_on", "id"] },
   { table: "foods", file: "aliments-perso", label: "Aliments et recettes créés (valeurs pour 100 g)", order: ["created_at", "id"] },
   {
     table: "recipe_items",
@@ -62,6 +63,12 @@ export const EXPORT_TABLES: ExportTable[] = [
   { table: "nutrition_targets", file: "cibles", label: "Cibles par type de jour", order: ["day_type"] },
   { table: "body_weights", file: "pesees", label: "Pesées", order: ["measured_on", "id"] },
   { table: "body_measurements", file: "mensurations", label: "Mensurations", order: ["measured_on", "site", "id"] },
+  {
+    table: "daily_checkins",
+    file: "forme",
+    label: "Forme du jour (1 à 5 : sommeil et énergie, 5 = très bien ; courbatures et stress, 5 = forts)",
+    order: ["checkin_on"],
+  },
   { table: "progress_photos", file: "photos", label: "Photos de progression (fichiers dans photos/)", order: ["taken_on", "id"] },
 ];
 

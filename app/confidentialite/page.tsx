@@ -7,7 +7,7 @@ import { getUserId } from "@/lib/auth";
 export const metadata: Metadata = { title: "Confidentialité" };
 
 /** Date de la dernière modification de cette page, à changer avec son contenu. */
-const UPDATED = "7 novembre 2026";
+const UPDATED = "8 novembre 2026";
 
 function Section({ id, title, children }: { id: string; title: string; children: ReactNode }) {
   return (
@@ -55,12 +55,12 @@ export default async function PrivacyPage() {
               <strong>Ton profil</strong> : année de naissance, sexe, taille, niveau, jours d&apos;entraînement, objectifs.
             </li>
             <li>
-              <strong>Ce que tu notes</strong> : séances et séries, programmes, aliments, recettes, repas, cibles, pesées, mensurations,
-              photos de progression.
+              <strong>Ce que tu notes</strong> : séances et séries, sports (durée, intensité), programmes, aliments, recettes, repas, cibles,
+              pesées, mensurations, photos de progression, forme du jour (sommeil, courbatures, énergie, stress).
             </li>
           </List>
           <p>
-            Le poids, les mensurations, les photos et ce que tu manges sont des <strong>données de santé</strong>, sensibles au sens du
+            Le poids, les mensurations, les photos, ce que tu manges et ta forme du jour sont des <strong>données de santé</strong>, sensibles au sens du
             RGPD. Fonte ne garde que ce qui sert à l&apos;app et ne les utilise pour rien d&apos;autre.
           </p>
         </Section>

@@ -4,6 +4,15 @@ Format : une entrée par version (semver), du plus récent au plus ancien. Les m
 
 ## [Non publié]
 
+### v0.7 : confidentialité, export et suppression du compte
+
+- Page Confidentialité, lisible sans compte : ce que Fonte garde, où, qui peut techniquement le lire (l'administrateur du projet Supabase), ce qui sort de l'app, les cookies et tes droits. Liens depuis la connexion, l'inscription et Réglages.
+- Réglages > Mes données : une archive zip préparée sur le téléphone, avec toutes les données en JSON, un CSV par table pour un tableur (réglé en français) et les photos de progression. Le JSON seul se télécharge aussi.
+- Réglages > Supprimer mon compte : ce qui va disparaître (chiffré), l'export proposé avant, confirmation tapée. Photos d'abord, puis le compte et toutes ses données ; le téléphone est vidé comme à la déconnexion.
+- SMTP personnalisé : guide pas à pas dans `docs/SELF-HOSTING.md` (Brevo ou Resend), à régler dans le tableau de bord Supabase.
+- Aucune dépendance ajoutée : le zip est écrit à la main (`lib/export/zip.ts`).
+- Migration non destructive : `20261114000000_suppression_compte.sql` (fonction `delete_my_account`), avec 5 tests. Fichier en attente de validation : `supabase/pending-destructive/20261114010000_suppression_compte_sans_anon.sql` (retire l'appel de la fonction au rôle `anon`).
+
 ### v0.6.2 : code-barres et photo d'étiquette
 
 - Scanner un code-barres depuis l'ajout d'un repas ou Mes aliments : un produit déjà enregistré passe directement à la quantité, sinon Fonte cherche sur Open Food Facts et préremplit l'aliment (nom, marque, valeurs pour 100 g, portion), à vérifier avant d'enregistrer.

@@ -24,9 +24,38 @@ Deux façons d'utiliser Fonte :
 6. Créez le projet sur Vercel depuis votre fork et renseignez les variables de `.env.example`.
 7. Générez votre premier code d'invitation (commande documentée en v1.0) et inscrivez-vous.
 
-## E-mails
+## E-mails (SMTP personnalisé)
 
-Le serveur d'e-mails intégré à Supabase n'envoie qu'aux membres de l'équipe du projet et avec un faible débit. Pour inviter d'autres personnes, configurez un SMTP (par exemple Brevo ou Resend) dans Authentication > SMTP Settings.
+Le serveur d'e-mails intégré à Supabase n'envoie qu'aux membres de l'équipe du projet, avec un débit très faible. Sans SMTP à vous, un ami invité ne reçoit pas son code de connexion et ne peut s'inscrire qu'avec Google. Le réglage se fait dans le tableau de bord Supabase (il contient un mot de passe : jamais dans le dépôt).
+
+### 1. Choisir un service d'envoi
+
+| Service | Gratuit | Expéditeur | Quand le choisir |
+| --- | --- | --- | --- |
+| **Brevo** | 300 e-mails par jour | une adresse vérifiée par un clic, ou un domaine | sans nom de domaine : le plus simple pour démarrer |
+| **Resend** | 3 000 par mois, 100 par jour | un domaine vérifié (enregistrements DNS) | si vous avez un nom de domaine |
+
+Un groupe d'amis envoie quelques e-mails par jour : les offres gratuites suffisent largement. Avec un nom de domaine (et ses enregistrements SPF, DKIM et DMARC), les e-mails arrivent plus sûrement dans la boîte de réception qu'en indésirables.
+
+### 2. Récupérer les identifiants SMTP
+
+- **Brevo** : créez un compte, ajoutez l'adresse d'expédition dans *Expéditeurs* et cliquez sur le lien de vérification reçu. Dans *SMTP & API*, onglet SMTP, notez le serveur (`smtp-relay.brevo.com`), le port (`587`), l'identifiant, et générez une clé SMTP : c'est le mot de passe.
+- **Resend** : ajoutez votre domaine et posez les enregistrements DNS indiqués, puis créez une clé d'API. Serveur `smtp.resend.com`, port `465`, identifiant `resend`, mot de passe = la clé d'API.
+
+### 3. Les coller dans Supabase
+
+Authentication > Emails > SMTP Settings, activez *Enable custom SMTP* :
+
+- **Sender email** : l'adresse vérifiée à l'étape 2 ;
+- **Sender name** : `Fonte` ;
+- **Host**, **Port**, **Username**, **Password** : ceux de l'étape 2 ;
+- enregistrez.
+
+Supabase limite alors l'envoi à 30 e-mails par heure (Authentication > Rate Limits) : c'est assez pour un groupe d'amis.
+
+### 4. Vérifier
+
+Depuis une fenêtre privée, demandez un code de connexion avec une adresse qui n'est pas membre du projet Supabase. Le code doit arriver en moins d'une minute ; sinon, regardez les indésirables puis les journaux d'envoi du service (Brevo : *Transactionnel > Journaux*). Les modèles d'e-mail (`supabase/templates/`) ne changent pas.
 
 ## Mises à jour
 

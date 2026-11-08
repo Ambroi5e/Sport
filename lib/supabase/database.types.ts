@@ -13,6 +13,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      activities: {
+        Row: {
+          created_at: string
+          duration_minutes: number
+          id: string
+          intensity: Database["public"]["Enums"]["activity_intensity"]
+          label: string | null
+          performed_on: string
+          sport: Database["public"]["Enums"]["activity_sport"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          duration_minutes: number
+          id?: string
+          intensity: Database["public"]["Enums"]["activity_intensity"]
+          label?: string | null
+          performed_on: string
+          sport: Database["public"]["Enums"]["activity_sport"]
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          intensity?: Database["public"]["Enums"]["activity_intensity"]
+          label?: string | null
+          performed_on?: string
+          sport?: Database["public"]["Enums"]["activity_sport"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       body_measurements: {
         Row: {
           created_at: string
@@ -70,6 +106,39 @@ export type Database = {
           updated_at?: string
           user_id?: string
           weight_kg?: number
+        }
+        Relationships: []
+      }
+      daily_checkins: {
+        Row: {
+          checkin_on: string
+          created_at: string
+          energy: number
+          sleep: number
+          soreness: number
+          stress: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          checkin_on: string
+          created_at?: string
+          energy: number
+          sleep: number
+          soreness: number
+          stress: number
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          checkin_on?: string
+          created_at?: string
+          energy?: number
+          sleep?: number
+          soreness?: number
+          stress?: number
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -900,6 +969,20 @@ export type Database = {
       }
     }
     Enums: {
+      activity_intensity: "legere" | "moderee" | "intense"
+      activity_sport:
+        | "padel"
+        | "tennis"
+        | "squash"
+        | "badminton"
+        | "foot"
+        | "basket"
+        | "handball"
+        | "rugby"
+        | "volley"
+        | "escalade"
+        | "combat"
+        | "autre"
       app_module:
         | "musculation"
         | "endurance"
@@ -985,6 +1068,21 @@ export type Enums<T extends keyof Database["public"]["Enums"]> = Database["publi
 export const Constants = {
   public: {
     Enums: {
+      activity_intensity: ["legere", "moderee", "intense"],
+      activity_sport: [
+        "padel",
+        "tennis",
+        "squash",
+        "badminton",
+        "foot",
+        "basket",
+        "handball",
+        "rugby",
+        "volley",
+        "escalade",
+        "combat",
+        "autre",
+      ],
       app_module: ["musculation", "endurance", "hyrox", "sports", "nutrition", "courses", "corps", "complements", "planning", "amis"],
       app_role: ["admin"],
       body_site: ["cou", "epaules", "poitrine", "bras", "avant_bras", "taille", "hanches", "cuisse", "mollet"],

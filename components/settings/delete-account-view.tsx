@@ -26,9 +26,9 @@ export function DeleteAccountView({
         {summary.length ? <p className="text-[15px]">{summary.join(", ")}, et le reste :</p> : null}
         <ul className="grid list-disc gap-1.5 pl-5 text-[15px] text-muted marker:text-muted">
           <li>ton compte et ta connexion (e-mail ou Google) ;</li>
-          <li>tes séances, séries, programmes et modèles ;</li>
+          <li>tes séances, séries, programmes, modèles et sports ;</li>
           <li>tes aliments, recettes, repas et ton journal ;</li>
-          <li>tes pesées, mensurations et photos de progression ;</li>
+          <li>tes pesées, mensurations, photos de progression et ta forme du jour ;</li>
           <li>tes objectifs et réglages.</li>
         </ul>
         <p className="text-[15px]">Personne ne pourra les récupérer depuis Fonte, pas même l&apos;administrateur.</p>

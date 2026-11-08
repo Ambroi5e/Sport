@@ -1,4 +1,4 @@
-import { CheckIcon } from "@phosphor-icons/react/ssr";
+import { CheckIcon, TennisBallIcon } from "@phosphor-icons/react/ssr";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/components/ui/cn";
@@ -11,7 +11,15 @@ function sessions(n: number) {
   return `${n} séance${n > 1 ? "s" : ""}`;
 }
 
-/** Semaine en cours : séances faites face aux séances prévues, jour par jour. */
+function dayStatus(d: WeekDay): string {
+  const done = [d.sessions > 0 ? sessions(d.sessions) : null, d.sports > 0 ? `${d.sports} sport${d.sports > 1 ? "s" : ""}` : null].filter(Boolean).join(" et ");
+  return done || (d.planned ? "jour habituel, pas de séance" : "repos");
+}
+
+/**
+ * Semaine en cours : séances faites face aux séances prévues, jour par jour. Un
+ * jour de sport a sa balle, sans compter comme séance de musculation.
+ */
 export function WeekCard({ days, done, planned }: { days: WeekDay[]; done: number; planned: number | null }) {
   const habitual = days.filter((d) => d.planned).map((d) => NAMES[d.weekday - 1]);
   return (
@@ -43,24 +51,35 @@ export function WeekCard({ days, done, planned }: { days: WeekDay[]; done: numbe
             </span>
             <span
               className={cn(
-                "grid size-9 place-items-center rounded-full",
-                d.sessions > 0 ? "bg-accent text-on-accent" : d.planned ? "border-2 border-muted/60" : "",
+                "relative grid size-9 place-items-center rounded-full",
+                d.sessions > 0 ? "bg-accent text-on-accent" : d.sports > 0 ? "bg-surface-2 text-accent-text" : d.planned ? "border-2 border-muted/60" : "",
                 d.isToday && "outline-2 outline-offset-2 outline-accent-text",
               )}
               aria-hidden="true"
             >
-              {d.sessions > 0 ? <CheckIcon size={16} weight="bold" /> : d.planned ? null : <span className="size-1.5 rounded-full bg-line" />}
+              {d.sessions > 0 ? (
+                <CheckIcon size={16} weight="bold" />
+              ) : d.sports > 0 ? (
+                <TennisBallIcon size={18} weight="bold" />
+              ) : d.planned ? null : (
+                <span className="size-1.5 rounded-full bg-line" />
+              )}
+              {d.sessions > 0 && d.sports > 0 ? (
+                <span className="absolute -right-1 -top-1 grid size-[18px] place-items-center rounded-full border border-line bg-surface text-accent-text">
+                  <TennisBallIcon size={11} weight="bold" />
+                </span>
+              ) : null}
             </span>
             <span className="sr-only">
               {NAMES[d.weekday - 1]}
-              {d.isToday ? " (aujourd'hui)" : ""} : {d.sessions > 0 ? sessions(d.sessions) : d.planned ? "jour habituel, pas de séance" : "repos"}
+              {d.isToday ? " (aujourd'hui)" : ""} : {dayStatus(d)}
             </span>
           </li>
         ))}
       </ol>
       <p className="text-[13px] text-muted">
         {habitual.length ? (
-          <>Cercles : tes jours habituels ({habitual.join(", ")}). Point : jour de repos.</>
+          <>Cercles : tes jours habituels ({habitual.join(", ")}). Balle : un sport. Point : repos.</>
         ) : (
           <>
             Indique tes jours habituels dans{" "}

@@ -19,6 +19,7 @@ export function LineChart({
   ticks: tickCount = 4,
   dashed = false,
   goal,
+  domain = [],
 }: {
   points?: Point[];
   line?: Point[];
@@ -26,6 +27,8 @@ export function LineChart({
   dashed?: boolean;
   /** Valeur visée, en ligne de repère horizontale. */
   goal?: number;
+  /** Bornes toujours visibles sur l'axe (une note de 1 à 5, par exemple). */
+  domain?: readonly number[];
   from: string;
   to: string;
   format: (value: number) => string;
@@ -35,6 +38,7 @@ export function LineChart({
 }) {
   const values = [...points, ...line].map((p) => p.value).concat(goal === undefined ? [] : [goal]);
   if (values.length === 0) return null;
+  values.push(...domain);
 
   const ticks = niceTicks(Math.min(...values), Math.max(...values), tickCount);
   const lo = ticks[0];

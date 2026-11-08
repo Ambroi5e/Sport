@@ -100,8 +100,12 @@ export async function getTargets(): Promise<Partial<Record<DayType, Target>>> {
 export async function getDayType(day: string, trainingDays: readonly number[]): Promise<DayType> {
   const userId = await requireUserId();
   const supabase = await createClient();
-  const { count } = await supabase.from("workouts").select("id", { count: "exact", head: true }).eq("user_id", userId).eq("performed_on", day);
-  return dayTypeFor(day, trainingDays, (count ?? 0) > 0);
+  // Une séance de musculation ou un sport noté ce jour-là en font un jour d'entraînement.
+  const [{ count: workouts }, { count: sports }] = await Promise.all([
+    supabase.from("workouts").select("id", { count: "exact", head: true }).eq("user_id", userId).eq("performed_on", day),
+    supabase.from("activities").select("id", { count: "exact", head: true }).eq("user_id", userId).eq("performed_on", day),
+  ]);
+  return dayTypeFor(day, trainingDays, (workouts ?? 0) + (sports ?? 0) > 0);
 }
 
 export type SavedMeal = { id: string; name: string; meal: Meal; items: { food: Food; grams: number }[]; totals: Nutrients };

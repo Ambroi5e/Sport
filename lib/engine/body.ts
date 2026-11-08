@@ -184,13 +184,20 @@ export function mostTrackedExercises(history: Record<string, SessionBest[]>, lim
     .map(([id]) => id);
 }
 
-export type WeekDay = { date: string; weekday: number; sessions: number; planned: boolean; isToday: boolean; isPast: boolean };
+export type WeekDay = { date: string; weekday: number; sessions: number; sports: number; planned: boolean; isToday: boolean; isPast: boolean };
 
 /**
- * Semaine en cours, du lundi au dimanche : séances faites chaque jour et jours
- * habituels d'entraînement. `workoutDates` contient une date par séance terminée.
+ * Semaine en cours, du lundi au dimanche : séances faites chaque jour, sports
+ * notés et jours habituels d'entraînement. `workoutDates` contient une date par
+ * séance terminée, `activityDates` une date par activité. `done` ne compte que
+ * les séances : c'est lui qu'on compare aux séances prévues.
  */
-export function currentWeek(today: string, workoutDates: string[], trainingDays: readonly number[]): { start: string; days: WeekDay[]; done: number } {
+export function currentWeek(
+  today: string,
+  workoutDates: string[],
+  trainingDays: readonly number[],
+  activityDates: readonly string[] = [],
+): { start: string; days: WeekDay[]; done: number } {
   const start = monday(today);
   const days = Array.from({ length: 7 }, (_, i) => {
     const date = shift(start, i);
@@ -198,6 +205,7 @@ export function currentWeek(today: string, workoutDates: string[], trainingDays:
       date,
       weekday: i + 1,
       sessions: workoutDates.filter((d) => d === date).length,
+      sports: activityDates.filter((d) => d === date).length,
       planned: trainingDays.includes(i + 1),
       isToday: date === today,
       isPast: date < today,

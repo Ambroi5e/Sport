@@ -173,6 +173,12 @@ describe("semaine en cours", () => {
     expect(week.days.filter((d) => d.isPast)).toHaveLength(3);
   });
 
+  it("marque les sports à part, sans les compter comme séances", () => {
+    const week = currentWeek("2026-11-05", ["2026-11-02"], [1, 3, 5], ["2026-11-04", "2026-11-04", "2026-11-09"]);
+    expect(week.done).toBe(1);
+    expect(week.days.map((d) => d.sports)).toEqual([0, 0, 2, 0, 0, 0, 0]);
+  });
+
   it("un dimanche appartient à la semaine qui finit ce jour-là", () => {
     expect(currentWeek("2026-11-08", [], []).start).toBe("2026-11-02");
   });

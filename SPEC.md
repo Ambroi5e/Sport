@@ -36,7 +36,8 @@ Tableau de bord, musculation, endurance, Hyrox, sports additionnels, planning in
 | v0.6.1 | TDEE adaptatif, recettes |
 | v0.6.2 | Scan de code-barres (Open Food Facts) et photo d'étiquette nutritionnelle |
 | v0.7 | Confidentialité, export JSON + CSV, suppression du compte, SMTP personnalisé |
-| v0.8 | Sports additionnels, planning intelligent, forme du jour |
+| v0.8 | Sports additionnels (padel, foot, tennis…, calories estimées) et forme du jour (check-in, courbe) |
+| v0.8.1 | Planning intelligent : semaine placée selon la récupération, les sports et les disponibilités, adaptée à la forme |
 | v0.9 | Amis, partage par catégorie, séances communes en temps réel |
 | v0.10 | Courses, budget, stock, compléments, rappels push, bilan du dimanche |
 | v0.11 | Endurance, Hyrox, plans de course |

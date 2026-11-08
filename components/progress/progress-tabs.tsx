@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { cn } from "@/components/ui/cn";
 
+// « Mesures » pour les mensurations : les cinq onglets tiennent à 375 px.
 const TABS = [
   { href: "/progres", label: "Poids" },
-  { href: "/progres/mensurations", label: "Mensurations" },
+  { href: "/progres/mensurations", label: "Mesures" },
   { href: "/progres/photos", label: "Photos" },
   { href: "/progres/force", label: "Force" },
+  { href: "/progres/forme", label: "Forme" },
 ] as const;
 
 export type ProgressSection = (typeof TABS)[number]["href"];
@@ -13,7 +15,7 @@ export type ProgressSection = (typeof TABS)[number]["href"];
 /** Sections de l'onglet Progrès : même place, même ordre sur chaque écran. */
 export function ProgressTabs({ current }: { current: ProgressSection }) {
   return (
-    <nav aria-label="Sections de Progrès" className="mb-4 grid grid-cols-4 gap-1 rounded-control border border-line bg-surface-2 p-1 md:mb-6 md:max-w-xl">
+    <nav aria-label="Sections de Progrès" className="mb-4 grid grid-cols-5 gap-1 rounded-control border border-line bg-surface-2 p-1 md:mb-6 md:max-w-xl">
       {TABS.map((t) => (
         <Link
           key={t.href}

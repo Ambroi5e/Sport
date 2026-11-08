@@ -1,6 +1,7 @@
 import { FlagIcon, GearSixIcon } from "@phosphor-icons/react/ssr";
 import Link from "next/link";
 import { TodayNutritionCard } from "@/components/nutrition/today-card";
+import { CheckinCard } from "@/components/progress/checkin-card";
 import { PaceAlertNotice } from "@/components/progress/pace-alert";
 import { WeekCard } from "@/components/progress/week-card";
 import { WeeklyVolume } from "@/components/progress/weekly-volume";
@@ -14,6 +15,8 @@ import { currentWeek, HIGH_PROTEIN_GOALS, kgTo, sumNutrients, weeklyVolume } fro
 import { GOAL_LABELS } from "@/lib/goals";
 import { getFinishedWorkoutDates, getTrainingSetsSince } from "./entrainement/data";
 import { getActivityDates } from "./entrainement/sports/data";
+import { saveCheckin } from "./progres/forme/actions";
+import { getCheckin } from "./progres/forme/data";
 import { getDayLogs, getDayType, getTargets } from "./nutrition/data";
 import { getPrimaryGoal, getWeightSummary } from "./weight-data";
 
@@ -25,13 +28,14 @@ export default async function HomePage() {
   const monday = weekStart(weight.today);
   // Musculation et force : le volume des 8 dernières semaines a sa place sur l'accueil.
   const strengthGoal = goal ? HIGH_PROTEIN_GOALS.has(goal.type) : false;
-  const [meals, targets, dayType, workoutDates, sets, sportDates] = await Promise.all([
+  const [meals, targets, dayType, workoutDates, sets, sportDates, checkin] = await Promise.all([
     getDayLogs(weight.today),
     getTargets(),
     getDayType(weight.today, profile.training_days),
     getFinishedWorkoutDates(monday),
     strengthGoal ? getTrainingSetsSince(addDays(monday, -49)) : Promise.resolve([]),
     getActivityDates(monday),
+    getCheckin(weight.today),
   ]);
   const week = currentWeek(weight.today, workoutDates, profile.training_days, sportDates);
   const planned = profile.sessions_per_week ?? (profile.training_days.length || null);
@@ -73,6 +77,16 @@ export default async function HomePage() {
             <WeightTrend average7={weight.average7} rate={weight.rate} status={weight.status} target={weight.target} unit={unit} />
             {weight.alert && weight.target ? <PaceAlertNotice alert={weight.alert} target={weight.target} unit={unit} /> : null}
           </Card>
+
+          <CheckinCard
+            action={saveCheckin}
+            current={checkin}
+            link={
+              <Link href="/progres/forme" className="text-sm font-medium text-accent-text underline-offset-4 hover:underline">
+                Courbe
+              </Link>
+            }
+          />
 
           <WeekCard days={week.days} done={week.done} planned={planned} />
         </div>

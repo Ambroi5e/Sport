@@ -15,7 +15,11 @@ import {
   type Meal,
   type SetEntry,
   type WeighIn,
+  activitiesKcal,
+  weightOn,
+  type DatedCheckin,
 } from "@/lib/engine";
+import type { Activity } from "@/app/(app)/entrainement/sports/data";
 import type { MeasurementRow, Photo, PhotoPose } from "@/lib/body";
 import type { Food, JournalEntry, Target } from "@/lib/nutrition";
 import { fromOpenFoodFacts } from "@/lib/openfoodfacts";
@@ -468,3 +472,34 @@ export const SAMPLE_REPLACE = [
   { id: "ex-presse-pec", name: "Presse à pectoraux", detail: "Machine · Pectoraux", liked: false },
   { id: "ex-ecarte", name: "Écarté à la poulie", detail: "Poulie · Pectoraux", liked: false },
 ];
+
+const activityRows: Omit<Activity, "kcal" | "weightKg">[] = [
+  { id: "act-1", date: "2026-11-04", sport: "padel", label: null, minutes: 90, intensity: "intense" },
+  { id: "act-2", date: "2026-11-01", sport: "foot", label: null, minutes: 60, intensity: "moderee" },
+  { id: "act-3", date: "2026-10-28", sport: "padel", label: null, minutes: 90, intensity: "moderee" },
+  { id: "act-4", date: "2026-10-25", sport: "escalade", label: null, minutes: 120, intensity: "legere" },
+  { id: "act-5", date: "2026-10-21", sport: "padel", label: null, minutes: 90, intensity: "intense" },
+  { id: "act-6", date: "2026-10-18", sport: "autre", label: "Paddle", minutes: 60, intensity: "legere" },
+];
+const activityKcal = activitiesKcal(activityRows, SAMPLE_WEIGHTS);
+
+/** Sports des trois dernières semaines, avec la dépense calculée comme dans l'app. */
+export const SAMPLE_ACTIVITIES: Activity[] = activityRows.map((a, i) => ({ ...a, kcal: activityKcal[i], weightKg: weightOn(SAMPLE_WEIGHTS, a.date) }));
+
+/** Note entre 1 et 5 qui ondule d'un jour à l'autre. */
+function note(i: number, base: number, swing: number): number {
+  return Math.min(5, Math.max(1, Math.round(base + wobble(i) * swing)));
+}
+
+/** 75 jours de check-ins (quelques oublis), avec une semaine plus difficile il y a trois semaines. */
+export const SAMPLE_CHECKINS: DatedCheckin[] = Array.from({ length: 75 }, (_, i) => {
+  const daysAgo = 74 - i;
+  const rough = daysAgo >= 18 && daysAgo <= 24;
+  return {
+    date: shiftDay(SAMPLE_DAY, -daysAgo),
+    sleep: note(i, rough ? 2.2 : 3.8, 1.2),
+    soreness: note(i + 3, rough ? 3.8 : 2.4, 1.3),
+    energy: note(i + 7, rough ? 2.4 : 3.7, 1.1),
+    stress: note(i + 11, rough ? 3.6 : 2.3, 1.2),
+  };
+}).filter((_, i) => i % 6 !== 2 || i === 74);

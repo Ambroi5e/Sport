@@ -57,10 +57,21 @@ import { StrengthView } from "@/components/progress/strength-view";
 import { WeekCard } from "@/components/progress/week-card";
 import { WeeklyVolume } from "@/components/progress/weekly-volume";
 import { WeightView } from "@/components/progress/weight-view";
+import { CheckinCard } from "@/components/progress/checkin-card";
+import { ReadinessView } from "@/components/progress/readiness-view";
+import { ActivitiesView } from "@/components/training/activities-view";
+import { ActivityForm } from "@/components/training/activity-form";
+import { ActivityRepeat } from "@/components/training/activity-repeat";
+import { saveActivity } from "@/app/(app)/entrainement/sports/actions";
+import { saveCheckin } from "@/app/(app)/progres/forme/actions";
+import type { Checkin } from "@/lib/engine";
+import type { Sport } from "@/lib/sports";
 import { addDays, weekStart } from "@/lib/dates";
 import { currentWeek, movingAverage, paceAlert, rateStatus, sumNutrients, weeklyRate, weeklyVolume } from "@/lib/engine";
 import {
+  SAMPLE_ACTIVITIES,
   SAMPLE_BLOCKS,
+  SAMPLE_CHECKINS,
   SAMPLE_DAY,
   SAMPLE_EXERCISE_NAMES,
   SAMPLE_EXERCISES,
@@ -109,7 +120,15 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
     target,
     alert: paceAlert(SAMPLE_WEIGHTS, SAMPLE_DAY, target),
   };
-  const week = currentWeek(SAMPLE_DAY, SAMPLE_SETS.filter((x, i, all) => all.findIndex((y) => y.workoutId === x.workoutId) === i).map((x) => x.date), [1, 3, 5]);
+  const week = currentWeek(
+    SAMPLE_DAY,
+    SAMPLE_SETS.filter((x, i, all) => all.findIndex((y) => y.workoutId === x.workoutId) === i).map((x) => x.date),
+    [1, 3, 5],
+    SAMPLE_ACTIVITIES.map((a) => a.date),
+  );
+  const todayCheckin = SAMPLE_CHECKINS.find((c) => c.date === SAMPLE_DAY) ?? null;
+  const middling: Checkin = { sleep: 2, soreness: 4, energy: 3, stress: 3 };
+  const sportOrder: Sport[] = ["padel", "foot", "escalade", "tennis", "squash", "badminton", "basket", "handball", "rugby", "volley", "combat", "autre"];
 
   if (ecran === "onboarding") {
     return (
@@ -144,6 +163,37 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
           <>
             <PageHeader title="Supprimer mon compte" back="/apercu?ecran=reglages" />
             <DeleteAccountView summary={["48 séances", "1 214 aliments notés", "96 pesées", "12 photos"]} admin action={deleteAccount} exportHref="/apercu?ecran=donnees" />
+          </>
+        ) : ecran === "sports" ? (
+          <>
+            <PageHeader title="Sports" back="/apercu" />
+            <ActivitiesView activities={SAMPLE_ACTIVITIES} today={SAMPLE_DAY} addHref="/apercu?ecran=sport-ajouter" itemHref={() => "/apercu?ecran=sport-ajouter"} />
+          </>
+        ) : ecran === "sports-vide" ? (
+          <>
+            <PageHeader title="Sports" back="/apercu" />
+            <ActivitiesView activities={[]} today={SAMPLE_DAY} addHref="/apercu?ecran=sport-ajouter" itemHref={() => "/apercu"} />
+          </>
+        ) : ecran === "sport-ajouter" ? (
+          <>
+            <PageHeader title="Noter un sport" back="/apercu?ecran=sports" />
+            <div className="grid gap-6 md:max-w-2xl">
+              <ActivityRepeat action={saveActivity.bind(null, null)} last={SAMPLE_ACTIVITIES[0]} today={SAMPLE_DAY} />
+              <h2 className="text-lg font-semibold">Ou autre chose</h2>
+              <ActivityForm
+                action={saveActivity.bind(null, null)}
+                defaults={{ sport: "padel", label: "", minutes: 90, intensity: "intense", date: SAMPLE_DAY }}
+                sports={sportOrder}
+                today={SAMPLE_DAY}
+                weightKg={SAMPLE_ACTIVITIES[0].weightKg}
+              />
+            </div>
+          </>
+        ) : ecran === "forme" ? (
+          <>
+            <PageHeader title="Progrès" />
+            <ProgressTabs current="/progres/forme" />
+            <ReadinessView checkins={SAMPLE_CHECKINS} today={SAMPLE_DAY} period="1m" checkin={<CheckinCard action={saveCheckin} current={todayCheckin} />} />
           </>
         ) : ecran === "progres" ? (
           <>
@@ -395,7 +445,7 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
           </>
         ) : ecran === "seance" ? (
           <>
-            <PageHeader back="/apercu" eyebrow="vendredi 7 novembre" title="Push A" />
+            <PageHeader back="/apercu" eyebrow="samedi 7 novembre" title="Push A" />
             <WorkoutLogger
               userId="apercu"
               workoutId="apercu"
@@ -431,7 +481,7 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
           </>
         ) : (
           <>
-            <PageHeader eyebrow="ven. 7 nov." title="Salut Exemple" />
+            <PageHeader eyebrow="sam. 7 nov." title="Salut Exemple" />
             <div className="grid gap-4 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] md:gap-6">
               <div className="grid content-start gap-4">
                 <Card className="grid gap-4">
@@ -443,6 +493,11 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
                   <WeightTrend average7={weight.average7} rate={weight.rate} status={weight.status} target={target} unit="kg" />
                   {weight.alert ? <PaceAlertNotice alert={weight.alert} target={target} unit="kg" /> : null}
                 </Card>
+                <CheckinCard
+                  action={saveCheckin}
+                  current={ecran === "accueil-forme" ? middling : null}
+                  link={<span className="text-sm font-medium text-accent-text">Courbe</span>}
+                />
                 <WeekCard days={week.days} done={week.done} planned={4} />
               </div>
               <div className="grid content-start gap-4">

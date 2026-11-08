@@ -24,6 +24,10 @@ import { startWorkout } from "@/app/(app)/entrainement/actions";
 import { createProgram, endProgram, replaceProgramItem, setExercisePreference } from "@/app/(app)/entrainement/programme/actions";
 import { goalOptions } from "@/lib/program";
 import { SessionSettings } from "@/components/settings/session-settings";
+import { DataPrivacyCard } from "@/components/settings/data-privacy-card";
+import { DeleteAccountView } from "@/components/settings/delete-account-view";
+import DataPage from "@/app/(app)/reglages/donnees/page";
+import { deleteAccount } from "@/app/(app)/reglages/actions";
 import { FoodForm } from "@/components/nutrition/food-form";
 import { FoodPicker } from "@/components/nutrition/food-picker";
 import { MealTabs } from "@/components/nutrition/meal-tabs";
@@ -131,7 +135,15 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
                 <h2 className="text-lg font-semibold">Séance</h2>
                 <SessionSettings />
               </Card>
+              <DataPrivacyCard />
             </div>
+          </>
+        ) : ecran === "donnees" ? (
+          <DataPage />
+        ) : ecran === "supprimer" ? (
+          <>
+            <PageHeader title="Supprimer mon compte" back="/apercu?ecran=reglages" />
+            <DeleteAccountView summary={["48 séances", "1 214 aliments notés", "96 pesées", "12 photos"]} admin action={deleteAccount} exportHref="/apercu?ecran=donnees" />
           </>
         ) : ecran === "progres" ? (
           <>

@@ -3,7 +3,7 @@ import { env } from "@/lib/env";
 import { updateSession } from "@/lib/supabase/proxy";
 
 // Pages accessibles sans être connecté.
-const PUBLIC_PATHS = ["/connexion", "/inscription", "/auth/confirm", "/auth/callback", "/hors-ligne"];
+const PUBLIC_PATHS = ["/connexion", "/inscription", "/auth/confirm", "/auth/callback", "/hors-ligne", "/confidentialite", "/compte-supprime"];
 
 function isPublic(pathname: string) {
   // Aperçu avec données d'exemple, réservé au développement (la page renvoie 404 en production).

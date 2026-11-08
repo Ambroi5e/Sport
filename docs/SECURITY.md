@@ -41,8 +41,16 @@ Les données de santé (poids, mensurations, photos, forme, nutrition) sont des 
 - Un dossier par utilisateur (`<user_id>/<id>.jpg`). Politiques de `storage.objects` : lecture, dépôt et suppression seulement dans son propre dossier. Le chemin enregistré dans `progress_photos` est imposé par une contrainte. Tests RLS sur une copie du schéma `storage`.
 - Réduction et réencodage sur le téléphone avant l'envoi : 1 600 px, sans métadonnées EXIF, donc sans position GPS ni modèle d'appareil. Le serveur revérifie le type, la taille et la signature JPEG.
 - Affichage par liens signés de 10 minutes, générés côté serveur à chaque page. 10 minutes plutôt que 60 secondes : les vignettes se chargent au défilement, un lien trop court casserait l'affichage d'une page ouverte depuis une minute. Pas d'optimiseur d'images : aucune copie hors du bucket.
-- Suppression d'une photo : le fichier est effacé avant la ligne, jamais de fichier orphelin. La suppression du compte avec ses photos arrive en v0.7.
+- Suppression d'une photo : le fichier est effacé avant la ligne, jamais de fichier orphelin. Suppression du compte : tout le dossier est effacé d'abord, et `delete_my_account()` refuse tant qu'il reste un fichier.
 - Jamais montrées aux amis tant que la permission « photos » n'existe pas (v0.9), et alors seulement sur accord explicite.
+
+## Export et suppression du compte (v0.7)
+
+- Export lu au nom de la personne (RLS) avec un filtre `user_id` explicite, jamais de clé `service_role`. Réponses `Cache-Control: private, no-store`. Les invitations restent hors de l'export (codes hachés, adresses d'autres personnes).
+- L'archive se construit sur le téléphone ; les photos viennent directement de Storage par des liens signés de 10 minutes. Rien n'est gardé côté serveur.
+- CSV : une cellule de texte commençant par `=`, `+`, `-` ou `@` est préfixée d'une apostrophe, pour qu'un nom de produit (venu d'Open Food Facts par exemple) ne devienne jamais une formule dans un tableur.
+- Suppression : confirmation tapée, photos effacées par l'API Storage (Supabase interdit de les effacer en SQL), puis `public.delete_my_account()` (`security definer`, `search_path` vide) supprime la ligne `auth.users` de la personne connectée ; tout suit par cascade. Elle refuse sans session et tant qu'un fichier reste. Retirer son `execute` au rôle `anon` attend dans `supabase/pending-destructive/`.
+- Les sauvegardes techniques de l'hébergeur, s'il y en a, ne sont pas effacées par l'app ; la page Confidentialité le dit.
 
 ## Fichiers importés
 
@@ -58,4 +66,4 @@ Taille maximale et type vérifiés avant lecture (CSV 5 Mo, GPX et FIT 20 Mo, ex
 
 ## Qui a techniquement accès aux données
 
-Sur l'instance partagée : l'administrateur du projet Supabase (Ambroise) peut techniquement lire la base depuis le tableau de bord Supabase, comme tout hébergeur. L'app ne lui donne aucun accès au contenu. La page Confidentialité de l'app le dira clairement (v0.7). L'auto-hébergement supprime cette dépendance, au prix des fonctions entre amis.
+Sur l'instance partagée : l'administrateur du projet Supabase (Ambroise) peut techniquement lire la base depuis le tableau de bord Supabase, comme tout hébergeur. L'app ne lui donne aucun accès au contenu. La page Confidentialité de l'app le dit (v0.7). L'auto-hébergement supprime cette dépendance, au prix des fonctions entre amis.

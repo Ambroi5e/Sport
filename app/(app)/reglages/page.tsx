@@ -3,6 +3,7 @@ import Link from "next/link";
 import { signOut } from "@/app/(auth)/actions";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/components/ui/cn";
+import { DataPrivacyCard } from "@/components/settings/data-privacy-card";
 import { SessionSettings } from "@/components/settings/session-settings";
 import { SignOutButton } from "@/components/settings/sign-out-button";
 import { StylePicker } from "@/components/settings/style-picker";
@@ -91,6 +92,8 @@ export default async function SettingsPage() {
           </div>
           <SessionSettings />
         </Card>
+
+        <DataPrivacyCard />
 
         {admin ? (
           <Link href="/admin" className="rounded-control border border-line bg-surface p-4 font-medium hover:bg-surface-2">

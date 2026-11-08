@@ -1,4 +1,4 @@
-import { BarbellIcon, CaretRightIcon, ForkKnifeIcon, ScalesIcon } from "@phosphor-icons/react/ssr";
+import { BarbellIcon, CaretRightIcon, ForkKnifeIcon, ScalesIcon, SneakerMoveIcon } from "@phosphor-icons/react/ssr";
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -43,6 +43,7 @@ export default async function QuickAddPage() {
             label="Séance"
             detail={active ? `Reprendre : ${active.name}` : "Démarrer depuis un modèle ou en libre"}
           />
+          <Shortcut href="/entrainement/sports/ajouter" icon={<SneakerMoveIcon size={22} />} label="Sport" detail="Padel, foot, tennis… avec sa dépense estimée" />
         </nav>
       </div>
     </>

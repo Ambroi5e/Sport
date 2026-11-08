@@ -1,4 +1,4 @@
-import { BarbellIcon, CalendarCheckIcon, CaretRightIcon, ClockCounterClockwiseIcon, ListChecksIcon, TrophyIcon } from "@phosphor-icons/react/ssr";
+import { BarbellIcon, CalendarCheckIcon, CaretRightIcon, ClockCounterClockwiseIcon, ListChecksIcon, SneakerMoveIcon, TrophyIcon } from "@phosphor-icons/react/ssr";
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -15,6 +15,7 @@ import { formatElapsed, formatVolume } from "@/lib/training";
 import { startWorkout } from "./actions";
 import { getActiveWorkout, getSetsSince, getTemplates, getWorkoutHistory } from "./data";
 import { getActiveProgram } from "./programme/data";
+import { getActivityDates } from "./sports/data";
 
 export const metadata: Metadata = { title: "Entraînement" };
 
@@ -23,7 +24,14 @@ export default async function TrainingPage() {
   const unit = profile.weight_unit === "lb" ? "lb" : "kg";
   const monday = weekStart(localDate(profile.timezone));
   const today = localDate(profile.timezone);
-  const [active, templates, recent, week, program] = await Promise.all([getActiveWorkout(), getTemplates(), getWorkoutHistory(3), getSetsSince(monday), getActiveProgram()]);
+  const [active, templates, recent, week, program, sportDates] = await Promise.all([
+    getActiveWorkout(),
+    getTemplates(),
+    getWorkoutHistory(3),
+    getSetsSince(monday),
+    getActiveProgram(),
+    getActivityDates(monday),
+  ]);
   const perMuscle = setsPerMuscle(week.sets, week.muscles);
   // Les séances du programme passent par la carte Programme ; les autres modèles restent ici.
   const ready = templates.filter((t) => t.exerciseNames.length > 0 && (!program || t.programId !== program.id));
@@ -117,6 +125,12 @@ export default async function TrainingPage() {
               icon={<CalendarCheckIcon size={20} />}
               label="Programme"
               detail={program ? `${program.name}, semaine ${Math.min(programWeekNumber, program.weeks)}` : "Séances générées, charge suggérée"}
+            />
+            <NavRow
+              href="/entrainement/sports"
+              icon={<SneakerMoveIcon size={20} />}
+              label="Sports"
+              detail={sportDates.length ? `${sportDates.length} cette semaine` : "Padel, foot, tennis, escalade…"}
             />
             <NavRow href="/entrainement/modeles" icon={<ListChecksIcon size={20} />} label="Modèles" detail={`${templates.length} modèle${templates.length > 1 ? "s" : ""}`} />
             <NavRow href="/entrainement/exercices" icon={<BarbellIcon size={20} />} label="Exercices" detail="Bibliothèque et fiches" />

@@ -13,6 +13,7 @@ import { addDays, daysBetween, formatShortDate, weekStart } from "@/lib/dates";
 import { currentWeek, HIGH_PROTEIN_GOALS, kgTo, sumNutrients, weeklyVolume } from "@/lib/engine";
 import { GOAL_LABELS } from "@/lib/goals";
 import { getFinishedWorkoutDates, getTrainingSetsSince } from "./entrainement/data";
+import { getActivityDates } from "./entrainement/sports/data";
 import { getDayLogs, getDayType, getTargets } from "./nutrition/data";
 import { getPrimaryGoal, getWeightSummary } from "./weight-data";
 
@@ -24,14 +25,15 @@ export default async function HomePage() {
   const monday = weekStart(weight.today);
   // Musculation et force : le volume des 8 dernières semaines a sa place sur l'accueil.
   const strengthGoal = goal ? HIGH_PROTEIN_GOALS.has(goal.type) : false;
-  const [meals, targets, dayType, workoutDates, sets] = await Promise.all([
+  const [meals, targets, dayType, workoutDates, sets, sportDates] = await Promise.all([
     getDayLogs(weight.today),
     getTargets(),
     getDayType(weight.today, profile.training_days),
     getFinishedWorkoutDates(monday),
     strengthGoal ? getTrainingSetsSince(addDays(monday, -49)) : Promise.resolve([]),
+    getActivityDates(monday),
   ]);
-  const week = currentWeek(weight.today, workoutDates, profile.training_days);
+  const week = currentWeek(weight.today, workoutDates, profile.training_days, sportDates);
   const planned = profile.sessions_per_week ?? (profile.training_days.length || null);
   const daysLeft = goal?.target_date ? daysBetween(weight.today, goal.target_date) : null;
 

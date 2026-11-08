@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Logo } from "@/components/logo";
 
 /** Écrans publics : une colonne étroite, centrée, logo en tête. */
@@ -9,6 +10,9 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <span className="font-title text-[34px] uppercase">Fonte</span>
       </div>
       {children}
+      <Link href="/confidentialite" className="inline-flex min-h-11 items-center justify-self-start text-[14px] text-muted underline-offset-4 hover:text-text hover:underline">
+        Confidentialité : ce que Fonte garde et qui peut le lire
+      </Link>
     </main>
   );
 }

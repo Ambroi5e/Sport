@@ -889,6 +889,7 @@ export type Database = {
           expires_at: string
         }[]
       }
+      delete_my_account: { Args: never; Returns: undefined }
       exercise_is_usable: { Args: { p_exercise_id: string }; Returns: boolean }
       food_is_usable: { Args: { p_food_id: string }; Returns: boolean }
       invitation_hash: { Args: { p_code: string }; Returns: string }

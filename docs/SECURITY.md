@@ -52,6 +52,11 @@ Les données de santé (poids, mensurations, photos, forme, nutrition) sont des 
 - Suppression : confirmation tapée, photos effacées par l'API Storage (Supabase interdit de les effacer en SQL), puis `public.delete_my_account()` (`security definer`, `search_path` vide) supprime la ligne `auth.users` de la personne connectée ; tout suit par cascade. Elle refuse sans session et tant qu'un fichier reste. Retirer son `execute` au rôle `anon` attend dans `supabase/pending-destructive/`.
 - Les sauvegardes techniques de l'hébergeur, s'il y en a, ne sont pas effacées par l'app ; la page Confidentialité le dit.
 
+## Sports et forme du jour (v0.8)
+
+- `activities` et `daily_checkins` ont la RLS habituelle (quatre politiques limitées à `user_id = (select auth.uid())`), testée dans `supabase/tests/rls-sports-forme.test.ts` : lecture, modification et suppression refusées à un autre compte, écriture au nom d'un autre refusée, visiteur sans accès, contraintes de valeurs.
+- Sommeil, courbatures, énergie et stress sont des données de santé : même régime que le poids (export, suppression du compte par cascade, rien de partagé). Le partage par catégorie de la v0.9 (`forme`) sera désactivé par défaut.
+
 ## Fichiers importés
 
 Taille maximale et type vérifiés avant lecture (CSV 5 Mo, GPX et FIT 20 Mo, export Apple Santé lu sur le téléphone). Chaque ligne validée par zod ; une ligne invalide est rejetée et signalée, jamais insérée partiellement.

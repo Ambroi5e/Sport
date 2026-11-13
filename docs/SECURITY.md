@@ -5,7 +5,7 @@ Les données de santé (poids, mensurations, photos, forme, nutrition) sont des 
 ## Cloisonnement des données
 
 - RLS activée sur toutes les tables du schéma `public`. Quatre politiques par table (select, insert, update, delete) limitées à `user_id = (select auth.uid())`.
-- Le partage entre amis passe uniquement par `public.can_view(owner, catégorie)` : amitié acceptée des deux côtés et permission active. Lecture seule.
+- Le partage entre amis passe uniquement par `public.can_view(owner, catégorie)` : amitié en place et permission active. Lecture seule, par des fonctions dédiées ; les politiques des tables de données restent limitées à leur propriétaire (détail plus bas, « Amis et partage »).
 - Un test vérifie qu'aucune table de `public` n'a la RLS désactivée. Chaque table a ses tests : A ne lit, ne modifie ni ne supprime les lignes de B.
 - Fonctions `security definer` : `search_path` fixé à vide, noms entièrement qualifiés, droits `execute` retirés à `public` et `anon` quand ils ne sont pas nécessaires.
 - Rattachements entre tables d'un même utilisateur par clés étrangères composites `(id, user_id)` : un élément de modèle ne peut pas viser le modèle d'un autre, un modèle ne peut pas rejoindre le programme d'un autre (v0.6), un ingrédient ne peut pas viser la recette d'un autre (v0.6.1). Les exercices visés (objectif d'un programme, préférences) doivent être du catalogue commun ou à soi (`exercise_is_usable`).
@@ -61,6 +61,16 @@ Les données de santé (poids, mensurations, photos, forme, nutrition) sont des 
 
 - `weekly_sports`, `session_pins` et `blocked_days` ont la RLS habituelle, testée dans `supabase/tests/rls-planning.test.ts`. `session_pins` référence la séance par `(template_id, user_id)` : impossible de déplacer la séance d'un autre compte, même en connaissant son identifiant.
 - Rien de prévu n'est stocké : le planning et le conseil du jour se calculent à la lecture, à partir des données de la personne seule. Le conseil reste général et rappelle de consulter un professionnel quand la forme n'est pas bonne.
+
+## Amis et partage (v0.9)
+
+- **Pas d'annuaire** : aucune requête ne permet de chercher un compte. Une amitié naît d'un code d'ami (`AMI-XXXX-XXXX`, 31^8 possibilités, haché en SHA-256, usage unique, 7 jours, cinq en attente au plus) créé par l'un et saisi par l'autre. `friendships` et `friend_invites` n'ont pas de politique d'insertion ni de modification : seules `create_friend_invite` et `accept_friend_invite` y écrivent.
+- **Rien par défaut** : `share_grants` (propriétaire, ami, catégorie) est vide tant que la personne n'ouvre rien. On ne peut ouvrir qu'à un ami et qu'en son propre nom ; l'ami lit la ligne mais ne peut ni la modifier ni la supprimer.
+- **Lecture par fonctions** : `friend_workouts`, `friend_activities`, `friend_records`, `friend_weights`, `friend_measurements`, `friend_nutrition`, `friend_checkins` (`security definer`, `search_path` vide) vérifient `can_view` et refusent (`not_shared`) sinon. Elles ne renvoient qu'un résumé borné : pas de notes de séance ni de pesée, pas de détail des repas, aucune photo. Les tables elles-mêmes restent fermées à l'ami, même toutes permissions ouvertes : aucune requête de l'app ne peut mélanger ses lignes avec celles d'un autre.
+- **Profil** : un ami ne lit que le prénom (`friends_overview`), jamais la ligne `profiles`.
+- **Révocation** : supprimer la ligne de `share_grants` coupe l'accès à la requête suivante ; supprimer l'amitié efface les permissions des deux côtés (déclencheur), et une permission sans amitié ne donne rien.
+- Tout cela est testé dans `supabase/tests/rls-amis.test.ts` (27 tests), y compris le tiers, le visiteur et chaque fonction face à chaque catégorie.
+- En attente de validation : retirer au rôle `anon` le droit d'appeler ces fonctions (`supabase/pending-destructive/20261117010000_amis_sans_anon.sql`). Sans session elles refusent déjà.
 
 ## Fichiers importés
 

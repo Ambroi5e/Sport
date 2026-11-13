@@ -425,6 +425,110 @@ export type Database = {
         }
         Relationships: []
       }
+      group_events: {
+        Row: {
+          created_at: string
+          duration_seconds: number | null
+          exercise_name: string
+          id: string
+          reps: number | null
+          session_id: string
+          set_id: string
+          user_id: string
+          weight_kg: number | null
+        }
+        Insert: {
+          created_at?: string
+          duration_seconds?: number | null
+          exercise_name: string
+          id?: string
+          reps?: number | null
+          session_id: string
+          set_id: string
+          user_id: string
+          weight_kg?: number | null
+        }
+        Update: {
+          created_at?: string
+          duration_seconds?: number | null
+          exercise_name?: string
+          id?: string
+          reps?: number | null
+          session_id?: string
+          set_id?: string
+          user_id?: string
+          weight_kg?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_events_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "group_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_events_set_id_fkey"
+            columns: ["set_id"]
+            isOneToOne: false
+            referencedRelation: "workout_sets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      group_participants: {
+        Row: {
+          created_at: string
+          joined_at: string | null
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          joined_at?: string | null
+          session_id: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          joined_at?: string | null
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_participants_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "group_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      group_sessions: {
+        Row: {
+          created_at: string
+          ended_at: string | null
+          id: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          name?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       invitations: {
         Row: {
           code_hash: string
@@ -1213,9 +1317,21 @@ export type Database = {
           since: string
         }[]
       }
+      group_people: {
+        Args: { p_session: string }
+        Returns: {
+          display_name: string
+          is_owner: boolean
+          joined_at: string
+          user_id: string
+        }[]
+      }
       invitation_hash: { Args: { p_code: string }; Returns: string }
       is_admin: { Args: never; Returns: boolean }
       is_friend: { Args: { p_other: string }; Returns: boolean }
+      is_group_member: { Args: { p_session: string }; Returns: boolean }
+      is_group_participant: { Args: { p_session: string }; Returns: boolean }
+      owns_group_session: { Args: { p_session: string }; Returns: boolean }
       reserve_invitation: {
         Args: { p_code: string; p_email: string }
         Returns: boolean

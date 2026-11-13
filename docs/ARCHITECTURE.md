@@ -42,7 +42,7 @@ docs/  audit/  SPEC.md  CLAUDE.md  CHANGELOG.md
 - **Modules activables** : table `user_modules` et registre `lib/modules`. L'objectif choisi active un jeu de modules par défaut, modifiable ensuite.
 - **Moteur pur** : fonctions déterministes, sans effet de bord, testées. Le plan prédictif et le planning seront des règles explicables (double progression, décharge toutes les 4 à 6 semaines, 48 à 72 h de récupération par muscle).
 - **Hors ligne** : service worker écrit à la main (`public/sw.js`, sans Serwist tant qu'il reste simple) : fichiers statiques en cache, pages toujours demandées au réseau avec repli sur `/hors-ligne`. Une seule page personnelle gardée : la séance en cours (voir « Séance en direct »). Chaque saisie reçoit un identifiant généré sur le téléphone, passe par une file d'attente et est envoyée dès que possible, sans doublon possible.
-- **Temps réel** : Supabase Realtime seulement pour les séances communes, un canal privé par séance.
+- **Temps réel** : Supabase Realtime seulement pour les séances communes (changements Postgres de `group_events` et `group_participants`, filtrés par la RLS), avec un rechargement toutes les 15 secondes en filet de sécurité.
 - **Gros imports** (Apple Santé, FIT, GPX) : lus dans un Web Worker sur le téléphone, seuls les résumés utiles partent au serveur.
 
 ## Schéma de données
@@ -74,6 +74,14 @@ Chaque table porte un `user_id`. Les catalogues communs (exercices, aliments de 
 - Un ami ne peut jamais écrire chez un autre. Révoquer supprime la ligne : l'accès tombe à la requête suivante. Retirer un ami efface les permissions des deux côtés.
 - Écrans : `/amis` (liste, créer un code, saisir un code), `/amis/[id]` (ce qu'il montre, ce qu'on lui montre, retirer). Les charges d'un ami s'affichent dans l'unité de celui qui regarde.
 - Les données venues de Strava ne seront jamais partagées.
+
+### Séances communes (v0.9.1)
+
+- Une séance commune est un tableau partagé par-dessus les séances de chacun : `group_sessions` (qui l'a lancée, nom, fin), `group_participants` (invité, puis présent quand `joined_at` est rempli), `group_events` (une ligne par série terminée).
+- **Le fil s'écrit en base** : un déclencheur sur `workout_sets` copie la série dans `group_events` quand elle passe à « faite » et que la personne est présente dans une séance commune en cours (pas terminée, lancée depuis moins de six heures). La saisie des séries et sa file hors ligne ne changent pas ; une série renvoyée deux fois ne donne qu'un événement (`unique (session_id, set_id)`).
+- `groupBoard` et `groupFeed` (`lib/engine/group.ts`) résument le fil par participant ; `getGroupSession` (`app/(app)/amis/seance/data.ts`) les calcule à chaque rendu.
+- `LiveRefresh` (`components/friends/live-refresh.tsx`) écoute Realtime et demande au serveur de redessiner (`router.refresh()`) ; il recharge aussi toutes les 15 secondes tant que l'écran est visible. Aucune donnée ne transite par le client navigateur : il ne fait que signaler qu'il y a du nouveau.
+- Écrans : `/amis/seance/nouvelle`, `/amis/seance/[id]`, et un bandeau dans Amis et Entraînement.
 
 ## Interfaces prévues
 

@@ -4,6 +4,16 @@ Format : une entrée par version (semver), du plus récent au plus ancien. Les m
 
 ## [Non publié]
 
+### v0.9.1 : séances communes en temps réel
+
+- Amis > Lancer une séance commune : un nom, les amis à inviter. Chacun garde sa propre séance, son programme et ses charges.
+- Un invité voit l'invitation dans Amis et dans Entraînement, et rejoint en un tap. Le bouton dit ce que ça montre : chaque série terminée (exercice, charge, répétitions), aux participants, pendant la séance commune seulement. Jamais l'échauffement ni les notes.
+- Tableau en direct : pour chaque participant, le nombre de séries, l'exercice en cours, la dernière série et le volume ; à côté, le fil des dernières séries. Il se met à jour à chaque série (Supabase Realtime), et au pire toutes les 15 secondes.
+- La séance commune se termine quand celui qui l'a lancée la termine, ou six heures après son lancement. Chacun peut la quitter avant.
+- Export : `seances-communes.csv`, `seances-communes-participations.csv`, `seances-communes-series.csv`. Page Confidentialité mise à jour.
+- Migration non destructive appliquée : `20261118000000_seances_communes.sql` (tables `group_sessions`, `group_participants`, `group_events`, déclencheur sur les séries), avec 12 tests RLS. Fichier en attente de validation : `supabase/pending-destructive/20261118010000_seances_communes_sans_anon.sql`. Aucune dépendance ajoutée.
+- À vérifier à deux comptes sur l'aperçu Vercel : la mise à jour instantanée (le rechargement toutes les 15 secondes, lui, ne dépend de rien).
+
 ### v0.9 : amis et partage par catégorie
 
 - Amis (depuis l'accueil, la barre latérale et Réglages) : on s'ajoute avec un code d'ami à usage unique, valable 7 jours, donné de la main à la main. Pas d'annuaire : personne ne peut te chercher.
@@ -11,7 +21,6 @@ Format : une entrée par version (semver), du plus récent au plus ancien. Les m
 - Ce qu'un ami voit est un résumé en lecture seule : jamais tes notes, le détail de tes repas ni tes photos. Refermer une catégorie ou retirer un ami coupe l'accès tout de suite, des deux côtés.
 - Export : `amis.csv` et `partages.csv`. Page Confidentialité mise à jour.
 - Migration non destructive appliquée : `20261117000000_amis.sql` (tables `friendships`, `friend_invites`, `share_grants`, fonction `can_view` et lectures partagées), avec 27 tests RLS. Fichier en attente de validation : `supabase/pending-destructive/20261117010000_amis_sans_anon.sql` (retire l'appel de ces fonctions au rôle `anon`, qui est déjà refusé par les fonctions elles-mêmes). Aucune dépendance ajoutée.
-- Les séances communes en temps réel arrivent en v0.9.1.
 
 ### v0.8.1 : planning intelligent
 

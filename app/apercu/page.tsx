@@ -64,7 +64,12 @@ import { ActivityForm } from "@/components/training/activity-form";
 import { ActivityRepeat } from "@/components/training/activity-repeat";
 import { saveActivity } from "@/app/(app)/entrainement/sports/actions";
 import { saveCheckin } from "@/app/(app)/progres/forme/actions";
-import type { Checkin } from "@/lib/engine";
+import { MoveSession } from "@/components/training/move-session";
+import { WeekPlanView } from "@/components/training/week-plan-view";
+import { WeekTypeView } from "@/components/training/week-type-view";
+import { addWeeklySport, deleteWeeklySport, freeDay, moveSession, postponeSession, resetSession, saveAvailableDays } from "@/app/(app)/entrainement/semaine/actions";
+import { ADAPT_HINTS } from "@/lib/planning";
+import { moveOptions, todayOptions, type Checkin } from "@/lib/engine";
 import type { Sport } from "@/lib/sports";
 import { addDays, weekStart } from "@/lib/dates";
 import { currentWeek, movingAverage, paceAlert, rateStatus, sumNutrients, weeklyRate, weeklyVolume } from "@/lib/engine";
@@ -83,6 +88,11 @@ import {
   SAMPLE_MEASUREMENTS,
   SAMPLE_PHOTOS,
   SAMPLE_INGREDIENTS,
+  SAMPLE_LOAD,
+  SAMPLE_PLAN,
+  SAMPLE_PLAN_DAY,
+  SAMPLE_PLAN_INPUT,
+  SAMPLE_WEEKLY_SPORTS,
   SAMPLE_LABEL,
   SAMPLE_OFF,
   SAMPLE_OFF_PREFILL,
@@ -128,6 +138,7 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
   );
   const todayCheckin = SAMPLE_CHECKINS.find((c) => c.date === SAMPLE_DAY) ?? null;
   const middling: Checkin = { sleep: 2, soreness: 4, energy: 3, stress: 3 };
+  const low: Checkin = { sleep: 1, soreness: 3, energy: 1, stress: 4 };
   const sportOrder: Sport[] = ["padel", "foot", "escalade", "tennis", "squash", "badminton", "basket", "handball", "rugby", "volley", "combat", "autre"];
 
   if (ecran === "onboarding") {
@@ -163,6 +174,59 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
           <>
             <PageHeader title="Supprimer mon compte" back="/apercu?ecran=reglages" />
             <DeleteAccountView summary={["48 séances", "1 214 aliments notés", "96 pesées", "12 photos"]} admin action={deleteAccount} exportHref="/apercu?ecran=donnees" />
+          </>
+        ) : ecran === "semaine" || ecran === "semaine-forme" || ecran === "semaine-basse" ? (
+          <>
+            <PageHeader back="/apercu?ecran=entrainement" eyebrow="jeudi 5 novembre" title="Ma semaine" />
+            <WeekPlanView
+              data={{
+                today: SAMPLE_PLAN_DAY,
+                plan: SAMPLE_PLAN,
+                options: todayOptions(SAMPLE_PLAN_INPUT, SAMPLE_PLAN, ecran === "semaine-forme" ? middling : ecran === "semaine-basse" ? low : null, SAMPLE_LOAD.ratio),
+                load: SAMPLE_LOAD,
+                availableDays: SAMPLE_PLAN_INPUT.availableDays,
+                weeklySports: SAMPLE_WEEKLY_SPORTS,
+                hasProgram: true,
+                active: null,
+              }}
+              actions={{
+                start: startWorkout,
+                move: (id) => moveSession.bind(null, id),
+                postpone: (id) => postponeSession.bind(null, id),
+                free: (date) => freeDay.bind(null, date),
+              }}
+              moveHref={() => "/apercu?ecran=semaine-deplacer"}
+              typeHref="/apercu?ecran=semaine-type"
+              programHref="/apercu?ecran=programme"
+              checkinHref="/apercu?ecran=forme"
+              workoutHref={() => "/apercu?ecran=seance"}
+            />
+          </>
+        ) : ecran === "semaine-deplacer" ? (
+          <>
+            <PageHeader back="/apercu?ecran=semaine" eyebrow="Déplacer" title="Bas B" />
+            <div className="md:max-w-xl">
+              <MoveSession
+                options={moveOptions(SAMPLE_PLAN_INPUT, "seance-3")}
+                today={SAMPLE_PLAN_DAY}
+                pinned
+                moveAction={moveSession.bind(null, "apercu")}
+                resetAction={resetSession.bind(null, "apercu")}
+              />
+            </div>
+          </>
+        ) : ecran === "semaine-type" ? (
+          <>
+            <PageHeader back="/apercu?ecran=semaine" eyebrow="Ma semaine" title="Semaine type" />
+            <WeekTypeView
+              availableDays={SAMPLE_PLAN_INPUT.availableDays}
+              weeklySports={SAMPLE_WEEKLY_SPORTS}
+              sports={sportOrder}
+              defaults={{ sport: "padel", minutes: 90, intensity: "moderee" }}
+              saveDaysAction={saveAvailableDays}
+              addSportAction={addWeeklySport}
+              deleteSportAction={(id) => deleteWeeklySport.bind(null, id)}
+            />
           </>
         ) : ecran === "sports" ? (
           <>
@@ -295,6 +359,8 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
                 week={SAMPLE_PROGRAM.week}
                 deload={false}
                 session={{ id: "seance-2", name: SAMPLE_PROGRAM.sessions[2].name, exerciseNames: SAMPLE_PROGRAM.sessions[2].items.map((i) => i.name) }}
+                when="Aujourd'hui"
+                hint={ADAPT_HINTS.alleger}
                 startAction={startWorkout}
               />
               <Card className="grid gap-4">
@@ -498,7 +564,13 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
                   current={ecran === "accueil-forme" ? middling : null}
                   link={<span className="text-sm font-medium text-accent-text">Courbe</span>}
                 />
-                <WeekCard days={week.days} done={week.done} planned={4} />
+                <WeekCard
+                  days={week.days}
+                  done={week.done}
+                  planned={4}
+                  href="/apercu?ecran=semaine"
+                  plan={{ today: "Haut A", hint: ecran === "accueil-forme" ? ADAPT_HINTS.alleger : null, next: null }}
+                />
               </div>
               <div className="grid content-start gap-4">
                 <Card className="grid gap-2">

@@ -49,6 +49,24 @@ export type Database = {
         }
         Relationships: []
       }
+      blocked_days: {
+        Row: {
+          blocked_on: string
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          blocked_on: string
+          created_at?: string
+          user_id?: string
+        }
+        Update: {
+          blocked_on?: string
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       body_measurements: {
         Row: {
           created_at: string
@@ -691,6 +709,41 @@ export type Database = {
         }
         Relationships: []
       }
+      session_pins: {
+        Row: {
+          created_at: string
+          planned_on: string
+          template_id: string
+          updated_at: string
+          user_id: string
+          week_start: string
+        }
+        Insert: {
+          created_at?: string
+          planned_on: string
+          template_id: string
+          updated_at?: string
+          user_id?: string
+          week_start: string
+        }
+        Update: {
+          created_at?: string
+          planned_on?: string
+          template_id?: string
+          updated_at?: string
+          user_id?: string
+          week_start?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_pins_template_id_user_id_fkey"
+            columns: ["template_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "workout_templates"
+            referencedColumns: ["id", "user_id"]
+          },
+        ]
+      }
       template_items: {
         Row: {
           created_at: string
@@ -781,6 +834,42 @@ export type Database = {
           created_at?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      weekly_sports: {
+        Row: {
+          created_at: string
+          duration_minutes: number
+          id: string
+          intensity: Database["public"]["Enums"]["activity_intensity"]
+          label: string | null
+          sport: Database["public"]["Enums"]["activity_sport"]
+          updated_at: string
+          user_id: string
+          weekday: number
+        }
+        Insert: {
+          created_at?: string
+          duration_minutes: number
+          id?: string
+          intensity: Database["public"]["Enums"]["activity_intensity"]
+          label?: string | null
+          sport: Database["public"]["Enums"]["activity_sport"]
+          updated_at?: string
+          user_id?: string
+          weekday: number
+        }
+        Update: {
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          intensity?: Database["public"]["Enums"]["activity_intensity"]
+          label?: string | null
+          sport?: Database["public"]["Enums"]["activity_sport"]
+          updated_at?: string
+          user_id?: string
+          weekday?: number
         }
         Relationships: []
       }
@@ -896,6 +985,7 @@ export type Database = {
           created_at: string
           ended_at: string | null
           id: string
+          is_light: boolean
           name: string
           notes: string | null
           performed_on: string
@@ -908,6 +998,7 @@ export type Database = {
           created_at?: string
           ended_at?: string | null
           id?: string
+          is_light?: boolean
           name: string
           notes?: string | null
           performed_on: string
@@ -920,6 +1011,7 @@ export type Database = {
           created_at?: string
           ended_at?: string | null
           id?: string
+          is_light?: boolean
           name?: string
           notes?: string | null
           performed_on?: string

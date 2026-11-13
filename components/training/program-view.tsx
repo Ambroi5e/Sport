@@ -27,7 +27,8 @@ export type ProgramViewData = {
   week: number;
   deload: boolean;
   today: string;
-  next: { session: ProgramSessionView; suggestions: Record<string, string> } | null;
+  /** `when` : jour où le planning place la séance (« aujourd'hui », « jeudi »). */
+  next: { session: ProgramSessionView; when?: string | null; suggestions: Record<string, string> } | null;
   sessions: ProgramSessionView[];
   planned: Record<string, number>;
   goal: { exerciseName: string; kg: number; date: string | null; history: { date: string; e1rm: number }[]; projection: Projection | null } | null;
@@ -79,7 +80,7 @@ export function ProgramView({
         {data.next ? (
           <Card aria-labelledby="prochaine-titre" className="grid gap-4 border-accent-text/60">
             <div className="grid gap-1">
-              <p className="label-caps">Prochaine séance</p>
+              <p className="label-caps">Prochaine séance{data.next.when ? ` · ${data.next.when}` : ""}</p>
               <h2 id="prochaine-titre" className="font-title text-[26px]">
                 {data.next.session.name}
               </h2>
@@ -102,8 +103,11 @@ export function ProgramView({
               </SubmitButton>
             </form>
             <p className="text-[13px] text-muted">
-              Une séance ratée ne décale rien : la suivante reprend dans l&apos;ordre. La charge suggérée est un repère ; en cas de douleur, arrête et parles-en à
-              un professionnel de santé.
+              Une séance ratée est replacée dans{" "}
+              <Link href="/entrainement/semaine" className="font-medium text-accent-text underline-offset-4 hover:underline">
+                ta semaine
+              </Link>
+              . La charge suggérée est un repère ; en cas de douleur, arrête et parles-en à un professionnel de santé.
             </p>
           </Card>
         ) : null}

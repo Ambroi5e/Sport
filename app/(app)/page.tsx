@@ -11,12 +11,12 @@ import { QuickWeigh } from "@/components/weight/quick-weigh";
 import { WeightTrend } from "@/components/weight/trend";
 import { getProfile } from "@/lib/auth";
 import { addDays, daysBetween, formatShortDate, weekStart } from "@/lib/dates";
-import { currentWeek, HIGH_PROTEIN_GOALS, kgTo, sumNutrients, weeklyVolume } from "@/lib/engine";
+import { currentWeek, HIGH_PROTEIN_GOALS, kgTo, nextPlanned, sumNutrients, weeklyVolume } from "@/lib/engine";
 import { GOAL_LABELS } from "@/lib/goals";
-import { getFinishedWorkoutDates, getTrainingSetsSince } from "./entrainement/data";
-import { getActivityDates } from "./entrainement/sports/data";
+import { ADAPT_HINTS, dayWord } from "@/lib/planning";
+import { getTrainingSetsSince } from "./entrainement/data";
+import { getWeekContext } from "./entrainement/semaine/data";
 import { saveCheckin } from "./progres/forme/actions";
-import { getCheckin } from "./progres/forme/data";
 import { getDayLogs, getDayType, getTargets } from "./nutrition/data";
 import { getPrimaryGoal, getWeightSummary } from "./weight-data";
 
@@ -28,17 +28,20 @@ export default async function HomePage() {
   const monday = weekStart(weight.today);
   // Musculation et force : le volume des 8 dernières semaines a sa place sur l'accueil.
   const strengthGoal = goal ? HIGH_PROTEIN_GOALS.has(goal.type) : false;
-  const [meals, targets, dayType, workoutDates, sets, sportDates, checkin] = await Promise.all([
+  const [meals, targets, dayType, sets, planning] = await Promise.all([
     getDayLogs(weight.today),
     getTargets(),
     getDayType(weight.today, profile.training_days),
-    getFinishedWorkoutDates(monday),
     strengthGoal ? getTrainingSetsSince(addDays(monday, -49)) : Promise.resolve([]),
-    getActivityDates(monday),
-    getCheckin(weight.today),
+    getWeekContext(),
   ]);
-  const week = currentWeek(weight.today, workoutDates, profile.training_days, sportDates);
-  const planned = profile.sessions_per_week ?? (profile.training_days.length || null);
+  const { plan, checkin } = planning;
+  const inWeek = <T extends { date: string }>(list: readonly T[]) => list.filter((x) => x.date >= monday).map((x) => x.date);
+  // Avec un programme, les cercles de la semaine sont les séances placées par le planning (ratées comprises).
+  const plannedDays = planning.program ? plan.days.filter((d) => d.session || d.missed).map((d) => d.weekday) : profile.training_days;
+  const week = currentWeek(weight.today, inWeek(planning.input.workouts), plannedDays, inWeek(planning.input.activities));
+  const planned = planning.program ? planning.program.sessions.length : (profile.sessions_per_week ?? (profile.training_days.length || null));
+  const next = nextPlanned(plan);
   const daysLeft = goal?.target_date ? daysBetween(weight.today, goal.target_date) : null;
 
   return (
@@ -88,7 +91,21 @@ export default async function HomePage() {
             }
           />
 
-          <WeekCard days={week.days} done={week.done} planned={planned} />
+          <WeekCard
+            days={week.days}
+            done={week.done}
+            planned={planned}
+            href={planning.program ? "/entrainement/semaine" : "/entrainement"}
+            plan={
+              planning.program
+                ? {
+                    today: planning.options?.session.name ?? null,
+                    hint: planning.options?.advice ? ADAPT_HINTS[planning.options.advice.action] : null,
+                    next: next ? `${next.session.name}, ${dayWord(next.date, weight.today)}` : null,
+                  }
+                : undefined
+            }
+          />
         </div>
 
         <div className="grid content-start gap-4">

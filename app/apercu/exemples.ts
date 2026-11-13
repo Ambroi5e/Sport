@@ -18,7 +18,14 @@ import {
   activitiesKcal,
   weightOn,
   type DatedCheckin,
+  planWeek,
+  trainingLoad,
+  SPORT_EFFORT,
+  STRENGTH_EFFORT,
+  type LoadEntry,
+  type PlanInput,
 } from "@/lib/engine";
+import type { WeeklySportRow } from "@/components/training/week-type-view";
 import type { Activity } from "@/app/(app)/entrainement/sports/data";
 import type { MeasurementRow, Photo, PhotoPose } from "@/lib/body";
 import type { Food, JournalEntry, Target } from "@/lib/nutrition";
@@ -503,3 +510,50 @@ export const SAMPLE_CHECKINS: DatedCheckin[] = Array.from({ length: 75 }, (_, i)
     stress: note(i + 11, rough ? 3.6 : 2.3, 1.2),
   };
 }).filter((_, i) => i % 6 !== 2 || i === 74);
+
+/** Ma semaine : jeudi 5 novembre, Bas A faite lundi, Haut A ratée mardi, padel le mercredi, foot le dimanche. */
+export const SAMPLE_PLAN_DAY = "2026-11-05";
+
+const UPPER = ["dorsaux", "epaules_avant", "pectoraux"];
+const LOWER = ["fessiers", "ischios", "quadriceps"];
+
+export const SAMPLE_WEEKLY_SPORTS: WeeklySportRow[] = [
+  { id: "ws-1", weekday: 3, sport: "padel", label: null, minutes: 90, intensity: "intense" },
+  { id: "ws-2", weekday: 7, sport: "foot", label: null, minutes: 60, intensity: "moderee" },
+];
+
+export const SAMPLE_PLAN_INPUT: PlanInput = {
+  today: SAMPLE_PLAN_DAY,
+  sessions: [
+    { id: "seance-0", name: "Haut A", muscles: UPPER },
+    { id: "seance-1", name: "Bas A", muscles: LOWER },
+    { id: "seance-2", name: "Haut B", muscles: UPPER },
+    { id: "seance-3", name: "Bas B", muscles: LOWER },
+  ],
+  lastDoneBeforeWeek: "seance-0",
+  availableDays: [1, 2, 4, 5, 6],
+  workouts: [{ date: "2026-11-02", templateId: "seance-1", name: "Bas A", muscles: LOWER }],
+  activities: [
+    { date: "2026-11-01", sport: "foot", label: null, minutes: 60, intensity: "moderee" },
+    { date: "2026-11-04", sport: "padel", label: null, minutes: 90, intensity: "intense" },
+  ],
+  weeklySports: SAMPLE_WEEKLY_SPORTS,
+  pins: [],
+  blocked: [],
+};
+
+export const SAMPLE_PLAN = planWeek(SAMPLE_PLAN_INPUT);
+
+/** Quatre semaines régulières, puis une semaine plus chargée : la charge ressort en hausse. */
+const loadEntries: LoadEntry[] = Array.from({ length: 4 }, (_, week) => {
+  const monday = shiftDay("2026-11-02", -7 * week);
+  return [
+    { date: monday, minutes: week === 0 ? 85 : 65, effort: STRENGTH_EFFORT },
+    { date: shiftDay(monday, 1), minutes: week === 0 ? 0 : 60, effort: STRENGTH_EFFORT },
+    { date: shiftDay(monday, 2), minutes: 90, effort: SPORT_EFFORT[week === 0 ? "intense" : "moderee"] },
+    { date: shiftDay(monday, -1), minutes: 60, effort: SPORT_EFFORT.moderee },
+    { date: shiftDay(monday, -3), minutes: 65, effort: STRENGTH_EFFORT },
+  ];
+}).flat();
+
+export const SAMPLE_LOAD = trainingLoad(loadEntries, SAMPLE_PLAN_DAY);

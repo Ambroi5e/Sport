@@ -9,7 +9,7 @@ export type TableName = keyof Database["public"]["Tables"];
 export type Row = Record<string, unknown>;
 
 /** Un identifiant remplacé par un libellé lisible dans le CSV (la colonne d'origine reste). */
-export type Ref = { column: string; from: "exercises" | "foods" | "workouts"; field: string; as: string };
+export type Ref = { column: string; from: "exercises" | "foods" | "workouts" | "workout_templates"; field: string; as: string };
 
 export type ExportTable = {
   table: TableName;
@@ -40,7 +40,7 @@ export const EXPORT_TABLES: ExportTable[] = [
   { table: "programs", file: "programmes", label: "Programmes", order: ["created_at", "id"], refs: [exercise("goal_exercise_id", "goal_exercise_name")] },
   { table: "workout_templates", file: "modeles-seance", label: "Modèles de séance", order: ["position", "id"] },
   { table: "template_items", file: "modeles-exercices", label: "Exercices des modèles", order: ["template_id", "position", "id"], refs: [exercise()] },
-  { table: "workouts", file: "seances", label: "Séances", order: ["performed_on", "id"] },
+  { table: "workouts", file: "seances", label: "Séances (is_light : séance allégée selon la forme du jour)", order: ["performed_on", "id"] },
   {
     table: "workout_sets",
     file: "series",
@@ -49,6 +49,15 @@ export const EXPORT_TABLES: ExportTable[] = [
     refs: [{ column: "workout_id", from: "workouts", field: "performed_on", as: "workout_date" }, exercise()],
   },
   { table: "activities", file: "activites", label: "Sports notés (durée en minutes)", order: ["performed_on", "id"] },
+  { table: "weekly_sports", file: "sports-fixes", label: "Sports fixes de la semaine type (jour : 1 = lundi … 7 = dimanche)", order: ["weekday", "created_at", "id"] },
+  {
+    table: "session_pins",
+    file: "seances-deplacees",
+    label: "Séances du programme déplacées à la main (semaine du lundi indiqué)",
+    order: ["week_start", "template_id"],
+    refs: [{ column: "template_id", from: "workout_templates", field: "name", as: "template_name" }],
+  },
+  { table: "blocked_days", file: "jours-sans-seance", label: "Jours libérés à la main, sans séance", order: ["blocked_on"] },
   { table: "foods", file: "aliments-perso", label: "Aliments et recettes créés (valeurs pour 100 g)", order: ["created_at", "id"] },
   {
     table: "recipe_items",

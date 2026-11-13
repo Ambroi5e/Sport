@@ -57,6 +57,11 @@ Les données de santé (poids, mensurations, photos, forme, nutrition) sont des 
 - `activities` et `daily_checkins` ont la RLS habituelle (quatre politiques limitées à `user_id = (select auth.uid())`), testée dans `supabase/tests/rls-sports-forme.test.ts` : lecture, modification et suppression refusées à un autre compte, écriture au nom d'un autre refusée, visiteur sans accès, contraintes de valeurs.
 - Sommeil, courbatures, énergie et stress sont des données de santé : même régime que le poids (export, suppression du compte par cascade, rien de partagé). Le partage par catégorie de la v0.9 (`forme`) sera désactivé par défaut.
 
+## Planning (v0.8.1)
+
+- `weekly_sports`, `session_pins` et `blocked_days` ont la RLS habituelle, testée dans `supabase/tests/rls-planning.test.ts`. `session_pins` référence la séance par `(template_id, user_id)` : impossible de déplacer la séance d'un autre compte, même en connaissant son identifiant.
+- Rien de prévu n'est stocké : le planning et le conseil du jour se calculent à la lecture, à partir des données de la personne seule. Le conseil reste général et rappelle de consulter un professionnel quand la forme n'est pas bonne.
+
 ## Fichiers importés
 
 Taille maximale et type vérifiés avant lecture (CSV 5 Mo, GPX et FIT 20 Mo, export Apple Santé lu sur le téléphone). Chaque ligne validée par zod ; une ligne invalide est rejetée et signalée, jamais insérée partiellement.

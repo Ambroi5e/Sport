@@ -64,6 +64,9 @@ import { ActivityForm } from "@/components/training/activity-form";
 import { ActivityRepeat } from "@/components/training/activity-repeat";
 import { saveActivity } from "@/app/(app)/entrainement/sports/actions";
 import { saveCheckin } from "@/app/(app)/progres/forme/actions";
+import { FriendsView } from "@/components/friends/friends-view";
+import { FriendView } from "@/components/friends/friend-view";
+import { acceptFriendInvite, createFriendInvite, removeFriend, setShare } from "@/app/(app)/amis/actions";
 import { MoveSession } from "@/components/training/move-session";
 import { WeekPlanView } from "@/components/training/week-plan-view";
 import { WeekTypeView } from "@/components/training/week-type-view";
@@ -83,6 +86,8 @@ import {
   SAMPLE_FAVORITES,
   SAMPLE_FOODS,
   SAMPLE_FREQUENT,
+  SAMPLE_FRIEND_DATA,
+  SAMPLE_FRIENDS,
   SAMPLE_HISTORY,
   SAMPLE_ITEMS,
   SAMPLE_MEASUREMENTS,
@@ -226,6 +231,29 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
               saveDaysAction={saveAvailableDays}
               addSportAction={addWeeklySport}
               deleteSportAction={(id) => deleteWeeklySport.bind(null, id)}
+            />
+          </>
+        ) : ecran === "amis" || ecran === "amis-vide" ? (
+          <>
+            <PageHeader back="/apercu" title="Amis" />
+            <FriendsView
+              friends={ecran === "amis" ? SAMPLE_FRIENDS : []}
+              friendHref={(id) => `/apercu?ecran=${id === "ami-ines" ? "ami-nouveau" : "ami"}`}
+              inviteAction={createFriendInvite}
+              acceptAction={acceptFriendInvite}
+            />
+          </>
+        ) : ecran === "ami" || ecran === "ami-nouveau" ? (
+          <>
+            <PageHeader back="/apercu?ecran=amis" eyebrow="Ami" title={SAMPLE_FRIENDS[ecran === "ami" ? 2 : 0].name} />
+            <FriendView
+              friend={SAMPLE_FRIENDS[ecran === "ami" ? 2 : 0]}
+              data={ecran === "ami" ? SAMPLE_FRIEND_DATA : { workouts: [], activities: [], records: [], weights: [], measurements: [], nutrition: [], checkins: [] }}
+              unit="kg"
+              today={SAMPLE_DAY}
+              welcome={ecran === "ami-nouveau"}
+              shareAction={(category, shown) => setShare.bind(null, "apercu", category, shown)}
+              removeAction={removeFriend.bind(null, "apercu")}
             />
           </>
         ) : ecran === "sports" ? (

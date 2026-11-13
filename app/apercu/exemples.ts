@@ -26,6 +26,8 @@ import {
   type PlanInput,
 } from "@/lib/engine";
 import type { WeeklySportRow } from "@/components/training/week-type-view";
+import type { FriendData } from "@/app/(app)/amis/data";
+import type { Friend } from "@/lib/friends";
 import type { Activity } from "@/app/(app)/entrainement/sports/data";
 import type { MeasurementRow, Photo, PhotoPose } from "@/lib/body";
 import type { Food, JournalEntry, Target } from "@/lib/nutrition";
@@ -557,3 +559,45 @@ const loadEntries: LoadEntry[] = Array.from({ length: 4 }, (_, week) => {
 }).flat();
 
 export const SAMPLE_LOAD = trainingLoad(loadEntries, SAMPLE_PLAN_DAY);
+
+/** Amis : Léa montre presque tout, Karim ses séances, Inès vient d'être ajoutée. */
+export const SAMPLE_FRIENDS: Friend[] = [
+  { id: "ami-ines", name: "Inès", since: "2026-11-06T18:12:00Z", shownToMe: [], shownByMe: [] },
+  { id: "ami-karim", name: "Karim", since: "2026-10-12T09:30:00Z", shownToMe: ["seances", "records"], shownByMe: ["seances"] },
+  { id: "ami-lea", name: "Léa", since: "2026-09-20T17:05:00Z", shownToMe: ["seances", "records", "poids", "nutrition", "forme"], shownByMe: ["seances", "records", "poids"] },
+];
+
+export const SAMPLE_FRIEND_DATA: FriendData = {
+  workouts: [
+    { date: "2026-11-06", name: "Bas B", minutes: 68, sets: 19, volumeKg: 6840, isLight: false },
+    { date: "2026-11-04", name: "Haut A", minutes: 61, sets: 21, volumeKg: 4310, isLight: false },
+    { date: "2026-11-02", name: "Bas A", minutes: 55, sets: 12, volumeKg: 3920, isLight: true },
+    { date: "2026-10-30", name: "Haut B", minutes: 64, sets: 20, volumeKg: 4480, isLight: false },
+  ],
+  activities: [
+    { date: "2026-11-05", sport: "escalade", label: null, minutes: 120, intensity: "moderee" },
+    { date: "2026-11-01", sport: "autre", label: "Yoga", minutes: 60, intensity: "legere" },
+  ],
+  records: [
+    { exercise: "Soulevé de terre", kg: 110, reps: 3, e1rmKg: 121, date: "2026-10-23" },
+    { exercise: "Squat", kg: 85, reps: 5, e1rmKg: 99.2, date: "2026-11-06" },
+    { exercise: "Hip thrust", kg: 90, reps: 8, e1rmKg: 114, date: "2026-11-02" },
+    { exercise: "Développé couché", kg: 47.5, reps: 6, e1rmKg: 57, date: "2026-11-04" },
+    { exercise: "Tirage vertical", kg: 50, reps: 8, e1rmKg: 63.3, date: "2026-10-30" },
+  ],
+  weights: Array.from({ length: 30 }, (_, i) => ({ date: shiftDay(SAMPLE_DAY, -3 * (29 - i)), kg: Math.round((63.8 - i * 0.06 + wobble(i) * 0.4) * 10) / 10 })),
+  measurements: [],
+  nutrition: [
+    { date: "2026-11-07", kcal: 1480, protein: 96, carbs: 150, fat: 48 },
+    { date: "2026-11-06", kcal: 2150, protein: 128, carbs: 240, fat: 70 },
+    { date: "2026-11-05", kcal: 2040, protein: 121, carbs: 221, fat: 68 },
+    { date: "2026-11-04", kcal: 2210, protein: 133, carbs: 252, fat: 71 },
+    { date: "2026-11-03", kcal: 1980, protein: 118, carbs: 214, fat: 66 },
+  ],
+  checkins: [
+    { date: "2026-11-07", sleep: 4, soreness: 3, energy: 4, stress: 2 },
+    { date: "2026-11-06", sleep: 3, soreness: 2, energy: 3, stress: 3 },
+    { date: "2026-11-05", sleep: 2, soreness: 4, energy: 2, stress: 4 },
+    { date: "2026-11-04", sleep: 4, soreness: 2, energy: 4, stress: 2 },
+  ],
+};

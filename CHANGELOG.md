@@ -4,6 +4,18 @@ Format : une entrée par version (semver), du plus récent au plus ancien. Les m
 
 ## [Non publié]
 
+### v0.8.1 : planning intelligent
+
+- Entraînement > Ma semaine : les séances du programme placées du lundi au dimanche, sur tes jours disponibles, à 48 h au moins d'une séance ou d'un sport modéré ou intense qui travaille les mêmes muscles (le padel du mercredi éloigne la séance de jambes). Les règles sont écrites sous le planning.
+- Une séance ratée est signalée sur son jour et replacée sur les jours qui restent ; s'il n'y a plus de jour, Fonte le dit et le programme reprend dans l'ordre la semaine suivante.
+- Déplacer une séance en un tap : chaque jour dit ce qu'il implique (hors de tes jours, sport la veille ou le lendemain), rien n'est interdit. « Remettre en automatique » annule.
+- Semaine type : jours disponibles pour la musculation et sports fixes (jour, durée, intensité), pris en compte avant même d'être notés.
+- Séance du jour adaptée à la forme : après le check-in, Fonte conseille de la faire, de l'alléger (moins de séries, charges à −10 %, sans toucher à la progression), de la décaler ou de la remplacer par une séance qui travaille d'autres muscles. Les autres choix restent proposés, avec le rappel de consulter un professionnel quand la forme n'est pas bonne.
+- Charge des 7 derniers jours (minutes × effort) comparée à ta semaine habituelle sur quatre semaines ; une forte hausse fait conseiller une séance allégée.
+- L'accueil, l'Entraînement et le Programme montrent la séance que le planning place, avec son jour.
+- Export : `sports-fixes.csv`, `seances-deplacees.csv`, `jours-sans-seance.csv`, et la colonne `is_light` des séances. Page Confidentialité mise à jour.
+- Migration non destructive appliquée : `20261116000000_planning.sql` (tables `weekly_sports`, `session_pins`, `blocked_days`, colonne `workouts.is_light`), avec 17 tests RLS. Aucune dépendance ajoutée.
+
 ### v0.8 : sports additionnels et forme du jour
 
 - Entraînement > Sports : noter un match de padel, de foot, de tennis (et neuf autres sports, ou « Autre » avec son nom) avec le jour, la durée et l'intensité (légère, modérée, intense, expliquées par le test de la parole). La dernière activité se refait en un tap : +, Sport, « Enregistrer pour aujourd'hui ».
@@ -13,7 +25,6 @@ Format : une entrée par version (semver), du plus récent au plus ancien. Les m
 - Progrès > Forme : courbe de la note et sa moyenne sur 7 jours, chaque critère face à la semaine d'avant, la règle de calcul écrite. L'onglet Mensurations s'appelle « Mesures » pour que les cinq onglets tiennent sur téléphone.
 - Export : `activites.csv` et `forme.csv`. Page Confidentialité mise à jour (la forme du jour est une donnée de santé).
 - Migration non destructive appliquée : `20261115000000_sports_forme.sql` (tables `activities` et `daily_checkins`), avec 12 tests RLS. Aucune dépendance ajoutée.
-- Le planning intelligent (semaine placée selon la récupération, les sports et la forme) arrive en v0.8.1.
 
 ### v0.7 : confidentialité, export et suppression du compte
 

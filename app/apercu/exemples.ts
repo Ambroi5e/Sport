@@ -24,10 +24,15 @@ import {
   STRENGTH_EFFORT,
   type LoadEntry,
   type PlanInput,
+  groupBoard,
+  groupFeed,
+  type GroupEvent,
+  type GroupPerson,
 } from "@/lib/engine";
 import type { WeeklySportRow } from "@/components/training/week-type-view";
 import type { FriendData } from "@/app/(app)/amis/data";
 import type { Friend } from "@/lib/friends";
+import type { GroupSessionView } from "@/app/(app)/amis/seance/data";
 import type { Activity } from "@/app/(app)/entrainement/sports/data";
 import type { MeasurementRow, Photo, PhotoPose } from "@/lib/body";
 import type { Food, JournalEntry, Target } from "@/lib/nutrition";
@@ -600,4 +605,62 @@ export const SAMPLE_FRIEND_DATA: FriendData = {
     { date: "2026-11-05", sleep: 2, soreness: 4, energy: 2, stress: 4 },
     { date: "2026-11-04", sleep: 4, soreness: 2, energy: 4, stress: 2 },
   ],
+};
+
+/** Séance commune : samedi 9 h, quatre invités dont trois présents ; « maintenant » vaut 9 h 41. */
+export const SAMPLE_GROUP_NOW = Date.parse("2026-11-07T09:41:00Z");
+
+const groupPeople: GroupPerson[] = [
+  { userId: "ami-lea", name: "Léa", joinedAt: "2026-11-07T09:00:00Z", isOwner: true },
+  { userId: "moi", name: "Exemple", joinedAt: "2026-11-07T09:03:00Z", isOwner: false },
+  { userId: "ami-karim", name: "Karim", joinedAt: "2026-11-07T09:06:00Z", isOwner: false },
+  { userId: "ami-ines", name: "Inès", joinedAt: null, isOwner: false },
+];
+
+const groupSet = (n: number, userId: string, exercise: string, minute: number, weightKg: number | null, reps: number): GroupEvent => ({
+  id: `ev-${String(n).padStart(2, "0")}`,
+  userId,
+  exercise,
+  weightKg,
+  reps,
+  durationSeconds: null,
+  at: `2026-11-07T09:${String(minute).padStart(2, "0")}:00Z`,
+});
+
+const groupEvents: GroupEvent[] = [
+  groupSet(1, "ami-lea", "Squat", 8, 80, 5),
+  groupSet(2, "moi", "Développé couché", 10, 82.5, 6),
+  groupSet(3, "ami-lea", "Squat", 12, 85, 5),
+  groupSet(4, "ami-karim", "Tractions", 13, null, 9),
+  groupSet(5, "moi", "Développé couché", 14, 82.5, 6),
+  groupSet(6, "ami-lea", "Squat", 17, 85, 4),
+  groupSet(7, "ami-karim", "Tractions", 17, null, 8),
+  groupSet(8, "moi", "Développé couché", 19, 82.5, 5),
+  groupSet(9, "ami-lea", "Hip thrust", 24, 90, 8),
+  groupSet(10, "ami-karim", "Rowing barre", 25, 60, 10),
+  groupSet(11, "moi", "Développé incliné haltères", 27, 28, 9),
+  groupSet(12, "ami-lea", "Hip thrust", 29, 90, 8),
+  groupSet(13, "ami-karim", "Rowing barre", 31, 60, 9),
+  groupSet(14, "moi", "Développé incliné haltères", 33, 28, 8),
+  groupSet(15, "ami-lea", "Hip thrust", 35, 95, 6),
+  groupSet(16, "ami-karim", "Rowing barre", 38, 62.5, 8),
+  groupSet(17, "moi", "Développé incliné haltères", 39, 28, 8),
+  groupSet(18, "ami-lea", "Fentes bulgares", 40, 20, 10),
+];
+
+const groupBase = { id: "sc-1", name: "Samedi matin", createdAt: "2026-11-07T09:00:00Z", live: true };
+
+export const SAMPLE_GROUP: GroupSessionView = {
+  ...groupBase,
+  me: { userId: "moi", joined: true, isOwner: false },
+  board: groupBoard(groupPeople, groupEvents),
+  feed: groupFeed(groupEvents, 10),
+};
+
+/** La même, vue par un invité qui n'a pas encore rejoint : pas de fil. */
+export const SAMPLE_GROUP_INVITED: GroupSessionView = {
+  ...groupBase,
+  me: { userId: "moi", joined: false, isOwner: false },
+  board: groupBoard(groupPeople.map((p) => (p.userId === "moi" ? { ...p, joinedAt: null } : p)), []),
+  feed: [],
 };

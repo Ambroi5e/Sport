@@ -62,6 +62,9 @@ export const EXPORT_TABLES: ExportTable[] = [
   { table: "blocked_days", file: "jours-sans-seance", label: "Jours libérés à la main, sans séance", order: ["blocked_on"] },
   { table: "friendships", file: "amis", label: "Amitiés (identifiants des deux comptes, date)", order: ["user_a", "user_b"], owner: ["user_a", "user_b"] },
   { table: "share_grants", file: "partages", label: "Ce que tu montres à chaque ami, par catégorie", order: ["friend_id", "category"] },
+  { table: "group_sessions", file: "seances-communes", label: "Séances communes que tu as lancées", order: ["created_at", "id"] },
+  { table: "group_participants", file: "seances-communes-participations", label: "Séances communes où tu as été invité ou présent", order: ["created_at", "session_id"] },
+  { table: "group_events", file: "seances-communes-series", label: "Tes séries parties dans le fil d'une séance commune", order: ["created_at", "id"] },
   { table: "foods", file: "aliments-perso", label: "Aliments et recettes créés (valeurs pour 100 g)", order: ["created_at", "id"] },
   {
     table: "recipe_items",

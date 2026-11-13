@@ -90,7 +90,8 @@ export default async function PrivacyPage() {
               <strong>Tes amis</strong> : rien par défaut. On ne devient amis qu&apos;avec un code donné de la main à la main (pas d&apos;annuaire, personne
               ne peut te chercher). Ensuite tu choisis, ami par ami, ce que tu montres : séances et sports, records, poids, mesures, totaux de
               nutrition, forme du jour. C&apos;est un résumé en lecture seule (jamais tes notes, le détail de tes repas ni tes photos), et refermer une
-              catégorie ou retirer un ami coupe l&apos;accès tout de suite. Un ami voit aussi ton prénom.
+              catégorie ou retirer un ami coupe l&apos;accès tout de suite. Un ami voit aussi ton prénom. Dans une séance commune que tu as rejointe,
+              les participants voient en direct chaque série que tu termines (exercice, charge, répétitions), jusqu&apos;à sa fin ou ton départ.
             </li>
             <li>
               <strong>L&apos;administrateur de cette instance</strong> (la personne qui gère le projet Supabase) peut techniquement lire

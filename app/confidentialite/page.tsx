@@ -55,7 +55,7 @@ export default async function PrivacyPage() {
               <strong>Ton profil</strong> : année de naissance, sexe, taille, niveau, jours d&apos;entraînement, objectifs.
             </li>
             <li>
-              <strong>Ce que tu notes</strong> : séances et séries, sports (durée, intensité), semaine type et séances déplacées, programmes, aliments, recettes, repas, cibles,
+              <strong>Ce que tu notes</strong> : séances et séries, sports (durée, intensité), semaine type et séances déplacées, programmes, amis et ce que tu leur montres, aliments, recettes, repas, cibles,
               pesées, mensurations, photos de progression, forme du jour (sommeil, courbatures, énergie, stress).
             </li>
           </List>
@@ -87,8 +87,10 @@ export default async function PrivacyPage() {
               <strong>Toi</strong>, une fois connecté.
             </li>
             <li>
-              <strong>Tes amis</strong> : rien pour l&apos;instant. Le partage entre amis arrivera plus tard, catégorie par catégorie,
-              seulement si tu l&apos;actives, et il se retirera à tout moment.
+              <strong>Tes amis</strong> : rien par défaut. On ne devient amis qu&apos;avec un code donné de la main à la main (pas d&apos;annuaire, personne
+              ne peut te chercher). Ensuite tu choisis, ami par ami, ce que tu montres : séances et sports, records, poids, mesures, totaux de
+              nutrition, forme du jour. C&apos;est un résumé en lecture seule (jamais tes notes, le détail de tes repas ni tes photos), et refermer une
+              catégorie ou retirer un ami coupe l&apos;accès tout de suite. Un ami voit aussi ton prénom.
             </li>
             <li>
               <strong>L&apos;administrateur de cette instance</strong> (la personne qui gère le projet Supabase) peut techniquement lire

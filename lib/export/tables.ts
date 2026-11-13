@@ -20,14 +20,16 @@ export type ExportTable = {
   /** Tri stable et unique pour lire page par page. */
   order: string[];
   refs?: Ref[];
+  /** Colonnes qui désignent la personne ; `user_id` par défaut. Une amitié en a deux. */
+  owner?: string[];
 };
 
 const exercise = (column = "exercise_id", as = "exercise_name"): Ref => ({ column, from: "exercises", field: "name", as });
 const food = (column = "food_id", as = "food_name"): Ref => ({ column, from: "foods", field: "name", as });
 
 /**
- * Toutes les tables d'un compte, sauf les invitations (codes hachés et adresses
- * d'autres personnes). Exercices et aliments : seulement ceux de la personne ;
+ * Toutes les tables d'un compte, sauf les invitations et les codes d'ami (codes
+ * hachés et adresses d'autres personnes). Exercices et aliments : seulement ceux de la personne ;
  * ceux du catalogue qu'elle utilise sont nommés dans `catalog`.
  */
 export const EXPORT_TABLES: ExportTable[] = [
@@ -58,6 +60,8 @@ export const EXPORT_TABLES: ExportTable[] = [
     refs: [{ column: "template_id", from: "workout_templates", field: "name", as: "template_name" }],
   },
   { table: "blocked_days", file: "jours-sans-seance", label: "Jours libérés à la main, sans séance", order: ["blocked_on"] },
+  { table: "friendships", file: "amis", label: "Amitiés (identifiants des deux comptes, date)", order: ["user_a", "user_b"], owner: ["user_a", "user_b"] },
+  { table: "share_grants", file: "partages", label: "Ce que tu montres à chaque ami, par catégorie", order: ["friend_id", "category"] },
   { table: "foods", file: "aliments-perso", label: "Aliments et recettes créés (valeurs pour 100 g)", order: ["created_at", "id"] },
   {
     table: "recipe_items",

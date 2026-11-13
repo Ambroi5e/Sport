@@ -239,6 +239,9 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
             <FriendsView
               friends={ecran === "amis" ? SAMPLE_FRIENDS : []}
               friendHref={(id) => `/apercu?ecran=${id === "ami-ines" ? "ami-nouveau" : "ami"}`}
+              sessions={ecran === "amis" ? [{ id: "sc-1", name: "Samedi matin", joined: false, mine: false }] : []}
+              groupHref={() => "/apercu?ecran=seance-commune-invitation"}
+              newGroupHref="/apercu?ecran=seance-commune-nouvelle"
               inviteAction={createFriendInvite}
               acceptAction={acceptFriendInvite}
             />

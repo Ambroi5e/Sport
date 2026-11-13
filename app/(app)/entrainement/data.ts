@@ -30,7 +30,7 @@ export async function getCompletedSets(exerciseIds: string[], excludeWorkoutId?:
   const supabase = await createClient();
   let query = supabase
     .from("workout_sets")
-    .select("id, exercise_id, workout_id, set_number, weight_kg, reps, duration_seconds, is_warmup, completed_at, workouts!inner(performed_on, name)")
+    .select("id, exercise_id, workout_id, set_number, weight_kg, reps, duration_seconds, is_warmup, completed_at, workouts!inner(performed_on, name, is_light)")
     .eq("user_id", userId)
     .in("exercise_id", exerciseIds)
     .not("completed_at", "is", null)
@@ -49,6 +49,7 @@ export async function getCompletedSets(exerciseIds: string[], excludeWorkoutId?:
     reps: s.reps,
     durationSeconds: s.duration_seconds,
     isWarmup: s.is_warmup,
+    isLight: s.workouts.is_light,
     completedAt: s.completed_at!,
   }));
 }
@@ -89,7 +90,7 @@ export async function getWorkout(id: string) {
   const { data } = await supabase
     .from("workouts")
     .select(
-      "id, name, performed_on, started_at, ended_at, template_id, workout_sets(id, exercise_id, exercise_order, set_number, weight_kg, reps, duration_seconds, rep_min, rep_max, is_warmup, completed_at, exercises(id, name, measure, equipment, primary_muscles, secondary_muscles))",
+      "id, name, performed_on, started_at, ended_at, template_id, is_light, workout_sets(id, exercise_id, exercise_order, set_number, weight_kg, reps, duration_seconds, rep_min, rep_max, is_warmup, completed_at, exercises(id, name, measure, equipment, primary_muscles, secondary_muscles))",
     )
     .eq("id", id)
     .eq("user_id", userId)

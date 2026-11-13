@@ -1,4 +1,4 @@
-import { TrophyIcon } from "@phosphor-icons/react/ssr";
+import { FeatherIcon, TrophyIcon } from "@phosphor-icons/react/ssr";
 import type { Metadata } from "next";
 import { Card } from "@/components/ui/card";
 import { ConfirmAction } from "@/components/ui/confirm-action";
@@ -39,8 +39,8 @@ export default async function WorkoutPage({ params }: { params: Promise<{ id: st
       repMax: b.sets.find((s) => s.rep_max !== null)?.rep_max ?? null,
       exercise: b.exercise,
     }));
-    programSuggestions(completed, lines, program, workout.performed_on).forEach((r, i) => {
-      if (r?.suggestion && lines[i].repMax !== null) suggestions[workout.blocks[i].order] = suggestionText(r.suggestion, unit, { repMax: lines[i].repMax! });
+    programSuggestions(completed, lines, program, workout.performed_on, workout.is_light).forEach((r, i) => {
+      if (r?.suggestion && lines[i].repMax !== null) suggestions[workout.blocks[i].order] = suggestionText(r.suggestion, unit, { repMax: lines[i].repMax! }, workout.is_light);
     });
   }
 
@@ -97,6 +97,15 @@ export default async function WorkoutPage({ params }: { params: Promise<{ id: st
   return (
     <>
       <PageHeader back="/entrainement" eyebrow={formatLongDate(workout.performed_on)} title={workout.name} />
+
+      {workout.is_light ? (
+        <p className="mb-4 flex items-start gap-2 rounded-control border border-line bg-surface-2 px-4 py-3 text-[14px]">
+          <FeatherIcon size={18} className="mt-0.5 shrink-0 text-accent-text" aria-hidden="true" />
+          <span>
+            <span className="font-semibold">Séance allégée</span> : moins de séries et charges à −10 %. Elle ne sert pas de référence pour tes prochaines charges.
+          </span>
+        </p>
+      ) : null}
 
       {finished ? (
         <Card aria-labelledby="resume-titre" className="mb-4 grid gap-3">

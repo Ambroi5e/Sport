@@ -28,9 +28,9 @@ type PlannedItem = {
 /**
  * Séries préremplies prêtes à insérer : la dernière performance, sinon la cible du
  * modèle. Dans une séance du programme en cours, la charge suggérée du jour
- * (double progression, décharge).
+ * (double progression, décharge, séance allégée).
  */
-async function plannedRows(workoutId: string, items: PlannedItem[], program?: { starts_on: string; deload_every: number } | null, date?: string) {
+async function plannedRows(workoutId: string, items: PlannedItem[], program?: { starts_on: string; deload_every: number } | null, date?: string, light = false) {
   const completed = await getCompletedSets(items.map((i) => i.exerciseId));
   const history = summarizeHistory(completed);
   const suggested =
@@ -40,6 +40,7 @@ async function plannedRows(workoutId: string, items: PlannedItem[], program?: { 
           items.map((i) => ({ exerciseId: i.exerciseId, sets: i.sets ?? 3, repMin: i.repMin ?? null, repMax: i.repMax ?? null, exercise: i.exercise ?? null })),
           program,
           date,
+          light,
         )
       : [];
   return items.flatMap((item, index) =>
@@ -59,7 +60,10 @@ async function plannedRows(workoutId: string, items: PlannedItem[], program?: { 
 
 // Séances ------------------------------------------------------------------------
 
-/** Démarre une séance, vide ou depuis un modèle, et ouvre l'écran de saisie. */
+/**
+ * Démarre une séance, vide ou depuis un modèle, et ouvre l'écran de saisie. Avec
+ * `light`, une séance du programme démarre allégée (forme basse, charge en hausse).
+ */
 export async function startWorkout(formData: FormData) {
   const profile = await getProfile();
   if (!profile) redirect("/connexion");
@@ -85,14 +89,15 @@ export async function startWorkout(formData: FormData) {
     }
   }
 
+  const light = formData.get("light") === "1" && program !== null;
   const { data: workout, error } = await supabase
     .from("workouts")
-    .insert({ name, performed_on: today, template_id: templateId.success ? templateId.data : null })
+    .insert({ name, performed_on: today, template_id: templateId.success ? templateId.data : null, is_light: light })
     .select("id")
     .single();
   if (error || !workout) throw new Error("workout_not_created");
 
-  if (items.length > 0) await supabase.from("workout_sets").insert(await plannedRows(workout.id, items, program, today));
+  if (items.length > 0) await supabase.from("workout_sets").insert(await plannedRows(workout.id, items, program, today, light));
 
   revalidatePath("/entrainement");
   redirect(`/entrainement/seance/${workout.id}`);

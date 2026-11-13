@@ -41,13 +41,15 @@ export function planLabel(sets: number, repMin: number | null, repMax: number | 
 }
 
 /** Une phrase sous l'exercice en séance : ce qui est proposé, et pourquoi. */
-export function suggestionText(s: Suggestion, unit: WeightUnit, target: { repMax: number }): string {
+export function suggestionText(s: Suggestion, unit: WeightUnit, target: { repMax: number }, light = false): string {
   const load = s.weightKg === null ? `${s.reps} reps` : `${formatWeight(s.weightKg, unit)} ${unit} × ${s.reps}`;
   switch (s.kind) {
     case "monter":
       return `Suggéré : ${load}. Tu as fait ${target.repMax} reps sur toutes tes séries, la charge monte.`;
-    case "decharge":
-      return s.weightKg === null ? `Semaine de décharge : ${load}, moins de séries.` : `Semaine de décharge : ${load}, charge allégée et moins de séries.`;
+    case "decharge": {
+      const why = light ? "Séance allégée" : "Semaine de décharge";
+      return s.weightKg === null ? `${why} : ${load}, moins de séries.` : `${why} : ${load}, charge allégée et moins de séries.`;
+    }
     default:
       return s.weightKg === null
         ? "Suggéré : une rep de plus par série que la dernière fois."
@@ -63,7 +65,17 @@ export function programName(kinds: readonly string[]): string {
   return `${split}, ${kinds.length} séances`;
 }
 
-type HistorySet = { exerciseId: string; workoutId: string; date: string; setNumber: number; weightKg: number | null; reps: number | null; isWarmup?: boolean };
+type HistorySet = {
+  exerciseId: string;
+  workoutId: string;
+  date: string;
+  setNumber: number;
+  weightKg: number | null;
+  reps: number | null;
+  isWarmup?: boolean;
+  /** Série d'une séance allégée : jamais la référence de la suite. */
+  isLight?: boolean;
+};
 type ProgramLine = {
   exerciseId: string;
   sets: number;
@@ -74,21 +86,24 @@ type ProgramLine = {
 
 /**
  * Charge suggérée de chaque exercice d'une séance du programme, à la date de la
- * séance. La référence est la dernière séance hors semaines de décharge. Rien pour
- * un exercice en durée ou sans fourchette de reps : il garde le préremplissage habituel.
+ * séance. La référence est la dernière séance hors semaines de décharge et hors
+ * séances allégées. Une séance allégée (`light`) se prépare comme une décharge.
+ * Rien pour un exercice en durée ou sans fourchette de reps : il garde le
+ * préremplissage habituel.
  */
 export function programSuggestions(
   history: readonly HistorySet[],
   lines: readonly ProgramLine[],
   program: { starts_on: string; deload_every: number },
   date: string,
+  light = false,
 ): ({ suggestion: Suggestion | null; sets: PlannedSet[] } | null)[] {
   const inDeload = (d: string) => d >= program.starts_on && isDeloadWeek(programWeek(program.starts_on, d), program.deload_every);
-  const deload = inDeload(date);
+  const deload = light || inDeload(date);
   return lines.map((line) => {
     if (!line.exercise || line.exercise.measure === "duree" || line.repMin === null || line.repMax === null) return null;
     const last = lastSession(
-      history.filter((s) => s.exerciseId === line.exerciseId),
+      history.filter((s) => s.exerciseId === line.exerciseId && !s.isLight),
       inDeload,
     );
     const increment = loadIncrement({ equipment: line.exercise.equipment, primary: line.exercise.primary_muscles });

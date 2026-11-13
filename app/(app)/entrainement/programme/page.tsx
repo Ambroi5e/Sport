@@ -7,12 +7,13 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { getProfile } from "@/lib/auth";
 import { localDate } from "@/lib/dates";
-import { e1rmHistory, isDeloadWeek, nextSessionIndex, plannedSetsPerMuscle, programWeek, projectE1RM } from "@/lib/engine";
+import { e1rmHistory, isDeloadWeek, nextPlanned, nextSessionIndex, plannedSetsPerMuscle, programWeek, projectE1RM } from "@/lib/engine";
+import { dayWord } from "@/lib/planning";
 import { programSuggestions, suggestionShort } from "@/lib/program";
 import { startWorkout } from "../actions";
 import { getCompletedSets } from "../data";
 import { endProgram } from "./actions";
-import { getActiveProgram } from "./data";
+import { getWeekContext } from "../semaine/data";
 
 export const metadata: Metadata = { title: "Programme" };
 
@@ -20,7 +21,8 @@ export default async function ProgramPage() {
   const profile = (await getProfile())!;
   const unit = profile.weight_unit === "lb" ? "lb" : "kg";
   const today = localDate(profile.timezone);
-  const program = await getActiveProgram();
+  const planning = await getWeekContext();
+  const program = planning.program;
 
   if (!program) {
     return (
@@ -46,7 +48,9 @@ export default async function ProgramPage() {
     program.sessions.map((s) => s.id),
     program.lastDone?.template_id ?? null,
   );
-  const next = program.sessions[nextIndex] ?? null;
+  // La prochaine séance est celle que le planning place en premier ; sinon la suivante dans l'ordre.
+  const placed = nextPlanned(planning.plan);
+  const next = program.sessions.find((s) => s.id === placed?.session.id) ?? program.sessions[nextIndex] ?? null;
   const suggested = next ? programSuggestions(history, next.items, program, today) : [];
   const goalHistory = program.goal_exercise_id ? (e1rmHistory(history.filter((s) => s.exerciseId === program.goal_exercise_id))[program.goal_exercise_id] ?? []) : [];
 
@@ -78,6 +82,7 @@ export default async function ProgramPage() {
           next: next
             ? {
                 session: view(next),
+                when: placed && placed.session.id === next.id ? dayWord(placed.date, today) : null,
                 suggestions: Object.fromEntries(next.items.flatMap((i, k) => (suggested[k]?.suggestion ? [[i.id, suggestionShort(suggested[k]!.suggestion!, unit)]] : []))),
               }
             : null,

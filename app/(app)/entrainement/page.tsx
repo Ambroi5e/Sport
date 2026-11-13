@@ -1,4 +1,4 @@
-import { BarbellIcon, CalendarCheckIcon, CaretRightIcon, ClockCounterClockwiseIcon, ListChecksIcon, SneakerMoveIcon, TrophyIcon } from "@phosphor-icons/react/ssr";
+import { BarbellIcon, CalendarCheckIcon, CalendarDotsIcon, CaretRightIcon, ClockCounterClockwiseIcon, ListChecksIcon, SneakerMoveIcon, TrophyIcon } from "@phosphor-icons/react/ssr";
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -10,12 +10,12 @@ import { PageHeader } from "@/components/ui/page-header";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { getProfile } from "@/lib/auth";
 import { formatLongDate, localDate, weekStart } from "@/lib/dates";
-import { isDeloadWeek, nextSessionIndex, programWeek, setsPerMuscle } from "@/lib/engine";
+import { isDeloadWeek, nextPlanned, nextSessionIndex, programWeek, setsPerMuscle } from "@/lib/engine";
+import { ADAPT_HINTS, capitalize, dayWord } from "@/lib/planning";
 import { formatElapsed, formatVolume } from "@/lib/training";
 import { startWorkout } from "./actions";
 import { getActiveWorkout, getSetsSince, getTemplates, getWorkoutHistory } from "./data";
-import { getActiveProgram } from "./programme/data";
-import { getActivityDates } from "./sports/data";
+import { getWeekContext } from "./semaine/data";
 
 export const metadata: Metadata = { title: "Entraînement" };
 
@@ -24,25 +24,25 @@ export default async function TrainingPage() {
   const unit = profile.weight_unit === "lb" ? "lb" : "kg";
   const monday = weekStart(localDate(profile.timezone));
   const today = localDate(profile.timezone);
-  const [active, templates, recent, week, program, sportDates] = await Promise.all([
-    getActiveWorkout(),
-    getTemplates(),
-    getWorkoutHistory(3),
-    getSetsSince(monday),
-    getActiveProgram(),
-    getActivityDates(monday),
-  ]);
+  const [active, templates, recent, week, planning] = await Promise.all([getActiveWorkout(), getTemplates(), getWorkoutHistory(3), getSetsSince(monday), getWeekContext()]);
+  const { program, plan } = planning;
+  const sportDates = planning.input.activities.filter((a) => a.date >= monday);
   const perMuscle = setsPerMuscle(week.sets, week.muscles);
   // Les séances du programme passent par la carte Programme ; les autres modèles restent ici.
   const ready = templates.filter((t) => t.exerciseNames.length > 0 && (!program || t.programId !== program.id));
+  // La prochaine séance est celle que le planning place en premier ; sinon la suivante dans l'ordre.
+  const placed = nextPlanned(plan);
   const next = program
-    ? program.sessions[
+    ? (program.sessions.find((s) => s.id === placed?.session.id) ??
+      program.sessions[
         nextSessionIndex(
           program.sessions.map((s) => s.id),
           program.lastDone?.template_id ?? null,
         )
-      ]
+      ])
     : undefined;
+  const when = placed && next?.id === placed.session.id ? capitalize(dayWord(placed.date, today)) : null;
+  const hint = planning.options?.advice && placed?.date === today ? ADAPT_HINTS[planning.options.advice.action] : null;
   const programWeekNumber = program ? programWeek(program.starts_on, today) : 0;
 
   return (
@@ -67,6 +67,8 @@ export default async function TrainingPage() {
                   week={Math.min(programWeekNumber, program.weeks)}
                   deload={isDeloadWeek(programWeekNumber, program.deload_every)}
                   session={{ id: next.id, name: next.name, exerciseNames: next.items.map((i) => i.exercise.name) }}
+                  when={when}
+                  hint={hint}
                   startAction={startWorkout}
                 />
               ) : null}
@@ -125,6 +127,12 @@ export default async function TrainingPage() {
               icon={<CalendarCheckIcon size={20} />}
               label="Programme"
               detail={program ? `${program.name}, semaine ${Math.min(programWeekNumber, program.weeks)}` : "Séances générées, charge suggérée"}
+            />
+            <NavRow
+              href="/entrainement/semaine"
+              icon={<CalendarDotsIcon size={20} />}
+              label="Ma semaine"
+              detail={program ? `${plan.done} faite${plan.done > 1 ? "s" : ""}, ${plan.remaining.length - plan.unplaced.length} à venir` : "Séances placées, sports, forme du jour"}
             />
             <NavRow
               href="/entrainement/sports"

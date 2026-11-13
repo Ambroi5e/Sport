@@ -13,14 +13,27 @@ function sessions(n: number) {
 
 function dayStatus(d: WeekDay): string {
   const done = [d.sessions > 0 ? sessions(d.sessions) : null, d.sports > 0 ? `${d.sports} sport${d.sports > 1 ? "s" : ""}` : null].filter(Boolean).join(" et ");
-  return done || (d.planned ? "jour habituel, pas de séance" : "repos");
+  return done || (d.planned ? "séance prévue, pas faite" : "repos");
 }
 
 /**
  * Semaine en cours : séances faites face aux séances prévues, jour par jour. Un
  * jour de sport a sa balle, sans compter comme séance de musculation.
  */
-export function WeekCard({ days, done, planned }: { days: WeekDay[]; done: number; planned: number | null }) {
+export function WeekCard({
+  days,
+  done,
+  planned,
+  plan,
+  href = "/entrainement",
+}: {
+  days: WeekDay[];
+  done: number;
+  planned: number | null;
+  /** Avec un programme : les cercles sont les séances placées par le planning, et la séance du jour est nommée. */
+  plan?: { today: string | null; hint: string | null; next: string | null };
+  href?: string;
+}) {
   const habitual = days.filter((d) => d.planned).map((d) => NAMES[d.weekday - 1]);
   return (
     <Card aria-labelledby="semaine-titre" className="grid gap-4">
@@ -28,8 +41,8 @@ export function WeekCard({ days, done, planned }: { days: WeekDay[]; done: numbe
         <h2 id="semaine-titre" className="text-lg font-semibold">
           Cette semaine
         </h2>
-        <Link href="/entrainement" className="text-sm font-medium text-accent-text underline-offset-4 hover:underline">
-          Entraînement
+        <Link href={href} className="text-sm font-medium text-accent-text underline-offset-4 hover:underline">
+          {plan ? "Ma semaine" : "Entraînement"}
         </Link>
       </div>
       <p className="text-[15px] text-muted">
@@ -43,6 +56,17 @@ export function WeekCard({ days, done, planned }: { days: WeekDay[]; done: numbe
           ` ${done > 1 ? "séances" : "séance"}`
         )}
       </p>
+      {plan && (plan.today || plan.next) ? (
+        <p className="text-[15px]">
+          {plan.today ? (
+            <>
+              Aujourd&apos;hui : <span className="font-semibold">{plan.today}</span>.{plan.hint ? ` ${plan.hint}` : ""}
+            </>
+          ) : (
+            <span className="text-muted">Prochaine séance : {plan.next}.</span>
+          )}
+        </p>
+      ) : null}
       <ol className="grid grid-cols-7 gap-1">
         {days.map((d) => (
           <li key={d.date} className="grid justify-items-center gap-1.5">
@@ -78,7 +102,9 @@ export function WeekCard({ days, done, planned }: { days: WeekDay[]; done: numbe
         ))}
       </ol>
       <p className="text-[13px] text-muted">
-        {habitual.length ? (
+        {plan ? (
+          <>Cercles : les séances placées par le planning. Balle : un sport. Point : repos.</>
+        ) : habitual.length ? (
           <>Cercles : tes jours habituels ({habitual.join(", ")}). Balle : un sport. Point : repos.</>
         ) : (
           <>

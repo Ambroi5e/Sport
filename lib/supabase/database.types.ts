@@ -344,6 +344,54 @@ export type Database = {
         }
         Relationships: []
       }
+      friend_invites: {
+        Row: {
+          code_hash: string
+          created_at: string
+          expires_at: string
+          id: string
+          used_at: string | null
+          used_by: string | null
+          user_id: string
+        }
+        Insert: {
+          code_hash: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          used_at?: string | null
+          used_by?: string | null
+          user_id?: string
+        }
+        Update: {
+          code_hash?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          used_at?: string | null
+          used_by?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      friendships: {
+        Row: {
+          created_at: string
+          user_a: string
+          user_b: string
+        }
+        Insert: {
+          created_at?: string
+          user_a: string
+          user_b: string
+        }
+        Update: {
+          created_at?: string
+          user_a?: string
+          user_b?: string
+        }
+        Relationships: []
+      }
       goals: {
         Row: {
           created_at: string
@@ -744,6 +792,27 @@ export type Database = {
           },
         ]
       }
+      share_grants: {
+        Row: {
+          category: Database["public"]["Enums"]["share_category"]
+          created_at: string
+          friend_id: string
+          user_id: string
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["share_category"]
+          created_at?: string
+          friend_id: string
+          user_id?: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["share_category"]
+          created_at?: string
+          friend_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       template_items: {
         Row: {
           created_at: string
@@ -1035,12 +1104,27 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_friend_invite: { Args: { p_code: string }; Returns: string }
       admin_stats: {
         Args: never
         Returns: {
           invitations_active: number
           invitations_used: number
           users: number
+        }[]
+      }
+      can_view: {
+        Args: {
+          p_category: Database["public"]["Enums"]["share_category"]
+          p_owner: string
+        }
+        Returns: boolean
+      }
+      create_friend_invite: {
+        Args: never
+        Returns: {
+          code: string
+          expires_at: string
         }[]
       }
       create_invitation: {
@@ -1053,8 +1137,85 @@ export type Database = {
       delete_my_account: { Args: never; Returns: undefined }
       exercise_is_usable: { Args: { p_exercise_id: string }; Returns: boolean }
       food_is_usable: { Args: { p_food_id: string }; Returns: boolean }
+      friend_activities: {
+        Args: { p_owner: string }
+        Returns: {
+          duration_minutes: number
+          intensity: string
+          label: string
+          performed_on: string
+          sport: string
+        }[]
+      }
+      friend_checkins: {
+        Args: { p_owner: string }
+        Returns: {
+          checkin_on: string
+          energy: number
+          sleep: number
+          soreness: number
+          stress: number
+        }[]
+      }
+      friend_measurements: {
+        Args: { p_owner: string }
+        Returns: {
+          measured_on: string
+          site: string
+          value_cm: number
+        }[]
+      }
+      friend_nutrition: {
+        Args: { p_owner: string }
+        Returns: {
+          carbs_g: number
+          eaten_on: string
+          fat_g: number
+          kcal: number
+          protein_g: number
+        }[]
+      }
+      friend_records: {
+        Args: { p_owner: string }
+        Returns: {
+          e1rm_kg: number
+          exercise_name: string
+          performed_on: string
+          reps: number
+          weight_kg: number
+        }[]
+      }
+      friend_weights: {
+        Args: { p_owner: string }
+        Returns: {
+          measured_on: string
+          weight_kg: number
+        }[]
+      }
+      friend_workouts: {
+        Args: { p_owner: string }
+        Returns: {
+          is_light: boolean
+          minutes: number
+          name: string
+          performed_on: string
+          sets: number
+          volume_kg: number
+        }[]
+      }
+      friends_overview: {
+        Args: never
+        Returns: {
+          display_name: string
+          friend_id: string
+          shown_by_me: Database["public"]["Enums"]["share_category"][]
+          shown_to_me: Database["public"]["Enums"]["share_category"][]
+          since: string
+        }[]
+      }
       invitation_hash: { Args: { p_code: string }; Returns: string }
       is_admin: { Args: never; Returns: boolean }
+      is_friend: { Args: { p_other: string }; Returns: boolean }
       reserve_invitation: {
         Args: { p_code: string; p_email: string }
         Returns: boolean
@@ -1146,6 +1307,13 @@ export type Database = {
         | "mollets"
       photo_pose: "face" | "profil" | "dos"
       sex: "homme" | "femme" | "autre"
+      share_category:
+        | "seances"
+        | "records"
+        | "poids"
+        | "mensurations"
+        | "nutrition"
+        | "forme"
       training_level: "debutant" | "intermediaire" | "avance"
     }
     CompositeTypes: {
@@ -1193,6 +1361,14 @@ export const Constants = {
       ],
       photo_pose: ["face", "profil", "dos"],
       sex: ["homme", "femme", "autre"],
+      share_category: [
+        "seances",
+        "records",
+        "poids",
+        "mensurations",
+        "nutrition",
+        "forme",
+      ],
       training_level: ["debutant", "intermediaire", "avance"],
     },
   },

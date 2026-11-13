@@ -61,6 +61,7 @@ function lookups(data: FonteExport): Lookup {
     exercises: index([...data.catalog.exercises, ...(data.tables.exercises ?? [])]),
     foods: index([...data.catalog.foods, ...(data.tables.foods ?? [])]),
     workouts: index(data.tables.workouts),
+    workout_templates: index(data.tables.workout_templates),
   };
 }
 

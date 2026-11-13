@@ -272,6 +272,27 @@ export type Database = {
           },
         ]
       }
+      food_prices: {
+        Row: {
+          food_id: string
+          price_per_kg: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          food_id: string
+          price_per_kg: number
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          food_id?: string
+          price_per_kg?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       foods: {
         Row: {
           archived_at: string | null
@@ -611,6 +632,7 @@ export type Database = {
           training_days: number[]
           updated_at: string
           user_id: string
+          weekly_food_budget: number | null
           weight_unit: string
         }
         Insert: {
@@ -628,6 +650,7 @@ export type Database = {
           training_days?: number[]
           updated_at?: string
           user_id: string
+          weekly_food_budget?: number | null
           weight_unit?: string
         }
         Update: {
@@ -645,6 +668,7 @@ export type Database = {
           training_days?: number[]
           updated_at?: string
           user_id?: string
+          weekly_food_budget?: number | null
           weight_unit?: string
         }
         Relationships: []
@@ -737,6 +761,33 @@ export type Database = {
           pose?: Database["public"]["Enums"]["photo_pose"]
           storage_path?: string
           taken_on?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      purchases: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          purchased_on: string
+          store: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          purchased_on: string
+          store?: string | null
+          user_id?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          purchased_on?: string
+          store?: string | null
           user_id?: string
         }
         Relationships: []
@@ -913,6 +964,45 @@ export type Database = {
           category?: Database["public"]["Enums"]["share_category"]
           created_at?: string
           friend_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      shopping_items: {
+        Row: {
+          aisle: Database["public"]["Enums"]["grocery_aisle"]
+          checked_at: string | null
+          created_at: string
+          food_id: string | null
+          grams: number | null
+          id: string
+          name: string
+          quantity: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          aisle?: Database["public"]["Enums"]["grocery_aisle"]
+          checked_at?: string | null
+          created_at?: string
+          food_id?: string | null
+          grams?: number | null
+          id?: string
+          name: string
+          quantity?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          aisle?: Database["public"]["Enums"]["grocery_aisle"]
+          checked_at?: string | null
+          created_at?: string
+          food_id?: string | null
+          grams?: number | null
+          id?: string
+          name?: string
+          quantity?: string | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -1386,6 +1476,16 @@ export type Database = {
         | "autre"
       exercise_measure: "charge" | "poids_du_corps" | "duree"
       exercise_preference: "aime" | "evite"
+      grocery_aisle:
+        | "fruits_legumes"
+        | "viandes_poissons"
+        | "frais"
+        | "feculents"
+        | "epicerie"
+        | "surgeles"
+        | "boissons"
+        | "hygiene"
+        | "autre"
       goal_type:
         | "prise_de_masse"
         | "seche"
@@ -1466,6 +1566,7 @@ export const Constants = {
       equipment: ["barre", "halteres", "machine", "poulie", "poids_du_corps", "kettlebell", "elastique", "autre"],
       exercise_measure: ["charge", "poids_du_corps", "duree"],
       exercise_preference: ["aime", "evite"],
+      grocery_aisle: ["fruits_legumes", "viandes_poissons", "frais", "feculents", "epicerie", "surgeles", "boissons", "hygiene", "autre"],
       goal_type: [
         "prise_de_masse", "seche", "recomposition", "force", "hyrox", "course_10k", "semi_marathon", "marathon",
         "triathlon_s", "triathlon_m", "triathlon_70_3", "triathlon_ironman", "raquette", "collectif", "forme",

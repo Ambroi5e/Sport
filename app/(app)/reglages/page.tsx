@@ -1,3 +1,4 @@
+import { CaretRightIcon, UsersThreeIcon } from "@phosphor-icons/react/ssr";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { signOut } from "@/app/(auth)/actions";
@@ -92,6 +93,17 @@ export default async function SettingsPage() {
           </div>
           <SessionSettings />
         </Card>
+
+        <Link href="/amis" className="flex min-h-14 items-center gap-3 rounded-control border border-line bg-surface px-4 py-2.5 shadow-card hover:bg-surface-2 md:px-5">
+          <span className="grid size-9 shrink-0 place-items-center rounded-control bg-surface-2 text-accent-text" aria-hidden="true">
+            <UsersThreeIcon size={18} weight="bold" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-[15px] font-medium">Amis</span>
+            <span className="block text-[13px] text-muted">S&apos;ajouter par code, choisir ce que chacun voit</span>
+          </span>
+          <CaretRightIcon size={18} className="shrink-0 text-muted" aria-hidden="true" />
+        </Link>
 
         <DataPrivacyCard />
 

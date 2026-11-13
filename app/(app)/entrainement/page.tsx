@@ -16,6 +16,8 @@ import { formatElapsed, formatVolume } from "@/lib/training";
 import { startWorkout } from "./actions";
 import { getActiveWorkout, getSetsSince, getTemplates, getWorkoutHistory } from "./data";
 import { getWeekContext } from "./semaine/data";
+import { getLiveGroupSessions } from "../amis/seance/data";
+import { GroupSessionLinks } from "@/components/friends/group-sessions";
 
 export const metadata: Metadata = { title: "Entraînement" };
 
@@ -24,7 +26,14 @@ export default async function TrainingPage() {
   const unit = profile.weight_unit === "lb" ? "lb" : "kg";
   const monday = weekStart(localDate(profile.timezone));
   const today = localDate(profile.timezone);
-  const [active, templates, recent, week, planning] = await Promise.all([getActiveWorkout(), getTemplates(), getWorkoutHistory(3), getSetsSince(monday), getWeekContext()]);
+  const [active, templates, recent, week, planning, groupSessions] = await Promise.all([
+    getActiveWorkout(),
+    getTemplates(),
+    getWorkoutHistory(3),
+    getSetsSince(monday),
+    getWeekContext(),
+    getLiveGroupSessions(),
+  ]);
   const { program, plan } = planning;
   const sportDates = planning.input.activities.filter((a) => a.date >= monday);
   const perMuscle = setsPerMuscle(week.sets, week.muscles);
@@ -50,6 +59,7 @@ export default async function TrainingPage() {
       <PageHeader title="Entraînement" />
       <div className="grid gap-4 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] md:gap-6">
         <div className="grid content-start gap-4">
+          <GroupSessionLinks sessions={groupSessions} href={(id) => `/amis/seance/${id}`} />
           {active ? (
             <Card aria-labelledby="en-cours-titre" className="grid gap-3 border-accent-text/60">
               <p className="label-caps">Séance en cours</p>

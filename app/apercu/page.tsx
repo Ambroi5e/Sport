@@ -64,6 +64,9 @@ import { ActivityForm } from "@/components/training/activity-form";
 import { ActivityRepeat } from "@/components/training/activity-repeat";
 import { saveActivity } from "@/app/(app)/entrainement/sports/actions";
 import { saveCheckin } from "@/app/(app)/progres/forme/actions";
+import { GroupBoard } from "@/components/friends/group-board";
+import { GroupForm } from "@/components/friends/group-form";
+import { createGroupSession, endGroupSession, joinGroupSession, leaveGroupSession } from "@/app/(app)/amis/seance/actions";
 import { FriendsView } from "@/components/friends/friends-view";
 import { FriendView } from "@/components/friends/friend-view";
 import { acceptFriendInvite, createFriendInvite, removeFriend, setShare } from "@/app/(app)/amis/actions";
@@ -88,6 +91,9 @@ import {
   SAMPLE_FREQUENT,
   SAMPLE_FRIEND_DATA,
   SAMPLE_FRIENDS,
+  SAMPLE_GROUP,
+  SAMPLE_GROUP_INVITED,
+  SAMPLE_GROUP_NOW,
   SAMPLE_HISTORY,
   SAMPLE_ITEMS,
   SAMPLE_MEASUREMENTS,
@@ -239,6 +245,9 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
             <FriendsView
               friends={ecran === "amis" ? SAMPLE_FRIENDS : []}
               friendHref={(id) => `/apercu?ecran=${id === "ami-ines" ? "ami-nouveau" : "ami"}`}
+              sessions={ecran === "amis" ? [{ id: "sc-1", name: "Samedi matin", joined: false, mine: false }] : []}
+              groupHref={() => "/apercu?ecran=seance-commune-invitation"}
+              newGroupHref="/apercu?ecran=seance-commune-nouvelle"
               inviteAction={createFriendInvite}
               acceptAction={acceptFriendInvite}
             />
@@ -255,6 +264,28 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
               shareAction={(category, shown) => setShare.bind(null, "apercu", category, shown)}
               removeAction={removeFriend.bind(null, "apercu")}
             />
+          </>
+        ) : ecran === "seance-commune" || ecran === "seance-commune-invitation" ? (
+          <>
+            <PageHeader back="/apercu?ecran=amis" eyebrow="Séance commune" title="Samedi matin" />
+            <GroupBoard
+              session={ecran === "seance-commune" ? SAMPLE_GROUP : SAMPLE_GROUP_INVITED}
+              unit="kg"
+              now={SAMPLE_GROUP_NOW}
+              workoutHref="/apercu?ecran=seance"
+              joinAction={joinGroupSession.bind(null, "apercu")}
+              leaveAction={leaveGroupSession.bind(null, "apercu")}
+              endAction={endGroupSession.bind(null, "apercu")}
+            />
+          </>
+        ) : ecran === "seance-commune-nouvelle" ? (
+          <>
+            <PageHeader back="/apercu?ecran=amis" eyebrow="Amis" title="Séance commune" />
+            <div className="md:max-w-xl">
+              <Card>
+                <GroupForm friends={SAMPLE_FRIENDS.map((f) => ({ id: f.id, name: f.name }))} action={createGroupSession} />
+              </Card>
+            </div>
           </>
         ) : ecran === "sports" ? (
           <>

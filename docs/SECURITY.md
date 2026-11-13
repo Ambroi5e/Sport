@@ -72,6 +72,15 @@ Les données de santé (poids, mensurations, photos, forme, nutrition) sont des 
 - Tout cela est testé dans `supabase/tests/rls-amis.test.ts` (27 tests), y compris le tiers, le visiteur et chaque fonction face à chaque catégorie.
 - En attente de validation : retirer au rôle `anon` le droit d'appeler ces fonctions (`supabase/pending-destructive/20261117010000_amis_sans_anon.sql`). Sans session elles refusent déjà.
 
+## Séances communes (v0.9.1)
+
+- On n'invite que ses amis, et seulement dans une séance commune qu'on a lancée (politique d'insertion de `group_participants`). Personne ne rejoint à la place d'un autre.
+- `group_events` est une copie réduite des séries (nom de l'exercice, charge, répétitions, durée), écrite par le seul déclencheur `share_set_with_group` : aucune politique d'écriture. Elle n'est lisible que par les participants qui ont rejoint (`is_group_member`). `workouts` et `workout_sets` restent fermées aux autres.
+- Rien ne part sans avoir rejoint, ni pour une série d'échauffement, ni après la fin, ni plus de six heures après le lancement. Le déclencheur avale ses propres erreurs : il ne peut pas empêcher d'enregistrer une série.
+- Les participants ne sont pas forcément amis entre eux : `group_people` ne leur donne que le prénom.
+- Temps réel : seules `group_events` et `group_participants` sont publiées, et Realtime applique leurs politiques de lecture. Le client navigateur (`lib/supabase/browser.ts`) n'a que la clé publique et la session de la personne.
+- Testé dans `supabase/tests/rls-seances-communes.test.ts` (12 tests).
+
 ## Fichiers importés
 
 Taille maximale et type vérifiés avant lecture (CSV 5 Mo, GPX et FIT 20 Mo, export Apple Santé lu sur le téléphone). Chaque ligne validée par zod ; une ligne invalide est rejetée et signalée, jamais insérée partiellement.

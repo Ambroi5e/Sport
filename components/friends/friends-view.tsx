@@ -5,16 +5,26 @@ import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { categoryList, type Friend } from "@/lib/friends";
 import { CodeForm } from "./code-form";
+import type { LiveGroupSession } from "@/app/(app)/amis/seance/data";
+import { buttonClasses } from "@/components/ui/button";
+import { GroupSessionLinks } from "./group-sessions";
 import { InviteCard } from "./invite-card";
 
 /** Amis : la liste, puis les deux façons de s'ajouter (donner un code, saisir un code). */
 export function FriendsView({
   friends,
   friendHref,
+  sessions = [],
+  groupHref,
+  newGroupHref,
   inviteAction,
   acceptAction,
 }: {
   friends: Friend[];
+  /** Séances communes en cours où je suis invité ou présent. */
+  sessions?: LiveGroupSession[];
+  groupHref: (id: string) => string;
+  newGroupHref: string;
   friendHref: (id: string) => string;
   inviteAction: () => Promise<InviteState>;
   acceptAction: (state: AcceptState, formData: FormData) => Promise<AcceptState>;
@@ -22,6 +32,11 @@ export function FriendsView({
   return (
     <div className="grid gap-4 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] md:gap-6">
       <section aria-labelledby="amis-titre" className="grid content-start gap-2">
+        {sessions.length ? (
+          <div className="mb-2">
+            <GroupSessionLinks sessions={sessions} href={groupHref} />
+          </div>
+        ) : null}
         <h2 id="amis-titre" className="label-caps">
           {friends.length > 1 ? `${friends.length} amis` : friends.length === 1 ? "1 ami" : "Tes amis"}
         </h2>
@@ -48,6 +63,11 @@ export function FriendsView({
             Crée un code d&apos;ami et donne-le à quelqu&apos;un, ou saisis le sien. Ensuite, chacun choisit ce qu&apos;il montre à l&apos;autre : par défaut, rien.
           </EmptyState>
         )}
+        {friends.length ? (
+          <Link href={newGroupHref} className={buttonClasses("secondary", "md", "mt-1 w-full")}>
+            <UsersThreeIcon size={18} aria-hidden="true" /> Lancer une séance commune
+          </Link>
+        ) : null}
         <p className="text-[13px] text-muted">
           Personne ne peut te chercher dans Fonte : on ne devient amis qu&apos;avec un code donné de la main à la main. Tes photos ne se partagent pas.
         </p>

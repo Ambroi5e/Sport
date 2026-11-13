@@ -8,6 +8,7 @@ import {
   HouseIcon,
   PlusIcon,
   ShoppingCartIcon,
+  UsersThreeIcon,
   type Icon,
 } from "@phosphor-icons/react";
 import Link from "next/link";
@@ -67,6 +68,14 @@ export function AppNav({ isAdmin }: { isAdmin: boolean }) {
               Admin
             </Link>
           ) : null}
+          <Link
+            href="/amis"
+            aria-current={isActive(pathname, "/amis") ? "page" : undefined}
+            className="flex h-11 items-center gap-3 rounded-control px-3 text-[15px] text-muted hover:bg-surface-2 hover:text-text"
+          >
+            <UsersThreeIcon size={22} aria-hidden="true" />
+            Amis
+          </Link>
           <Link
             href="/reglages"
             aria-current={isActive(pathname, "/reglages") ? "page" : undefined}

@@ -27,7 +27,7 @@ Fonte est une application web (PWA) de suivi musculation, endurance, nutrition, 
 
 ## Règles non négociables
 
-- RLS activée sur chaque table du schéma `public`, quatre politiques limitées à `user_id = (select auth.uid())`, plus `can_view(owner, catégorie)` pour le partage entre amis. Toute nouvelle table arrive avec ses tests RLS.
+- RLS activée sur chaque table du schéma `public`, quatre politiques limitées à `user_id = (select auth.uid())`. Le partage entre amis ne les élargit pas : un ami lit par des fonctions `friend_*` qui vérifient `can_view(owner, catégorie)`. Toute nouvelle table arrive avec ses tests RLS.
 - La clé `service_role` ne sort jamais du serveur ; aucun secret dans le dépôt (`.env.example` documenté, gitleaks en CI).
 - Migrations dans `supabase/migrations/` : les non destructives sont appliquées par Claude ; tout `drop`, `delete`, `revoke` ou `truncate` va dans `supabase/pending-destructive/` et attend la validation d'Ambroise.
 - Les données personnelles d'Ambroise (seed) restent hors du dépôt (`supabase/seed/personal*.sql` est ignoré).

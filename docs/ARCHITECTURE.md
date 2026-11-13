@@ -60,7 +60,7 @@ Chaque table porte un `user_id`. Les catalogues communs (exercices, aliments de 
 | Planning | `weekly_sports` (sports fixes de la semaine type), `session_pins` (séance déplacée à la main, pour une semaine), `blocked_days` (jour libéré), `workouts.is_light` ; le planning lui-même se calcule à la lecture | v0.8.1 |
 | Activités | `activities` (v0.8 : sports additionnels ; colonnes d'endurance en v0.11), `activity_segments`, `hr_zones`, `race_plans` | v0.8, v0.11 |
 | Forme et bilans | `daily_checkins` (v0.8), `weekly_reviews`, `review_adjustments` | v0.8, v0.10 |
-| Amis | `friendships`, `share_grants`, `group_sessions`, `group_participants`, `group_events` | v0.9 |
+| Amis | `friendships`, `friend_invites`, `share_grants` (v0.9) ; `group_sessions`, `group_participants`, `group_events` (v0.9.1) | v0.9, v0.9.1 |
 | Courses | `food_prices`, `shopping_lists`, `shopping_items`, `stock_items`, `budgets` | v0.10 |
 | Compléments | `supplements`, `supplement_logs` | v0.10 |
 | Rappels | `push_subscriptions`, `reminder_settings` | v0.10 |
@@ -68,7 +68,12 @@ Chaque table porte un `user_id`. Les catalogues communs (exercices, aliments de 
 
 ### Partage entre amis (v0.9)
 
-`friendships` n'est `accepted` que si les deux ont accepté. `share_grants` liste ce que chacun montre, par catégorie (`performances`, `records`, `seances`, `poids`, `mensurations`, `photos`, `nutrition`, `forme`). Les politiques de lecture des tables partageables ajoutent `or public.can_view(user_id, '<catégorie>')`. Un ami ne peut jamais écrire chez un autre. Révoquer supprime la ligne : l'accès tombe à la requête suivante. Les données venues de Strava ne sont jamais partagées.
+- `friendships` : une ligne par paire (plus petit identifiant en premier), créée quand l'un saisit le code d'ami de l'autre (`friend_invites`, code haché, usage unique, 7 jours). Pas d'annuaire ni de demande en attente : donner son code vaut accord.
+- `share_grants` liste ce que chacun montre à chaque ami, par catégorie (`seances`, `records`, `poids`, `mensurations`, `nutrition`, `forme`). Pas de ligne, rien de montré. Les photos ne se partagent pas.
+- **Les politiques des tables de données ne changent pas.** Un ami lit par des fonctions `friend_*` qui vérifient `public.can_view(propriétaire, catégorie)` et renvoient un résumé (`app/(app)/amis/data.ts` n'appelle que les catégories ouvertes). Choix fait contre des politiques de lecture élargies : aucune requête existante ne peut se mettre à mêler les lignes d'un ami aux siennes, et ce qui est partagé est écrit colonne par colonne.
+- Un ami ne peut jamais écrire chez un autre. Révoquer supprime la ligne : l'accès tombe à la requête suivante. Retirer un ami efface les permissions des deux côtés.
+- Écrans : `/amis` (liste, créer un code, saisir un code), `/amis/[id]` (ce qu'il montre, ce qu'on lui montre, retirer). Les charges d'un ami s'affichent dans l'unité de celui qui regarde.
+- Les données venues de Strava ne seront jamais partagées.
 
 ## Interfaces prévues
 

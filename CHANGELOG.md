@@ -4,6 +4,15 @@ Format : une entrée par version (semver), du plus récent au plus ancien. Les m
 
 ## [Non publié]
 
+### v0.9 : amis et partage par catégorie
+
+- Amis (depuis l'accueil, la barre latérale et Réglages) : on s'ajoute avec un code d'ami à usage unique, valable 7 jours, donné de la main à la main. Pas d'annuaire : personne ne peut te chercher.
+- Par défaut, des amis ne voient rien l'un de l'autre. Sur la fiche d'un ami, six interrupteurs choisissent ce que tu lui montres : séances et sports, records, poids, mesures, nutrition (totaux par jour), forme du jour. Chaque interrupteur dit exactement ce qui est montré.
+- Ce qu'un ami voit est un résumé en lecture seule : jamais tes notes, le détail de tes repas ni tes photos. Refermer une catégorie ou retirer un ami coupe l'accès tout de suite, des deux côtés.
+- Export : `amis.csv` et `partages.csv`. Page Confidentialité mise à jour.
+- Migration non destructive appliquée : `20261117000000_amis.sql` (tables `friendships`, `friend_invites`, `share_grants`, fonction `can_view` et lectures partagées), avec 27 tests RLS. Fichier en attente de validation : `supabase/pending-destructive/20261117010000_amis_sans_anon.sql` (retire l'appel de ces fonctions au rôle `anon`, qui est déjà refusé par les fonctions elles-mêmes). Aucune dépendance ajoutée.
+- Les séances communes en temps réel arrivent en v0.9.1.
+
 ### v0.8.1 : planning intelligent
 
 - Entraînement > Ma semaine : les séances du programme placées du lundi au dimanche, sur tes jours disponibles, à 48 h au moins d'une séance ou d'un sport modéré ou intense qui travaille les mêmes muscles (le padel du mercredi éloigne la séance de jambes). Les règles sont écrites sous le planning.

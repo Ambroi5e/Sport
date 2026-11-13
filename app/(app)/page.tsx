@@ -1,4 +1,4 @@
-import { FlagIcon, GearSixIcon } from "@phosphor-icons/react/ssr";
+import { FlagIcon, GearSixIcon, UsersThreeIcon } from "@phosphor-icons/react/ssr";
 import Link from "next/link";
 import { TodayNutritionCard } from "@/components/nutrition/today-card";
 import { CheckinCard } from "@/components/progress/checkin-card";
@@ -50,14 +50,23 @@ export default async function HomePage() {
         eyebrow={formatShortDate(weight.today)}
         title={`Salut ${profile.display_name ?? ""}`.trim()}
         action={
-          // Sur ordinateur, Réglages est dans la sidebar ; sur mobile, on y accède d'ici.
-          <Link
-            href="/reglages"
-            aria-label="Réglages"
-            className="grid size-11 shrink-0 place-items-center rounded-full border border-line bg-surface text-text transition-colors hover:bg-surface-2 md:hidden"
-          >
-            <GearSixIcon size={22} aria-hidden="true" />
-          </Link>
+          // Sur ordinateur, Amis et Réglages sont dans la sidebar ; sur mobile, on y accède d'ici.
+          <div className="flex shrink-0 gap-2 md:hidden">
+            <Link
+              href="/amis"
+              aria-label="Amis"
+              className="grid size-11 place-items-center rounded-full border border-line bg-surface text-text transition-colors hover:bg-surface-2"
+            >
+              <UsersThreeIcon size={22} aria-hidden="true" />
+            </Link>
+            <Link
+              href="/reglages"
+              aria-label="Réglages"
+              className="grid size-11 place-items-center rounded-full border border-line bg-surface text-text transition-colors hover:bg-surface-2"
+            >
+              <GearSixIcon size={22} aria-hidden="true" />
+            </Link>
+          </div>
         }
       />
 

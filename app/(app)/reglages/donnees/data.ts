@@ -10,10 +10,10 @@ const PAGE = 1000;
 /** Garde-fou : au-delà, l'export s'arrête plutôt que de tourner sans fin. */
 const MAX_ROWS = 200_000;
 
-async function readAll(db: SupabaseClient, table: string, order: string[], userId: string): Promise<Row[]> {
+async function readAll(db: SupabaseClient, table: string, order: string[], userId: string, owner: string[] = ["user_id"]): Promise<Row[]> {
   const rows: Row[] = [];
   for (let from = 0; from < MAX_ROWS; from += PAGE) {
-    let query = db.from(table).select("*").eq("user_id", userId);
+    let query = db.from(table).select("*").or(owner.map((column) => `${column}.eq.${userId}`).join(","));
     for (const column of order) query = query.order(column, { ascending: true });
     const { data, error } = await query.range(from, from + PAGE - 1);
     if (error) throw new Error(`Lecture impossible : ${table}`);
@@ -37,8 +37,8 @@ async function readCatalog(db: SupabaseClient, table: "exercises" | "foods", ids
 
 /**
  * Toutes les données de la personne connectée, lues en son nom (RLS). Le filtre
- * `user_id` reste explicite : quand le partage entre amis existera, la RLS laissera
- * voir des lignes d'amis, qui n'ont rien à faire dans cet export.
+ * sur la personne reste explicite : la RLS laisse voir ce qu'un ami nous montre
+ * (`share_grants`), qui n'a rien à faire dans cet export.
  */
 export async function collectExport(): Promise<FonteExport> {
   const userId = await requireUserId();
@@ -47,7 +47,7 @@ export async function collectExport(): Promise<FonteExport> {
 
   const [{ data: auth }, ...tables] = await Promise.all([
     supabase.auth.getUser(),
-    ...EXPORT_TABLES.map(({ table, order }) => readAll(db, table, order, userId)),
+    ...EXPORT_TABLES.map(({ table, order, owner }) => readAll(db, table, order, userId, owner)),
   ]);
   const data: FonteExport["tables"] = Object.fromEntries(EXPORT_TABLES.map(({ table }, i) => [table, tables[i]]));
   const [exercises, foods] = await Promise.all([

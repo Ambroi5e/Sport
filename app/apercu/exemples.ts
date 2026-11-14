@@ -1,5 +1,7 @@
 import type { MealNeed, Purchase, ShoppingItem, StockItem } from "@/lib/groceries";
 import type { Supplement } from "@/lib/supplements";
+import type { SavedReview } from "@/lib/review";
+import { weekReview } from "@/lib/engine";
 import { adherence, type SupplementMoment } from "@/lib/engine";
 import type { ProgramViewData } from "@/components/training/program-view";
 import type { LoggerBlock, LoggerHistory } from "@/components/training/workout-logger";
@@ -757,4 +759,58 @@ export const SAMPLE_SUPPLEMENTS: Supplement[] = [
   supplement("k-omega", "Oméga-3", "2 gélules", "midi", ["2026-11-06"], "2026-11-06"),
   supplement("k-magnesium", "Magnésium", "1 comprimé", "coucher", ["2026-11-02", "2026-11-05", "2026-11-06"]),
   supplement("k-zinc", "Zinc", null, "soir", [], "2026-09-01", true),
+];
+
+// Bilan de la semaine ---------------------------------------------------------------
+
+export const SAMPLE_REVIEW = weekReview({
+  weekStart: SAMPLE_BUDGET_WEEK,
+  sessionsPlanned: 4,
+  workoutDates: ["2026-11-02", "2026-11-04", "2026-11-06"],
+  activities: [{ date: "2026-11-07", minutes: 90 }],
+  sets: 58,
+  previousSets: 64,
+  intake: [
+    { date: "2026-11-02", kcal: 3620, proteinG: 188 },
+    { date: "2026-11-03", kcal: 3350, proteinG: 176 },
+    { date: "2026-11-04", kcal: 3710, proteinG: 196 },
+    { date: "2026-11-05", kcal: 3280, proteinG: 171 },
+    { date: "2026-11-06", kcal: 3640, proteinG: 191 },
+    { date: "2026-11-07", kcal: 3540, proteinG: 182 },
+  ],
+  targets: { entrainement: { kcal: 3700, proteinG: 190 }, repos: { kcal: 3400, proteinG: 190 } },
+  trainingDays: [1, 3, 5],
+  weights: [
+    { date: "2026-10-27", kg: 78.0 },
+    { date: "2026-10-30", kg: 78.2 },
+    { date: "2026-11-03", kg: 78.4 },
+    { date: "2026-11-06", kg: 78.6 },
+  ],
+  rateTarget: { min: 0.25, max: 0.5 },
+  checkins: SAMPLE_CHECKINS,
+  purchases: SAMPLE_PURCHASES,
+  budget: 50,
+});
+
+export const SAMPLE_REVIEW_EMPTY = weekReview({
+  weekStart: SAMPLE_BUDGET_WEEK,
+  sessionsPlanned: null,
+  workoutDates: [],
+  activities: [],
+  sets: 0,
+  previousSets: 0,
+  intake: [{ date: "2026-11-02", kcal: 2100, proteinG: 120 }],
+  targets: {},
+  trainingDays: [],
+  weights: [],
+  rateTarget: null,
+  checkins: [],
+  purchases: [],
+  budget: null,
+});
+
+export const SAMPLE_REVIEWS: SavedReview[] = [
+  { weekStart: "2026-10-26", feeling: 4, note: "Quatre séances faites, sommeil correct. Trop peu mangé jeudi : préparer le repas la veille." },
+  { weekStart: "2026-10-19", feeling: 2, note: "Semaine chargée au travail, deux séances sautées." },
+  { weekStart: "2026-10-12", feeling: 5, note: null },
 ];

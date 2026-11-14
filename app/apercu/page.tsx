@@ -85,6 +85,9 @@ import {
   SAMPLE_MEAL_NEEDS,
   SAMPLE_PURCHASES,
   SAMPLE_SHOPPING,
+  SAMPLE_REVIEW,
+  SAMPLE_REVIEW_EMPTY,
+  SAMPLE_REVIEWS,
   SAMPLE_STOCK,
   SAMPLE_SUPPLEMENTS,
   SAMPLE_BLOCKS,
@@ -145,6 +148,8 @@ import { SupplementsView } from "@/components/supplements/supplements-view";
 import { TodaySupplementsCard } from "@/components/supplements/today-card";
 import { addSupplement, toggleTaken, updateSupplement } from "@/app/(app)/nutrition/complements/actions";
 import { SUPPLEMENT_NOTICE } from "@/lib/supplements";
+import { ReviewPrompt, ReviewView } from "@/components/progress/review-view";
+import { saveReview } from "@/app/(app)/progres/bilan/actions";
 import { getAppearance } from "@/lib/appearance";
 
 /**
@@ -391,6 +396,22 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
               )}
               <p className="text-[13px] text-muted">{SUPPLEMENT_NOTICE}</p>
             </div>
+          </>
+        ) : ecran === "bilan" || ecran === "bilan-vide" ? (
+          <>
+            <PageHeader title="Bilan de la semaine" eyebrow="Progrès" back="/apercu?ecran=poids" />
+            <ReviewView
+              review={ecran === "bilan" ? SAMPLE_REVIEW : SAMPLE_REVIEW_EMPTY}
+              unit="kg"
+              saved={null}
+              history={ecran === "bilan" ? SAMPLE_REVIEWS : []}
+              current={false}
+              prevHref="/apercu?ecran=bilan"
+              nextHref={ecran === "bilan" ? null : "/apercu?ecran=bilan"}
+              weekHref={() => "/apercu?ecran=bilan"}
+              lineHref={() => "/apercu?ecran=bilan"}
+              saveAction={saveReview.bind(null, "apercu")}
+            />
           </>
         ) : ecran === "amis" || ecran === "amis-vide" ? (
           <>
@@ -760,6 +781,11 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
         ) : (
           <>
             <PageHeader eyebrow="sam. 7 nov." title="Salut Exemple" />
+            {ecran === "accueil-bilan" ? (
+              <div className="mb-4">
+                <ReviewPrompt weekStart={SAMPLE_BUDGET_WEEK} href="/apercu?ecran=bilan" />
+              </div>
+            ) : null}
             <div className="grid gap-4 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] md:gap-6">
               <div className="grid content-start gap-4">
                 <Card className="grid gap-4">

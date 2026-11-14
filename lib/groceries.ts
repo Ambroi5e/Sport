@@ -1,5 +1,6 @@
 /** Courses : libellés des rayons, montants et quantités tels qu'on les affiche. */
-import { costOf, type Aisle } from "@/lib/engine";
+import { costOf, type Aisle, type Expiry } from "@/lib/engine";
+import { formatShortDate } from "@/lib/dates";
 
 export const AISLE_LABELS: Record<Aisle, string> = {
   fruits_legumes: "Fruits et légumes",
@@ -53,6 +54,30 @@ export function itemCost(item: Pick<ShoppingItem, "grams" | "pricePerKg">): numb
 }
 
 /** Ce qu'il faudrait racheter d'un aliment, d'après les repas notés. */
-export type MealNeed = { foodId: string; name: string; grams: number; buyGrams: number; pricePerKg: number | null; inList: boolean };
+export type MealNeed = {
+  foodId: string;
+  name: string;
+  /** Grammes mangés sur la période. */
+  grams: number;
+  /** Grammes en stock, non périmés. */
+  stockGrams: number;
+  /** Quantité d'achat une fois le stock déduit ; 0 quand le stock suffit. */
+  buyGrams: number;
+  pricePerKg: number | null;
+  inList: boolean;
+};
 
 export type Purchase = { id: string; on: string; amount: number; store: string | null };
+
+export const MAX_STOCK_ITEMS = 300;
+
+export type StockItem = { id: string; name: string; quantity: string | null; aisle: Aisle; foodId: string | null; grams: number | null; expiresOn: string | null };
+
+/** La péremption en mots : « Périmé depuis hier », « À finir demain », « Jusqu'au 12 déc. » ; null sans date. */
+export function expiryLabel(expiry: Expiry, expiresOn: string | null): string | null {
+  if (expiry.days === null || !expiresOn) return null;
+  const d = expiry.days;
+  if (d < 0) return d === -1 ? "Périmé depuis hier" : `Périmé depuis ${-d} jours`;
+  if (expiry.state === "bientot") return d === 0 ? "À finir aujourd'hui" : d === 1 ? "À finir demain" : `À finir dans ${d} jours`;
+  return `Jusqu'au ${formatShortDate(expiresOn)}`;
+}

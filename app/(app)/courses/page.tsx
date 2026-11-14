@@ -1,4 +1,4 @@
-import { ForkKnifeIcon } from "@phosphor-icons/react/ssr";
+import { ForkKnifeIcon, PackageIcon } from "@phosphor-icons/react/ssr";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AddItemForm } from "@/components/groceries/add-item-form";
@@ -9,7 +9,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { getProfile } from "@/lib/auth";
 import { addDays, localDate, weekStart } from "@/lib/dates";
 import { budgetStatus } from "@/lib/engine";
-import { addItem, clearChecked, toggleItem } from "./actions";
+import { addItem, clearChecked, storeChecked, toggleItem } from "./actions";
 import { getPurchases, getShoppingList } from "./data";
 
 export const metadata: Metadata = { title: "Courses" };
@@ -27,11 +27,16 @@ export default async function GroceriesPage() {
         <div className="grid gap-5 md:order-2">
           <BudgetCard budget={budget} status={budgetStatus(budget, purchases, monday)} href="/courses/budget" />
           <AddItemForm action={addItem} />
-          <Link href="/courses/repas" className={buttonClasses("secondary", "md", "w-full")}>
-            <ForkKnifeIcon size={18} aria-hidden="true" /> Depuis mes repas
-          </Link>
+          <div className="grid grid-cols-2 gap-2">
+            <Link href="/courses/repas" className={buttonClasses("secondary", "md", "px-2")}>
+              <ForkKnifeIcon size={18} aria-hidden="true" /> Depuis mes repas
+            </Link>
+            <Link href="/courses/stock" className={buttonClasses("secondary", "md", "px-2")}>
+              <PackageIcon size={18} aria-hidden="true" /> Mon stock
+            </Link>
+          </div>
         </div>
-        <ShoppingList items={items} itemHref={(id) => `/courses/article/${id}`} toggleAction={toggleItem} clearAction={clearChecked} />
+        <ShoppingList items={items} itemHref={(id) => `/courses/article/${id}`} toggleAction={toggleItem} clearAction={clearChecked} storeAction={storeChecked} />
       </div>
     </>
   );

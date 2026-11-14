@@ -2,8 +2,8 @@ import "server-only";
 import { notFound } from "next/navigation";
 import { requireUserId } from "@/lib/auth";
 import { addDays } from "@/lib/dates";
-import { ingredientsEaten, purchaseGrams, type FoodAmount, type RecipeParts } from "@/lib/engine";
-import { MEAL_DAYS, type MealNeed, type Purchase, type ShoppingItem } from "@/lib/groceries";
+import { ingredientsEaten, missingGrams, purchaseGrams, sortStock, type FoodAmount, type RecipeParts } from "@/lib/engine";
+import { MEAL_DAYS, type MealNeed, type Purchase, type ShoppingItem, type StockItem } from "@/lib/groceries";
 import { createClient } from "@/lib/supabase/server";
 
 /** Prix au kilo saisis, par aliment. */
@@ -111,17 +111,54 @@ export async function getEaten(today: string): Promise<Eaten> {
   };
 }
 
-/** Ce qu'il faudrait racheter pour une semaine comme la dernière, arrondi à une quantité d'achat. */
-export function mealNeeds(eaten: Eaten, prices: ReadonlyMap<string, number>, list: readonly ShoppingItem[]): MealNeed[] {
+/**
+ * Ce qu'il faudrait racheter pour une semaine comme la dernière : le stock est
+ * déduit, puis le reste arrondi à une quantité d'achat.
+ */
+export function mealNeeds(eaten: Eaten, prices: ReadonlyMap<string, number>, list: readonly ShoppingItem[], stock: ReadonlyMap<string, number> = new Map()): MealNeed[] {
   const waiting = new Set(list.filter((i) => !i.checked && i.foodId).map((i) => i.foodId));
-  return eaten.ingredients.map((e) => ({
-    foodId: e.foodId,
-    name: e.name,
-    grams: e.grams,
-    buyGrams: purchaseGrams(e.grams),
-    pricePerKg: prices.get(e.foodId) ?? null,
-    inList: waiting.has(e.foodId),
-  }));
+  return eaten.ingredients.map((e) => {
+    const stockGrams = stock.get(e.foodId) ?? 0;
+    return {
+      foodId: e.foodId,
+      name: e.name,
+      grams: e.grams,
+      stockGrams,
+      buyGrams: purchaseGrams(missingGrams(e.grams, stockGrams)),
+      pricePerKg: prices.get(e.foodId) ?? null,
+      inList: waiting.has(e.foodId),
+    };
+  });
+}
+
+const STOCK_COLUMNS = "id, name, quantity, aisle, food_id, grams, expires_on";
+
+type StockRow = { id: string; name: string; quantity: string | null; aisle: StockItem["aisle"]; food_id: string | null; grams: number | null; expires_on: string | null };
+
+const toStock = (row: StockRow): StockItem => ({
+  id: row.id,
+  name: row.name,
+  quantity: row.quantity,
+  aisle: row.aisle,
+  foodId: row.food_id,
+  grams: row.grams === null ? null : Number(row.grams),
+  expiresOn: row.expires_on,
+});
+
+/** Le stock de la maison, le plus urgent en haut. */
+export async function getStock(): Promise<StockItem[]> {
+  const userId = await requireUserId();
+  const supabase = await createClient();
+  const { data } = await supabase.from("stock_items").select(STOCK_COLUMNS).eq("user_id", userId);
+  return sortStock((data ?? []).map(toStock));
+}
+
+export async function getStockItem(id: string): Promise<StockItem> {
+  const userId = await requireUserId();
+  const supabase = await createClient();
+  const { data } = await supabase.from("stock_items").select(STOCK_COLUMNS).eq("id", id).eq("user_id", userId).maybeSingle();
+  if (!data) notFound();
+  return toStock(data);
 }
 
 /** Achats notés depuis une date, du plus récent au plus ancien. */

@@ -5,11 +5,11 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { getProfile, requireUserId } from "@/lib/auth";
 import { addDays, localDate } from "@/lib/dates";
-import { AISLES, guessAisle } from "@/lib/engine";
-import { formatQuantity, MAX_LIST_ITEMS } from "@/lib/groceries";
+import { AISLES, guessAisle, stockByFood } from "@/lib/engine";
+import { formatQuantity, MAX_LIST_ITEMS, MAX_STOCK_ITEMS } from "@/lib/groceries";
 import { isDay } from "@/lib/nutrition";
 import { createClient } from "@/lib/supabase/server";
-import { getEaten, getPrices, getShoppingList, mealNeeds } from "./data";
+import { getEaten, getPrices, getShoppingList, getStock, mealNeeds } from "./data";
 
 /** `values` renvoie la saisie quand elle est refusée ; `saved` confirme un enregistrement sans changement de page. */
 export type GroceryState = { error?: string; saved?: string; values?: Record<string, string> };
@@ -121,9 +121,10 @@ export async function addFromMeals(_prev: GroceryState, formData: FormData): Pro
   await requireUserId();
   const chosen = new Set(formData.getAll("food").filter((v): v is string => typeof v === "string" && id.safeParse(v).success));
   if (!chosen.size) return { error: "Coche au moins un aliment." };
-  const [eaten, prices, list] = await Promise.all([getEaten(await today()), getPrices(), getShoppingList()]);
-  const rows = mealNeeds(eaten, prices, list)
-    .filter((n) => chosen.has(n.foodId))
+  const now = await today();
+  const [eaten, prices, list, stock] = await Promise.all([getEaten(now), getPrices(), getShoppingList(), getStock()]);
+  const rows = mealNeeds(eaten, prices, list, stockByFood(stock, now))
+    .filter((n) => chosen.has(n.foodId) && n.buyGrams > 0)
     .map((n) => ({ name: n.name.slice(0, 60), quantity: formatQuantity(n.buyGrams), aisle: guessAisle(n.name), food_id: n.foodId, grams: n.buyGrams }));
   if (!rows.length) return { error: "Ces aliments ne sont plus dans tes repas récents." };
   if (list.length + rows.length > MAX_LIST_ITEMS) return { error: FULL_LIST };
@@ -132,6 +133,81 @@ export async function addFromMeals(_prev: GroceryState, formData: FormData): Pro
   if (error) return { error: SAVE_ERROR };
   refresh();
   redirect("/courses");
+}
+
+// Stock ----------------------------------------------------------------------------
+
+const FULL_STOCK = `Le stock est plein (${MAX_STOCK_ITEMS} articles) : retire ce qui est fini.`;
+const expiry = z
+  .string()
+  .refine((d) => d === "" || isDay(d), "Choisis une date de péremption valide.")
+  .transform((d) => d || null);
+
+/** Après les courses : les articles cochés quittent la liste et entrent dans le stock. */
+export async function storeChecked() {
+  const userId = await requireUserId();
+  const supabase = await createClient();
+  const { data: checked } = await supabase.from("shopping_items").select("id, name, quantity, aisle, food_id, grams").eq("user_id", userId).not("checked_at", "is", null);
+  if (!checked?.length) return;
+  const { count } = await supabase.from("stock_items").select("id", { count: "exact", head: true }).eq("user_id", userId);
+  if ((count ?? 0) + checked.length > MAX_STOCK_ITEMS) throw new Error("stock_full");
+  const { error } = await supabase.from("stock_items").insert(checked.map(({ id: _id, ...item }) => item));
+  if (error) throw new Error("stock_not_saved");
+  // Le stock est écrit : la liste ne perd que ce qui vient d'y entrer.
+  const removed = await supabase
+    .from("shopping_items")
+    .delete()
+    .eq("user_id", userId)
+    .in("id", checked.map((c) => c.id));
+  if (removed.error) throw new Error("items_not_deleted");
+  refresh();
+  redirect("/courses/stock");
+}
+
+export async function addStockItem(_prev: GroceryState, formData: FormData): Promise<GroceryState> {
+  const userId = await requireUserId();
+  const values = { name: text(formData.get("name")), expires: text(formData.get("expires")) };
+  const parsed = z.object({ name: itemName, expires: expiry }).safeParse(values);
+  if (!parsed.success) return { error: parsed.error.issues[0].message, values };
+  const supabase = await createClient();
+  const { count } = await supabase.from("stock_items").select("id", { count: "exact", head: true }).eq("user_id", userId);
+  if ((count ?? 0) >= MAX_STOCK_ITEMS) return { error: FULL_STOCK, values };
+  const { error } = await supabase.from("stock_items").insert({ name: parsed.data.name, aisle: guessAisle(parsed.data.name), expires_on: parsed.data.expires });
+  if (error) return { error: SAVE_ERROR, values };
+  refresh();
+  return { saved: parsed.data.name };
+}
+
+export async function updateStockItem(itemId: string, _prev: GroceryState, formData: FormData): Promise<GroceryState> {
+  const userId = await requireUserId();
+  const values = { name: text(formData.get("name")), quantity: text(formData.get("quantity")), expires: text(formData.get("expires")) };
+  const parsed = z
+    .object({ id, name: itemName, quantity: z.string().trim().max(30, "Quantité : 30 caractères au maximum."), expires: expiry })
+    .safeParse({ id: itemId, ...values });
+  if (!parsed.success) return { error: parsed.error.issues[0].message, values };
+  const supabase = await createClient();
+  const { data: current } = await supabase.from("stock_items").select("quantity").eq("id", parsed.data.id).eq("user_id", userId).maybeSingle();
+  if (!current) return { error: SAVE_ERROR, values };
+  const quantity = parsed.data.quantity || null;
+  const { error } = await supabase
+    .from("stock_items")
+    // Une quantité réécrite à la main ne correspond plus au poids connu : il n'est plus déduit des courses.
+    .update({ name: parsed.data.name, quantity, expires_on: parsed.data.expires, ...(quantity === current.quantity ? {} : { grams: null }) })
+    .eq("id", parsed.data.id)
+    .eq("user_id", userId);
+  if (error) return { error: SAVE_ERROR, values };
+  refresh();
+  redirect("/courses/stock");
+}
+
+/** « Fini » : l'article quitte le stock. */
+export async function finishStockItem(itemId: string) {
+  const userId = await requireUserId();
+  if (!id.safeParse(itemId).success) throw new Error("invalid_item");
+  const supabase = await createClient();
+  const { error } = await supabase.from("stock_items").delete().eq("id", itemId).eq("user_id", userId);
+  if (error) throw new Error("item_not_deleted");
+  refresh();
 }
 
 // Budget et achats ----------------------------------------------------------------

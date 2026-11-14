@@ -12,7 +12,7 @@ import { formatEuros, formatQuantity, type MealNeed } from "@/lib/groceries";
  */
 export function MealNeedsForm({ needs, action }: { needs: MealNeed[]; action: (state: GroceryState, formData: FormData) => Promise<GroceryState> }) {
   const [state, formAction] = useActionState(action, {});
-  const [chosen, setChosen] = useState<ReadonlySet<string>>(() => new Set(needs.filter((n) => !n.inList).map((n) => n.foodId)));
+  const [chosen, setChosen] = useState<ReadonlySet<string>>(() => new Set(needs.filter((n) => !n.inList && n.buyGrams > 0).map((n) => n.foodId)));
   const total = needs.reduce((sum, n) => (chosen.has(n.foodId) && n.pricePerKg !== null ? sum + costOf(n.buyGrams, n.pricePerKg) : sum), 0);
 
   return (
@@ -26,6 +26,7 @@ export function MealNeedsForm({ needs, action }: { needs: MealNeed[]; action: (s
                 name="food"
                 value={n.foodId}
                 checked={chosen.has(n.foodId)}
+                disabled={n.buyGrams === 0}
                 onChange={(e) =>
                   setChosen((all) => {
                     const next = new Set(all);
@@ -39,12 +40,14 @@ export function MealNeedsForm({ needs, action }: { needs: MealNeed[]; action: (s
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-[15px] font-medium">{n.name}</span>
                 <span className="block text-[13px] text-muted">
-                  {formatQuantity(Math.round(n.grams))} mangés{n.inList ? " · déjà dans la liste" : ""}
+                  {formatQuantity(Math.round(n.grams))} mangés
+                  {n.stockGrams > 0 ? ` · ${formatQuantity(n.stockGrams)} en stock` : ""}
+                  {n.inList ? " · déjà dans la liste" : ""}
                 </span>
               </span>
               <span className="shrink-0 text-right">
-                <span className="font-numeric block text-[16px]">{formatQuantity(n.buyGrams)}</span>
-                {n.pricePerKg !== null ? <span className="block text-[13px] text-muted">{formatEuros(costOf(n.buyGrams, n.pricePerKg))}</span> : null}
+                <span className="font-numeric block text-[16px]">{n.buyGrams > 0 ? formatQuantity(n.buyGrams) : "Assez"}</span>
+                {n.pricePerKg !== null && n.buyGrams > 0 ? <span className="block text-[13px] text-muted">{formatEuros(costOf(n.buyGrams, n.pricePerKg))}</span> : null}
               </span>
             </label>
           </li>

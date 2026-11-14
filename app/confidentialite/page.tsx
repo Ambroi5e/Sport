@@ -55,12 +55,12 @@ export default async function PrivacyPage() {
               <strong>Ton profil</strong> : année de naissance, sexe, taille, niveau, jours d&apos;entraînement, objectifs.
             </li>
             <li>
-              <strong>Ce que tu notes</strong> : séances et séries, sports (durée, intensité), semaine type et séances déplacées, programmes, amis et ce que tu leur montres, aliments, recettes, repas, cibles, liste de courses, stock, prix, achats et budget, compléments et prises,
+              <strong>Ce que tu notes</strong> : séances et séries, sports et sorties d&apos;endurance (durée, intensité, distance, dénivelé, fréquence cardiaque moyenne), semaine type et séances déplacées, programmes, amis et ce que tu leur montres, aliments, recettes, repas, cibles, liste de courses, stock, prix, achats et budget, compléments et prises,
               pesées, mensurations, photos de progression, forme du jour (sommeil, courbatures, énergie, stress), bilans de la semaine (ressenti et note), rappels (heures choisies, appareils abonnés, dernier envoi).
             </li>
           </List>
           <p>
-            Le poids, les mensurations, les photos, ce que tu manges, tes compléments et ta forme du jour sont des <strong>données de santé</strong>, sensibles au sens du
+            Le poids, les mensurations, les photos, ce que tu manges, tes compléments, ta forme du jour et ta fréquence cardiaque sont des <strong>données de santé</strong>, sensibles au sens du
             RGPD. Fonte ne garde que ce qui sert à l&apos;app et ne les utilise pour rien d&apos;autre.
           </p>
         </Section>

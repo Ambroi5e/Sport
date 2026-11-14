@@ -61,6 +61,7 @@ import { CheckinCard } from "@/components/progress/checkin-card";
 import { ReadinessView } from "@/components/progress/readiness-view";
 import { ActivitiesView } from "@/components/training/activities-view";
 import { EnduranceView } from "@/components/training/endurance-view";
+import { GpxImport } from "@/components/training/gpx-import";
 import { HyroxForm } from "@/components/training/hyrox-form";
 import { HyroxView } from "@/components/training/hyrox-view";
 import { HrZonesView } from "@/components/training/hr-zones-view";
@@ -554,6 +555,24 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
               today={SAMPLE_DAY}
               action={saveHeartRates}
             />
+          </>
+        ) : ecran === "import-gpx" || ecran === "import-gpx-vide" ? (
+          <>
+            <PageHeader title="Importer une sortie" back="/apercu?ecran=sortie-ajouter" />
+            <div className="md:max-w-2xl">
+              <GpxImport
+                action={saveActivity.bind(null, null)}
+                sports={["course", "trail", "velo", ...sportOrder.filter((s) => !["course", "trail", "velo"].includes(s))]}
+                today={SAMPLE_DAY}
+                timeZone="Europe/Paris"
+                weightKg={SAMPLE_ACTIVITIES[0].weightKg}
+                initial={
+                  ecran === "import-gpx"
+                    ? { name: "sortie-longue.gpx", summary: { startedAt: Date.parse("2026-11-01T08:12:00Z"), distanceM: 16_240, seconds: 5241, elevationM: 132, avgHr: 149, sport: "course", points: 5310 } }
+                    : null
+                }
+              />
+            </div>
           </>
         ) : ecran === "sortie-ajouter" ? (
           <>

@@ -121,6 +121,12 @@ Les données de santé (poids, mensurations, photos, forme, nutrition) sont des 
 - Les écrans rappellent que zones et prédictions sont des repères généraux, et de consulter un médecin en cas de symptôme ou de doute.
 - Testé dans `supabase/tests/rls-plans-course.test.ts` (11 tests).
 
+## Import GPX (v0.12)
+
+- Minimisation : le fichier GPX est lu sur l'appareil et jamais envoyé. Les positions GPS (qui révèlent souvent le domicile) ne sont ni transmises ni stockées ; seuls les totaux passent par `saveActivity`, avec ses validations habituelles.
+- Le contenu du fichier n'est jamais inséré comme HTML : seuls des nombres en sont tirés, et le nom du fichier est affiché comme texte par React.
+- Taille limitée à 20 Mo avant lecture.
+
 ## Rappels push (v0.10.3)
 
 - `reminder_settings`, `push_subscriptions` et `reminder_log` ont les quatre politiques limitées à `user_id = (select auth.uid())`.

@@ -129,6 +129,12 @@ Chaque table porte un `user_id`. Les catalogues communs (exercices, aliments de 
 - **Zones** (`hrZones`) : cinq tranches de 50 à 100 % de `profiles.hr_max`, ou de la réserve (Karvonen) quand `hr_rest` est noté. Sans `hr_max`, estimation de Tanaka (208 − 0,7 × âge) depuis `birth_year`, marquée comme telle. `hrZoneTime` range chaque sortie entière dans la zone de sa fréquence moyenne.
 - Écrans : `/entrainement/endurance/objectifs` (liste, `ajouter`, `[id]`) et `/entrainement/endurance/zones`, liés depuis l'écran Endurance.
 
+### Import GPX (v0.12)
+
+- **Lu dans le navigateur** : `GpxImport` (`components/training/gpx-import.tsx`) lit le fichier avec `File.text()` et `readGpx` (`lib/engine/gpx.ts`), puis monte `ActivityForm` prérempli. L'enregistrement passe par `saveActivity`, comme une saisie à la main. La trace ne quitte pas l'appareil : pas de table, pas de stockage, pas de route d'envoi.
+- **Calculs** : distance par haversine ; temps en mouvement (intervalles de plus de 60 s écartés) ; dénivelé positif à hystérésis de 3 m ; fréquence cardiaque moyenne pondérée par le temps ; sport d'après `<type>` ; date du premier point dans le fuseau du profil.
+- Écran : `/entrainement/sports/importer`, lié depuis « Noter un sport ». Un fichier à la fois, 20 Mo au plus.
+
 ### Rappels push (v0.10.3)
 
 - **Réglages** : `reminder_settings`, une ligne par personne, une heure par rappel (vide = éteint) et les jours du rappel de séance. Heures dans le fuseau du profil.

@@ -21,3 +21,4 @@ export * from "./review";
 export * from "./endurance";
 export * from "./hyrox";
 export * from "./race";
+export * from "./gpx";

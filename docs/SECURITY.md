@@ -107,6 +107,13 @@ Les données de santé (poids, mensurations, photos, forme, nutrition) sont des 
 - La fréquence cardiaque est une donnée de santé : `friend_activities` ne renvoie ni elle, ni la distance, ni le dénivelé (testé).
 - Testé dans `supabase/tests/rls-endurance.test.ts` (8 tests).
 
+## Hyrox (v0.11.1)
+
+- Les temps d'une course vivent dans `activities.hyrox_splits` : mêmes quatre politiques, aucune table ni fonction ajoutée. Contrainte en base : seulement pour le sport `hyrox`, seize temps exactement, chacun de 1 à 7 200 secondes ou vide.
+- `saveHyrox` valide côté serveur (zod pour l'identifiant, `parseClock` pour chaque temps, somme des temps au plus égale au temps total) ; la correction et la suppression filtrent sur `sport = 'hyrox'` en plus de la RLS.
+- `friend_activities` ne renvoie pas les temps (vérifié par un test).
+- Testé dans `supabase/tests/rls-hyrox.test.ts` (9 tests).
+
 ## Rappels push (v0.10.3)
 
 - `reminder_settings`, `push_subscriptions` et `reminder_log` ont les quatre politiques limitées à `user_id = (select auth.uid())`.

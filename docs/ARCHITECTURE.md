@@ -58,7 +58,7 @@ Chaque table porte un `user_id`. Les catalogues communs (exercices, aliments de 
 | Nutrition | `foods`, `food_logs`, `nutrition_targets`, `saved_meals`, `saved_meal_items` (v0.4), `foods.is_recipe` et `recipe_items` (v0.6.1) : une recette est un aliment, la dépense réelle se calcule à la lecture (pas de table `tdee_estimates`) | v0.4, v0.6.1 |
 | Plan prédictif | `programs` (réglages et objectif chiffré), `exercise_preferences`, `workout_templates.program_id` : les séances du programme sont des modèles, les charges prévues se calculent à la lecture | v0.6 |
 | Planning | `weekly_sports` (sports fixes de la semaine type), `session_pins` (séance déplacée à la main, pour une semaine), `blocked_days` (jour libéré), `workouts.is_light` ; le planning lui-même se calcule à la lecture | v0.8.1 |
-| Activités | `activities` (v0.8 : sports additionnels ; v0.11 : sports d'endurance, `distance_m`, `duration_extra_s`, `elevation_m`, `avg_hr`) ; à venir : `activity_segments` (v0.11.1), `hr_zones`, `race_plans` (v0.11.2) | v0.8, v0.11 |
+| Activités | `activities` (v0.8 : sports additionnels ; v0.11 : sports d'endurance, `distance_m`, `duration_extra_s`, `elevation_m`, `avg_hr` ; v0.11.1 : sport `hyrox`, `hyrox_splits`) ; à venir : `hr_zones`, `race_plans` (v0.11.2) | v0.8, v0.11, v0.11.1 |
 | Forme et bilans | `daily_checkins` (v0.8), `weekly_reviews` (v0.10.2) | v0.8, v0.10.2 |
 | Amis | `friendships`, `friend_invites`, `share_grants` (v0.9) ; `group_sessions`, `group_participants`, `group_events` (v0.9.1) | v0.9, v0.9.1 |
 | Courses | `shopping_items`, `food_prices`, `purchases`, `profiles.weekly_food_budget` (v0.10) ; `stock_items` (v0.10.1) | v0.10, v0.10.1 |
@@ -114,6 +114,13 @@ Chaque table porte un `user_id`. Les catalogues communs (exercices, aliments de 
 - **Semaines et records** : `weeklyDistance` (huit semaines du lundi au dimanche) et `enduranceRecords` (plus longue sortie, plus gros dénivelé, meilleure allure parmi les sorties d'au moins chaque seuil de `RECORD_DISTANCES`). Un record d'allure est celui d'une sortie entière, pas un temps sur la distance exacte : les segments arrivent avec les imports (v0.12).
 - **Planning** : `SPORT_MUSCLES` connaît les nouveaux sports (jambes ; dos pour la natation et le rameur), donc la récupération et la charge les comptent.
 - Écran : `/entrainement/endurance` (`?sport=` pour changer de sport ; seuls les sports pratiqués sont proposés). Kilomètres seulement.
+
+### Hyrox (v0.11.1)
+
+- **Une course Hyrox est une activité** : sport `hyrox`, temps total dans la durée (minutes et `duration_extra_s`), et `hyrox_splits`, seize temps en secondes dans l'ordre de l'épreuve (course 1, atelier 1, … course 8, atelier 8), `null` pour un temps non noté. Pas de table de segments : seize nombres toujours lus et écrits ensemble, enregistrement atomique, politiques d'`activities` inchangées.
+- **Moteur** (`lib/engine/hyrox.ts`) : `hyroxSummary` (course, ateliers, transitions = temps total moins les seize segments, tenue de l'allure), `hyroxDeltas` (écart avec la course d'avant), `hyroxBests` (record par segment et somme des meilleurs), `parseClock` (« 4:35 », « 1:24:35 »). Rien n'est sommé tant qu'il manque un temps.
+- **Saisie** : `/entrainement/hyrox/ajouter` et `/entrainement/hyrox/[id]` (`HyroxForm`, `saveHyrox`). `clockInput` (`lib/hyrox.ts`) place les deux-points pendant la frappe. Une course Hyrox ouverte depuis Sports est renvoyée vers cet écran.
+- **Écran** : `/entrainement/hyrox` (`?course=` pour voir une course plus ancienne). Dépense : MET du Compendium 2024 (02035, 02040, 02214).
 
 ### Rappels push (v0.10.3)
 

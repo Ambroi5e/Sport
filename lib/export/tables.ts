@@ -50,7 +50,7 @@ export const EXPORT_TABLES: ExportTable[] = [
     order: ["workout_id", "exercise_order", "set_number", "id"],
     refs: [{ column: "workout_id", from: "workouts", field: "performed_on", as: "workout_date" }, exercise()],
   },
-  { table: "activities", file: "activites", label: "Sports et sorties d'endurance (durée en minutes plus duration_extra_s secondes, distance et dénivelé en mètres, fréquence cardiaque moyenne)", order: ["performed_on", "id"] },
+  { table: "activities", file: "activites", label: "Sports et sorties d'endurance (durée en minutes plus duration_extra_s secondes, distance et dénivelé en mètres, fréquence cardiaque moyenne, hyrox_splits : les seize temps d'une course Hyrox en secondes)", order: ["performed_on", "id"] },
   { table: "weekly_sports", file: "sports-fixes", label: "Sports fixes de la semaine type (jour : 1 = lundi … 7 = dimanche)", order: ["weekday", "created_at", "id"] },
   {
     table: "session_pins",

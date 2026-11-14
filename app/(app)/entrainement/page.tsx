@@ -1,4 +1,4 @@
-import { BarbellIcon, CalendarCheckIcon, CalendarDotsIcon, CaretRightIcon, ClockCounterClockwiseIcon, ListChecksIcon, PersonSimpleRunIcon, SneakerMoveIcon, TrophyIcon } from "@phosphor-icons/react/ssr";
+import { BarbellIcon, CalendarCheckIcon, CalendarDotsIcon, CaretRightIcon, ClockCounterClockwiseIcon, LightningIcon, ListChecksIcon, PersonSimpleRunIcon, SneakerMoveIcon, TrophyIcon } from "@phosphor-icons/react/ssr";
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -151,6 +151,7 @@ export default async function TrainingPage() {
               detail={sportDates.length ? `${sportDates.length} cette semaine` : "Course, vélo, padel, foot, escalade…"}
             />
             <NavRow href="/entrainement/endurance" icon={<PersonSimpleRunIcon size={20} />} label="Endurance" detail="Allures, kilomètres par semaine, records" />
+            <NavRow href="/entrainement/hyrox" icon={<LightningIcon size={20} />} label="Hyrox" detail="Courses, ateliers, transitions" />
             <NavRow href="/entrainement/modeles" icon={<ListChecksIcon size={20} />} label="Modèles" detail={`${templates.length} modèle${templates.length > 1 ? "s" : ""}`} />
             <NavRow href="/entrainement/exercices" icon={<BarbellIcon size={20} />} label="Exercices" detail="Bibliothèque et fiches" />
             <NavRow href="/entrainement/records" icon={<TrophyIcon size={20} />} label="Records" detail="1RM estimé, charges max" />

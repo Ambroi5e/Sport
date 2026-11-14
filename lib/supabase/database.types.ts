@@ -21,6 +21,7 @@ export type Database = {
           duration_extra_s: number
           duration_minutes: number
           elevation_m: number | null
+          hyrox_splits: number[] | null
           id: string
           intensity: Database["public"]["Enums"]["activity_intensity"]
           label: string | null
@@ -36,6 +37,7 @@ export type Database = {
           duration_extra_s?: number
           duration_minutes: number
           elevation_m?: number | null
+          hyrox_splits?: number[] | null
           id?: string
           intensity: Database["public"]["Enums"]["activity_intensity"]
           label?: string | null
@@ -51,6 +53,7 @@ export type Database = {
           duration_extra_s?: number
           duration_minutes?: number
           elevation_m?: number | null
+          hyrox_splits?: number[] | null
           id?: string
           intensity?: Database["public"]["Enums"]["activity_intensity"]
           label?: string | null
@@ -1656,6 +1659,7 @@ export type Database = {
         | "natation"
         | "rameur"
         | "marche"
+        | "hyrox"
       app_module:
         | "musculation"
         | "endurance"
@@ -1779,6 +1783,7 @@ export const Constants = {
         "natation",
         "rameur",
         "marche",
+        "hyrox",
       ],
       app_module: ["musculation", "endurance", "hyrox", "sports", "nutrition", "courses", "corps", "complements", "planning", "amis"],
       app_role: ["admin"],

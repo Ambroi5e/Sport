@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { ActivityForm } from "@/components/training/activity-form";
 import { ConfirmAction } from "@/components/ui/confirm-action";
 import { PageHeader } from "@/components/ui/page-header";
@@ -16,6 +16,8 @@ export default async function ActivityPage({ params }: { params: Promise<{ id: s
   if (!/^[0-9a-f-]{36}$/.test(id)) notFound();
   const [profile, activity, latest] = await Promise.all([getProfile(), getActivity(id), getLatestWeightKg()]);
   if (!activity) notFound();
+  // Une course Hyrox se corrige avec ses temps par tour, sur son propre écran.
+  if (activity.sport === "hyrox") redirect(`/entrainement/hyrox/${activity.id}`);
   const name = activityName(activity.sport, activity.label);
 
   return (

@@ -45,7 +45,7 @@ Tableau de bord, musculation, endurance, Hyrox, sports additionnels, planning in
 | v0.10.2 | Bilan du dimanche |
 | v0.10.3 | Rappels push : séance, forme du jour, compléments, bilan ; envoi par Supabase, signal vide |
 | v0.11 | Endurance : course, trail, vélo, natation, rameur, marche ; allure, kilomètres par semaine, records |
-| v0.11.1 | Hyrox |
+| v0.11.1 | Hyrox : temps total et seize temps par course, part course / ateliers / transitions, écarts et records par segment |
 | v0.11.2 | Plans de course, zones cardiaques |
 | v0.12 | Imports Strong, Hevy, CSV, GPX, FIT, Apple Santé, Strava en option |
 | v1.0 | Audit sécurité, tests end-to-end complets, auto-hébergement, checklist web |

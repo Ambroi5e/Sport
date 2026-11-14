@@ -4,6 +4,16 @@ Format : une entrée par version (semver), du plus récent au plus ancien. Les m
 
 ## [Non publié]
 
+### v0.11.1 : Hyrox
+
+- Nouvel écran Hyrox (depuis Entraînement) : note une course ou une simulation avec son temps total et, si tu les as, ses seize temps (huit courses de 1 km, huit ateliers). Les chiffres se tapent au pavé numérique, les deux-points se placent seuls.
+- Pour chaque course : la part de la course, des ateliers et des transitions, l'écart de chaque temps avec la course d'avant, et la tenue de l'allure entre les quatre premières et les quatre dernières courses.
+- Sur plusieurs courses : le record de chaque segment, et tes meilleurs segments mis bout à bout.
+- Hyrox est aussi un sport de « Noter un sport » : une course compte dans la semaine, le planning, la charge et la dépense estimée. Les amis voient le sport, la durée et l'intensité, pas les temps.
+- Aucun classement, aucun temps cible : les plans de course arrivent en v0.11.2. Le format et les charges (Open, Pro, Doubles) ne sont pas notés.
+- Export : la colonne `hyrox_splits` sort dans `activites.csv`. Page Confidentialité mise à jour.
+- Migration non destructive appliquée : `20261124000000_hyrox.sql` (une valeur de `activity_sport`, une colonne sur `activities`), avec 9 tests RLS. Pas de nouvelle table : la table `activity_segments` annoncée est remplacée par cette colonne. Aucun fichier destructif. Aucune dépendance ajoutée.
+
 ### v0.11 : endurance
 
 - Six sports de plus dans « Noter un sport » : course à pied, trail, vélo, natation, rameur, marche. Pour eux, le formulaire demande aussi la distance (en km, en mètres pour la natation et le rameur) et les secondes ; dénivelé et fréquence cardiaque moyenne sont sous « Plus de détails ». Tout est facultatif.

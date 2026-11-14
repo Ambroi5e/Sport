@@ -50,6 +50,7 @@ export const SPORT_MUSCLES: Readonly<Record<string, readonly string[]>> = {
   marche: LEGS,
   rameur: [...LEGS, "dorsaux"],
   natation: ["dorsaux"],
+  hyrox: [...LEGS, "dorsaux"],
   autre: [],
 };
 

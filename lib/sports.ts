@@ -10,6 +10,7 @@ export const SPORT_LABELS: Record<Sport, string> = {
   natation: "Natation",
   rameur: "Rameur",
   marche: "Marche",
+  hyrox: "Hyrox",
   padel: "Padel",
   tennis: "Tennis",
   squash: "Squash",

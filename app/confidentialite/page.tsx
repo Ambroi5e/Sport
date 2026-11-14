@@ -56,7 +56,7 @@ export default async function PrivacyPage() {
             </li>
             <li>
               <strong>Ce que tu notes</strong> : séances et séries, sports (durée, intensité), semaine type et séances déplacées, programmes, amis et ce que tu leur montres, aliments, recettes, repas, cibles, liste de courses, stock, prix, achats et budget, compléments et prises,
-              pesées, mensurations, photos de progression, forme du jour (sommeil, courbatures, énergie, stress).
+              pesées, mensurations, photos de progression, forme du jour (sommeil, courbatures, énergie, stress), bilans de la semaine (ressenti et note).
             </li>
           </List>
           <p>

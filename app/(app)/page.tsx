@@ -11,13 +11,15 @@ import { QuickWeigh } from "@/components/weight/quick-weigh";
 import { WeightTrend } from "@/components/weight/trend";
 import { getProfile } from "@/lib/auth";
 import { addDays, daysBetween, formatShortDate, weekStart } from "@/lib/dates";
-import { currentWeek, HIGH_PROTEIN_GOALS, kgTo, nextPlanned, sumNutrients, weeklyVolume } from "@/lib/engine";
+import { currentWeek, HIGH_PROTEIN_GOALS, kgTo, nextPlanned, reviewWeek, sumNutrients, weeklyVolume } from "@/lib/engine";
 import { GOAL_LABELS } from "@/lib/goals";
 import { ADAPT_HINTS, dayWord } from "@/lib/planning";
 import { getTrainingSetsSince } from "./entrainement/data";
 import { getWeekContext } from "./entrainement/semaine/data";
 import { saveCheckin } from "./progres/forme/actions";
 import { TodaySupplementsCard } from "@/components/supplements/today-card";
+import { ReviewPrompt } from "@/components/progress/review-view";
+import { getSavedReview } from "./progres/bilan/data";
 import { getSupplements } from "./nutrition/complements/data";
 import { getDayLogs, getDayType, getTargets } from "./nutrition/data";
 import { getPrimaryGoal, getWeightSummary } from "./weight-data";
@@ -30,13 +32,16 @@ export default async function HomePage() {
   const monday = weekStart(weight.today);
   // Musculation et force : le volume des 8 dernières semaines a sa place sur l'accueil.
   const strengthGoal = goal ? HIGH_PROTEIN_GOALS.has(goal.type) : false;
-  const [meals, targets, dayType, sets, planning, supplements] = await Promise.all([
+  // Dimanche et lundi : le bilan de la semaine attend, tant qu'il n'est pas fait.
+  const reviewDay = [0, 1].includes(new Date(`${weight.today}T00:00:00Z`).getUTCDay());
+  const [meals, targets, dayType, sets, planning, supplements, savedReview] = await Promise.all([
     getDayLogs(weight.today),
     getTargets(),
     getDayType(weight.today, profile.training_days),
     strengthGoal ? getTrainingSetsSince(addDays(monday, -49)) : Promise.resolve([]),
     getWeekContext(),
     getSupplements(weight.today, profile.timezone),
+    reviewDay ? getSavedReview(reviewWeek(weight.today)) : null,
   ]);
   const { plan, checkin } = planning;
   const inWeek = <T extends { date: string }>(list: readonly T[]) => list.filter((x) => x.date >= monday).map((x) => x.date);
@@ -72,6 +77,12 @@ export default async function HomePage() {
           </div>
         }
       />
+
+      {reviewDay && !savedReview ? (
+        <div className="mb-4">
+          <ReviewPrompt weekStart={reviewWeek(weight.today)} href="/progres/bilan" />
+        </div>
+      ) : null}
 
       <div className="grid gap-4 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] md:gap-6">
         <div className="grid content-start gap-4">

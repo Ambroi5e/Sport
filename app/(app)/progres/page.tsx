@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { buttonClasses } from "@/components/ui/button";
 import { ProgressTabs } from "@/components/progress/progress-tabs";
 import { WeightView } from "@/components/progress/weight-view";
 import { PageHeader } from "@/components/ui/page-header";
@@ -19,7 +21,14 @@ export default async function WeightProgressPage({ searchParams }: { searchParam
 
   return (
     <>
-      <PageHeader title="Progrès" />
+      <PageHeader
+        title="Progrès"
+        action={
+          <Link href="/progres/bilan" className={buttonClasses("secondary", "md", "h-11 shrink-0 px-3 text-[14px]")}>
+            Bilan
+          </Link>
+        }
+      />
       <ProgressTabs current="/progres" />
       <WeightView weight={weight} period={period} unit={unit} />
     </>

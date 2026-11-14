@@ -6,11 +6,12 @@ import { Button } from "@/components/ui/button";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { clearOutbox, useOutbox } from "@/lib/offline/outbox";
 import { forgetSessionCopy } from "@/lib/offline/session-copy";
+import { forgetPushDevice } from "@/lib/push-device";
 import { clearDeviceData } from "@/lib/session-prefs";
 
 /**
  * Déconnexion : efface du téléphone la file d'attente, la séance gardée et les
- * réglages de séance. Prévient d'abord s'il reste des séries pas encore envoyées.
+ * réglages de séance, et arrête les rappels sur cet appareil. Prévient d'abord s'il reste des séries pas encore envoyées.
  */
 export function SignOutButton({ action }: { action: () => Promise<void> }) {
   const { pending } = useOutbox();
@@ -26,6 +27,7 @@ export function SignOutButton({ action }: { action: () => Promise<void> }) {
     clearOutbox();
     clearDeviceData();
     forgetSessionCopy();
+    forgetPushDevice();
   }
 
   return (

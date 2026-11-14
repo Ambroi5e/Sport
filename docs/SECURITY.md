@@ -101,6 +101,16 @@ Les données de santé (poids, mensurations, photos, forme, nutrition) sont des 
 - Le bilan ne stocke aucun chiffre : il relit les tables de la personne avec ses propres droits.
 - Testé dans `supabase/tests/rls-bilans.test.ts` (4 tests).
 
+## Rappels push (v0.10.3)
+
+- `reminder_settings`, `push_subscriptions` et `reminder_log` ont les quatre politiques limitées à `user_id = (select auth.uid())`.
+- **Signal vide** : aucun texte ni donnée ne passe par les services de notifications. Le texte est servi par Fonte au service worker, sous la session de la personne ; une notification ne peut ouvrir qu'une page de l'app (chemin commençant par `/`).
+- **Pas d'adresse arbitraire** : une adresse de signal doit être en https chez un service de notifications connu. Vérifié trois fois : contrainte en base, action serveur, Edge Function (qui ne suit pas les redirections). Fonte ne peut pas être amené à appeler une adresse interne.
+- **Clés VAPID** : la clé privée n'existe que dans Supabase Vault. Elle n'est ni dans le dépôt, ni dans Vercel, ni dans les secrets de la fonction ; la base la transmet à la fonction à chaque envoi, en https. La clé publique se lit par `public.push_public_key()`.
+- **Edge Function sans privilège** : `rappels` n'a pas de secret, ne lit pas la base et n'utilise pas la clé `service_role`. Elle est appelable sans jeton (`verify_jwt` désactivé) : un appel étranger ne peut que lui faire signer, avec ses propres clés, un signal vide vers un service de notifications, ce qu'il pourrait faire sans elle. 500 adresses au plus par appel.
+- **Fonctions d'envoi** dans le schéma `private`, non exposé par l'API : ni `anon` ni `authenticated` ne peuvent les appeler (testé).
+- Testé dans `supabase/tests/rls-rappels.test.ts` (25 tests) et `supabase/tests/rappels-vapid.test.ts` (16 tests).
+
 ## Fichiers importés
 
 Taille maximale et type vérifiés avant lecture (CSV 5 Mo, GPX et FIT 20 Mo, export Apple Santé lu sur le téléphone). Chaque ligne validée par zod ; une ligne invalide est rejetée et signalée, jamais insérée partiellement.

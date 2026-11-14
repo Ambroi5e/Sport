@@ -4,8 +4,10 @@
  * - Une seule exception aux pages personnelles : la copie de la séance en cours,
  *   demandée par la page elle-même, pour la rouvrir sans réseau à la salle.
  *   Elle est effacée à la fin de la séance et à la déconnexion.
+ * - Rappels (v0.10.3) : le signal push arrive vide ; le texte est demandé à Fonte
+ *   avec la session de la personne, puis affiché.
  */
-const VERSION = "fonte-v0.3.0";
+const VERSION = "fonte-v0.10.3";
 const STATIC_CACHE = `${VERSION}-static`;
 const SESSION_CACHE = "fonte-seance";
 const OFFLINE_URL = "/hors-ligne";
@@ -120,4 +122,60 @@ self.addEventListener("fetch", (event) => {
       ),
     );
   }
+});
+
+const REMINDERS_URL = "/reglages/rappels/a-afficher";
+const FALLBACK_REMINDER = { tag: "rappel", title: "Fonte", body: "Un rappel t'attend.", url: "/" };
+
+/** Les rappels à afficher ; sans réseau ou sans session, un rappel sans détail. */
+async function remindersToShow() {
+  try {
+    const response = await fetch(REMINDERS_URL, { credentials: "same-origin", cache: "no-store", headers: { Accept: "application/json" } });
+    const json = (response.headers.get("content-type") || "").includes("application/json");
+    if (response.ok && !response.redirected && json) {
+      const list = await response.json();
+      if (Array.isArray(list) && list.length) return list.slice(0, 4);
+    }
+  } catch {
+    // Hors ligne : on affiche le rappel sans détail.
+  }
+  return [FALLBACK_REMINDER];
+}
+
+self.addEventListener("push", (event) => {
+  event.waitUntil(
+    remindersToShow().then((list) =>
+      Promise.all(
+        list.map((n) =>
+          self.registration.showNotification(String(n.title || FALLBACK_REMINDER.title), {
+            body: String(n.body || ""),
+            tag: String(n.tag || FALLBACK_REMINDER.tag),
+            icon: "/icons/icon-192.png",
+            badge: "/icons/icon-192.png",
+            // Seulement une page de l'app : jamais une adresse venue d'ailleurs.
+            data: { url: typeof n.url === "string" && n.url.startsWith("/") && !n.url.startsWith("//") ? n.url : "/" },
+          }),
+        ),
+      ),
+    ),
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const path = (event.notification.data && event.notification.data.url) || "/";
+  const url = new URL(path, self.location.origin).href;
+  event.waitUntil(
+    (async () => {
+      const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+      for (const client of windows) {
+        if ("focus" in client) {
+          await client.focus();
+          if ("navigate" in client) await client.navigate(url).catch(() => {});
+          return;
+        }
+      }
+      await self.clients.openWindow(url);
+    })(),
+  );
 });

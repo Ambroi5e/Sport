@@ -56,7 +56,7 @@ export default async function PrivacyPage() {
             </li>
             <li>
               <strong>Ce que tu notes</strong> : séances et séries, sports (durée, intensité), semaine type et séances déplacées, programmes, amis et ce que tu leur montres, aliments, recettes, repas, cibles, liste de courses, stock, prix, achats et budget, compléments et prises,
-              pesées, mensurations, photos de progression, forme du jour (sommeil, courbatures, énergie, stress), bilans de la semaine (ressenti et note).
+              pesées, mensurations, photos de progression, forme du jour (sommeil, courbatures, énergie, stress), bilans de la semaine (ressenti et note), rappels (heures choisies, appareils abonnés, dernier envoi).
             </li>
           </List>
           <p>
@@ -115,6 +115,11 @@ export default async function PrivacyPage() {
               <strong>Une photo d&apos;étiquette</strong> est lue sur ton téléphone : elle n&apos;est ni envoyée ni gardée.
             </li>
             <li>
+              <strong>Un rappel</strong>, si tu les actives, passe par le service de notifications de ton navigateur (Google, Apple, Mozilla ou
+              Microsoft). Il reçoit un signal vide, sans texte ni donnée : il sait seulement que Fonte réveille ton appareil, et quand. Le texte
+              du rappel est demandé à Fonte par ton téléphone.
+            </li>
+            <li>
               <strong>Avec Google</strong>, Google sait que tu te connectes à Fonte, et Fonte reçoit ton adresse e-mail et le nom de ton
               compte.
             </li>
@@ -132,7 +137,7 @@ export default async function PrivacyPage() {
           </p>
           <p>
             L&apos;app garde aussi sur le téléphone les saisies pas encore envoyées (sans réseau), le chrono et la séance en cours. Tout est
-            effacé quand tu te déconnectes.
+            effacé quand tu te déconnectes, et l&apos;appareil cesse de recevoir les rappels.
           </p>
         </Section>
 

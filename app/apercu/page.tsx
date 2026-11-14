@@ -150,6 +150,11 @@ import { addSupplement, toggleTaken, updateSupplement } from "@/app/(app)/nutrit
 import { SUPPLEMENT_NOTICE } from "@/lib/supplements";
 import { ReviewPrompt, ReviewView } from "@/components/progress/review-view";
 import { saveReview } from "@/app/(app)/progres/bilan/actions";
+import { saveReminders, subscribeDevice, unsubscribeDevice } from "@/app/(app)/reglages/rappels/actions";
+import { RemindersView } from "@/components/settings/reminders-view";
+import { NO_REMINDERS, type ReminderSettings } from "@/lib/reminders";
+
+const SAMPLE_REMINDERS: ReminderSettings = { times: { seance: "18:00", forme: "07:30", complements: null, bilan: "18:00" }, workoutDays: [1, 2, 4, 5] };
 import { getAppearance } from "@/lib/appearance";
 
 /**
@@ -396,6 +401,18 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
               )}
               <p className="text-[13px] text-muted">{SUPPLEMENT_NOTICE}</p>
             </div>
+          </>
+        ) : ecran === "rappels" || ecran === "rappels-vide" ? (
+          <>
+            <PageHeader title="Rappels" back="/apercu" />
+            <RemindersView
+              settings={ecran === "rappels" ? SAMPLE_REMINDERS : NO_REMINDERS}
+              publicKey={null}
+              devices={ecran === "rappels" ? 2 : 0}
+              saveAction={saveReminders}
+              subscribeAction={subscribeDevice}
+              unsubscribeAction={unsubscribeDevice}
+            />
           </>
         ) : ecran === "bilan" || ecran === "bilan-vide" ? (
           <>

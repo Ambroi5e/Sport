@@ -792,6 +792,27 @@ export type Database = {
         }
         Relationships: []
       }
+      push_subscriptions: {
+        Row: {
+          created_at: string
+          endpoint: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          endpoint: string
+          id?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          endpoint?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       recipe_items: {
         Row: {
           created_at: string
@@ -836,6 +857,60 @@ export type Database = {
             referencedColumns: ["id", "user_id"]
           },
         ]
+      }
+      reminder_log: {
+        Row: {
+          kind: string
+          sent_at: string
+          sent_on: string
+          user_id: string
+        }
+        Insert: {
+          kind: string
+          sent_at?: string
+          sent_on: string
+          user_id?: string
+        }
+        Update: {
+          kind?: string
+          sent_at?: string
+          sent_on?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      reminder_settings: {
+        Row: {
+          checkin_at: string | null
+          created_at: string
+          review_at: string | null
+          supplements_at: string | null
+          updated_at: string
+          user_id: string
+          workout_at: string | null
+          workout_days: number[]
+        }
+        Insert: {
+          checkin_at?: string | null
+          created_at?: string
+          review_at?: string | null
+          supplements_at?: string | null
+          updated_at?: string
+          user_id?: string
+          workout_at?: string | null
+          workout_days?: number[]
+        }
+        Update: {
+          checkin_at?: string | null
+          created_at?: string
+          review_at?: string | null
+          supplements_at?: string | null
+          updated_at?: string
+          user_id?: string
+          workout_at?: string | null
+          workout_days?: number[]
+        }
+        Relationships: []
       }
       saved_meal_items: {
         Row: {
@@ -1542,6 +1617,7 @@ export type Database = {
       is_group_member: { Args: { p_session: string }; Returns: boolean }
       is_group_participant: { Args: { p_session: string }; Returns: boolean }
       owns_group_session: { Args: { p_session: string }; Returns: boolean }
+      push_public_key: { Args: never; Returns: string }
       reserve_invitation: {
         Args: { p_code: string; p_email: string }
         Returns: boolean

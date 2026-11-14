@@ -61,8 +61,11 @@ import { CheckinCard } from "@/components/progress/checkin-card";
 import { ReadinessView } from "@/components/progress/readiness-view";
 import { ActivitiesView } from "@/components/training/activities-view";
 import { EnduranceView } from "@/components/training/endurance-view";
+import { HyroxForm } from "@/components/training/hyrox-form";
+import { HyroxView } from "@/components/training/hyrox-view";
 import { ActivityForm } from "@/components/training/activity-form";
 import { ActivityRepeat } from "@/components/training/activity-repeat";
+import { saveHyrox } from "@/app/(app)/entrainement/hyrox/actions";
 import { saveActivity } from "@/app/(app)/entrainement/sports/actions";
 import { saveCheckin } from "@/app/(app)/progres/forme/actions";
 import { GroupBoard } from "@/components/friends/group-board";
@@ -106,6 +109,7 @@ import {
   SAMPLE_GROUP_INVITED,
   SAMPLE_GROUP_NOW,
   SAMPLE_HISTORY,
+  SAMPLE_HYROX,
   SAMPLE_ITEMS,
   SAMPLE_MEASUREMENTS,
   SAMPLE_PHOTOS,
@@ -491,6 +495,24 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
               sportHref={(s) => `/apercu?ecran=${s === "natation" ? "endurance-natation" : "endurance"}`}
               outingHref={() => "/apercu?ecran=sortie-ajouter"}
             />
+          </>
+        ) : ecran === "hyrox" || ecran === "hyrox-ancienne" || ecran === "hyrox-vide" ? (
+          <>
+            <PageHeader title="Hyrox" back="/apercu" />
+            <HyroxView
+              races={ecran === "hyrox-vide" ? [] : SAMPLE_HYROX}
+              selectedId={ecran === "hyrox-ancienne" ? "hyrox-1" : undefined}
+              addHref="/apercu?ecran=hyrox-ajouter"
+              raceHref={(id) => `/apercu?ecran=${id === "hyrox-1" ? "hyrox-ancienne" : "hyrox"}`}
+              editHref={() => "/apercu?ecran=hyrox-ajouter"}
+            />
+          </>
+        ) : ecran === "hyrox-ajouter" ? (
+          <>
+            <PageHeader title="Course Hyrox" back="/apercu?ecran=hyrox" />
+            <div className="md:max-w-3xl">
+              <HyroxForm action={saveHyrox.bind(null, null)} defaults={{ date: SAMPLE_HYROX[0].date, seconds: SAMPLE_HYROX[0].seconds, splits: SAMPLE_HYROX[0].splits }} today={SAMPLE_DAY} />
+            </div>
           </>
         ) : ecran === "sortie-ajouter" ? (
           <>

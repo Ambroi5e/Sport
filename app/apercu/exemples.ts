@@ -1,7 +1,7 @@
 import type { MealNeed, Purchase, ShoppingItem, StockItem } from "@/lib/groceries";
 import type { Supplement } from "@/lib/supplements";
 import type { SavedReview } from "@/lib/review";
-import { weekReview, type Outing } from "@/lib/engine";
+import { weekReview, type HyroxRace, type Outing } from "@/lib/engine";
 import { adherence, type SupplementMoment } from "@/lib/engine";
 import type { ProgramViewData } from "@/components/training/program-view";
 import type { LoggerBlock, LoggerHistory } from "@/components/training/workout-logger";
@@ -833,4 +833,13 @@ export const SAMPLE_OUTINGS: Outing[] = [
   { id: "run-semi", date: "2026-10-11", sport: "course", distanceM: 21_100, seconds: 1 * 3600 + 52 * 60 + 40, elevationM: 120 },
   { id: "swim-1", date: "2026-10-30", sport: "natation", distanceM: 1500, seconds: 2400 },
   { id: "swim-2", date: "2026-10-16", sport: "natation", distanceM: 1200, seconds: 2040 },
+];
+
+const HYROX_NOV = [298, 262, 305, 171, 312, 318, 316, 284, 322, 291, 327, 142, 333, 329, 338, 401];
+
+/** Trois courses Hyrox : la dernière avec ses seize temps, celle d'avant aussi, la première au temps total seul. */
+export const SAMPLE_HYROX: HyroxRace[] = [
+  { id: "hyrox-3", date: "2026-11-01", seconds: 1 * 3600 + 26 * 60 + 14, splits: HYROX_NOV },
+  { id: "hyrox-2", date: "2026-06-14", seconds: 1 * 3600 + 31 * 60 + 2, splits: HYROX_NOV.map((s, i) => s + [14, -6, 9, 22, 11, -4, 18, 7, 16, 12, 21, -3, 25, 9, 31, 28][i]) },
+  { id: "hyrox-1", date: "2026-02-08", seconds: 1 * 3600 + 38 * 60 + 47, splits: null },
 ];

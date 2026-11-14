@@ -60,6 +60,7 @@ import { WeightView } from "@/components/progress/weight-view";
 import { CheckinCard } from "@/components/progress/checkin-card";
 import { ReadinessView } from "@/components/progress/readiness-view";
 import { ActivitiesView } from "@/components/training/activities-view";
+import { EnduranceView } from "@/components/training/endurance-view";
 import { ActivityForm } from "@/components/training/activity-form";
 import { ActivityRepeat } from "@/components/training/activity-repeat";
 import { saveActivity } from "@/app/(app)/entrainement/sports/actions";
@@ -81,6 +82,7 @@ import { addDays, weekStart } from "@/lib/dates";
 import { currentWeek, movingAverage, paceAlert, rateStatus, sumNutrients, weeklyRate, weeklyVolume } from "@/lib/engine";
 import {
   SAMPLE_ACTIVITIES,
+  SAMPLE_OUTINGS,
   SAMPLE_BUDGET_WEEK,
   SAMPLE_MEAL_NEEDS,
   SAMPLE_PURCHASES,
@@ -478,10 +480,43 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
               </Card>
             </div>
           </>
+        ) : ecran === "endurance" || ecran === "endurance-natation" || ecran === "endurance-vide" ? (
+          <>
+            <PageHeader title="Endurance" back="/apercu" />
+            <EnduranceView
+              outings={ecran === "endurance-vide" ? [] : SAMPLE_OUTINGS}
+              sport={ecran === "endurance-natation" ? "natation" : "course"}
+              today={SAMPLE_DAY}
+              addHref="/apercu?ecran=sortie-ajouter"
+              sportHref={(s) => `/apercu?ecran=${s === "natation" ? "endurance-natation" : "endurance"}`}
+              outingHref={() => "/apercu?ecran=sortie-ajouter"}
+            />
+          </>
+        ) : ecran === "sortie-ajouter" ? (
+          <>
+            <PageHeader title="Noter un sport" back="/apercu?ecran=endurance" />
+            <div className="grid gap-6 md:max-w-2xl">
+              <ActivityRepeat action={saveActivity.bind(null, null)} last={SAMPLE_ACTIVITIES[1]} today={SAMPLE_DAY} />
+              <h2 className="text-lg font-semibold">Ou autre chose</h2>
+              <ActivityForm
+                action={saveActivity.bind(null, null)}
+                defaults={{ sport: "course", label: "", minutes: 51, intensity: "moderee", date: SAMPLE_DAY, distanceM: 10_200, extraSeconds: 12, elevationM: 85, avgHr: 156 }}
+                sports={["course", "natation", ...sportOrder.filter((s) => s !== "course" && s !== "natation")]}
+                today={SAMPLE_DAY}
+                weightKg={SAMPLE_ACTIVITIES[0].weightKg}
+              />
+            </div>
+          </>
         ) : ecran === "sports" ? (
           <>
             <PageHeader title="Sports" back="/apercu" />
-            <ActivitiesView activities={SAMPLE_ACTIVITIES} today={SAMPLE_DAY} addHref="/apercu?ecran=sport-ajouter" itemHref={() => "/apercu?ecran=sport-ajouter"} />
+            <ActivitiesView
+              activities={SAMPLE_ACTIVITIES}
+              today={SAMPLE_DAY}
+              addHref="/apercu?ecran=sport-ajouter"
+              itemHref={() => "/apercu?ecran=sport-ajouter"}
+              enduranceHref="/apercu?ecran=endurance"
+            />
           </>
         ) : ecran === "sports-vide" ? (
           <>

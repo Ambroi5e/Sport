@@ -1,3 +1,4 @@
+import type { MealNeed, Purchase, ShoppingItem } from "@/lib/groceries";
 import type { ProgramViewData } from "@/components/training/program-view";
 import type { LoggerBlock, LoggerHistory } from "@/components/training/workout-logger";
 import {
@@ -664,3 +665,54 @@ export const SAMPLE_GROUP_INVITED: GroupSessionView = {
   board: groupBoard(groupPeople.map((p) => (p.userId === "moi" ? { ...p, joinedAt: null } : p)), []),
   feed: [],
 };
+
+// Courses -------------------------------------------------------------------------
+
+const shopping = (id: string, name: string, aisle: ShoppingItem["aisle"], quantity: string | null, grams: number | null, pricePerKg: number | null, checked = false): ShoppingItem => ({
+  id,
+  name,
+  quantity,
+  aisle,
+  checked,
+  foodId: grams === null ? null : `f-${id}`,
+  grams,
+  pricePerKg,
+});
+
+export const SAMPLE_SHOPPING: ShoppingItem[] = [
+  shopping("c-bananes", "Bananes", "fruits_legumes", "1 kg", 1000, 1.99),
+  shopping("c-brocoli", "Brocoli", "fruits_legumes", "600 g", 600, 3.2),
+  shopping("c-poulet", "Blanc de poulet", "viandes_poissons", "1,5 kg", 1500, 11.9),
+  shopping("c-skyr", "Skyr nature", "frais", "1,25 kg", 1250, 4.6),
+  shopping("c-oeufs", "Œufs", "frais", "12", null, null),
+  shopping("c-riz", "Riz basmati", "feculents", "900 g", 900, 2.4),
+  shopping("c-avoine", "Flocons d'avoine", "feculents", "300 g", 300, null),
+  shopping("c-coco", "Lait de coco", "epicerie", "400 g", 400, 4.5),
+  shopping("c-eponges", "Éponges", "hygiene", null, null, null),
+  shopping("c-huile", "Huile d'olive", "epicerie", "1 bouteille", null, null, true),
+  shopping("c-tomates", "Tomates concassées", "epicerie", "2 boîtes", null, null, true),
+];
+
+export const SAMPLE_MEAL_NEEDS: MealNeed[] = [
+  { foodId: "f-skyr", name: "Skyr nature", grams: 1050, buyGrams: 1250, pricePerKg: 4.6, inList: true },
+  { foodId: "f-poulet", name: "Blanc de poulet", grams: 980, buyGrams: 1000, pricePerKg: 11.9, inList: false },
+  { foodId: "f-banane", name: "Banane", grams: 840, buyGrams: 900, pricePerKg: 1.99, inList: false },
+  { foodId: "f-riz", name: "Riz basmati", grams: 620, buyGrams: 700, pricePerKg: 2.4, inList: false },
+  { foodId: "f-brocoli", name: "Brocoli", grams: 540, buyGrams: 600, pricePerKg: 3.2, inList: false },
+  { foodId: "f-coco", name: "Lait de coco", grams: 310, buyGrams: 400, pricePerKg: 4.5, inList: false },
+  { foodId: "f-avoine", name: "Flocons d'avoine", grams: 280, buyGrams: 300, pricePerKg: null, inList: false },
+  { foodId: "f-whey", name: "Whey vanille", grams: 210, buyGrams: 300, pricePerKg: null, inList: false },
+  { foodId: "f-huile", name: "Huile d'olive", grams: 95, buyGrams: 100, pricePerKg: null, inList: false },
+];
+
+/** Semaine du lundi 2 novembre 2026 ; `SAMPLE_DAY` tombe dedans. */
+export const SAMPLE_BUDGET_WEEK = "2026-11-02";
+export const SAMPLE_PURCHASES: Purchase[] = [
+  { id: "a-1", on: "2026-11-04", amount: 23.4, store: "Marché" },
+  { id: "a-2", on: "2026-11-02", amount: 16.25, store: "Supermarché" },
+  { id: "a-3", on: "2026-10-31", amount: 41.8, store: "Supermarché" },
+  { id: "a-4", on: "2026-10-27", amount: 9.9, store: null },
+  { id: "a-5", on: "2026-10-24", amount: 52.3, store: "Supermarché" },
+  { id: "a-6", on: "2026-10-17", amount: 44.1, store: "Supermarché" },
+  { id: "a-7", on: "2026-10-10", amount: 47.65, store: "Marché" },
+];

@@ -28,6 +28,7 @@ export function DeleteAccountView({
           <li>ton compte et ta connexion (e-mail ou Google) ;</li>
           <li>tes séances, séries, programmes, modèles et sports ;</li>
           <li>tes aliments, recettes, repas et ton journal ;</li>
+          <li>ta liste de courses, tes prix, tes achats et ton budget ;</li>
           <li>tes pesées, mensurations, photos de progression et ta forme du jour ;</li>
           <li>tes objectifs et réglages.</li>
         </ul>

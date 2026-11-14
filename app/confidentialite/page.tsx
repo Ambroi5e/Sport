@@ -55,7 +55,7 @@ export default async function PrivacyPage() {
               <strong>Ton profil</strong> : année de naissance, sexe, taille, niveau, jours d&apos;entraînement, objectifs.
             </li>
             <li>
-              <strong>Ce que tu notes</strong> : séances et séries, sports (durée, intensité), semaine type et séances déplacées, programmes, amis et ce que tu leur montres, aliments, recettes, repas, cibles,
+              <strong>Ce que tu notes</strong> : séances et séries, sports (durée, intensité), semaine type et séances déplacées, programmes, amis et ce que tu leur montres, aliments, recettes, repas, cibles, liste de courses, prix, achats et budget,
               pesées, mensurations, photos de progression, forme du jour (sommeil, courbatures, énergie, stress).
             </li>
           </List>

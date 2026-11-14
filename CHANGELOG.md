@@ -4,6 +4,17 @@ Format : une entrée par version (semver), du plus récent au plus ancien. Les m
 
 ## [Non publié]
 
+### v0.10 : liste de courses et budget
+
+- Courses : une seule liste, rangée par rayon dans l'ordre du magasin. On ajoute un article en écrivant son nom ; le rayon est deviné et se corrige d'un tap. Les articles cochés descendent dans le panier, qu'on vide d'un coup.
+- Depuis mes repas : Fonte additionne ce qui a été noté les 7 derniers jours, aliment par aliment (une recette est dépliée en ses ingrédients), arrondit à une quantité d'achat et propose la liste à cocher. Rien n'est ajouté sans validation.
+- Prix au kilo : saisis par la personne pour les aliments qu'elle mange. La liste affiche un total estimé et dit combien d'articles n'ont pas de prix.
+- Budget : un montant par semaine, vide par défaut, sans valeur par défaut pour personne. Après les courses on note le montant du ticket ; la carte montre dépensé, reste et la moyenne des dernières semaines.
+- Ce que tu manges : coût moyen par jour d'après le journal et les prix connus, avec la part des calories couverte. Sous 50 %, pas de chiffre ; le chiffre n'est jamais extrapolé.
+- Export : `courses.csv`, `prix.csv`, `achats.csv`. Pages Confidentialité et Supprimer mon compte mises à jour.
+- Migration non destructive appliquée : `20261119000000_courses.sql` (tables `shopping_items`, `food_prices`, `purchases`, colonne `profiles.weekly_food_budget`), avec 12 tests RLS. Aucun fichier destructif. Aucune dépendance ajoutée.
+- La v0.10 de la spec est découpée : v0.10 liste et budget, v0.10.1 stock et compléments, v0.10.2 rappels et bilan du dimanche.
+
 ### v0.9.1 : séances communes en temps réel
 
 - Amis > Lancer une séance commune : un nom, les amis à inviter. Chacun garde sa propre séance, son programme et ses charges.

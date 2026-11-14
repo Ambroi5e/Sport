@@ -81,6 +81,10 @@ import { addDays, weekStart } from "@/lib/dates";
 import { currentWeek, movingAverage, paceAlert, rateStatus, sumNutrients, weeklyRate, weeklyVolume } from "@/lib/engine";
 import {
   SAMPLE_ACTIVITIES,
+  SAMPLE_BUDGET_WEEK,
+  SAMPLE_MEAL_NEEDS,
+  SAMPLE_PURCHASES,
+  SAMPLE_SHOPPING,
   SAMPLE_BLOCKS,
   SAMPLE_CHECKINS,
   SAMPLE_DAY,
@@ -120,6 +124,18 @@ import {
   SAMPLE_WEIGHTS,
   SAMPLE_YESTERDAY,
 } from "./exemples";
+import { AddItemForm } from "@/components/groceries/add-item-form";
+import { BudgetCard, BudgetSummary } from "@/components/groceries/budget-card";
+import { BudgetForm, PricesForm, PurchaseForm } from "@/components/groceries/budget-forms";
+import { DayCostCard } from "@/components/groceries/day-cost-card";
+import { ItemForm } from "@/components/groceries/item-form";
+import { MealNeedsForm } from "@/components/groceries/meal-needs-form";
+import { PurchaseList } from "@/components/groceries/purchase-list";
+import { ShoppingList } from "@/components/groceries/shopping-list";
+import { addFromMeals, addItem, addPurchase, clearChecked, deletePurchase, savePrices, setBudget, toggleItem, updateItem } from "@/app/(app)/courses/actions";
+import { budgetStatus } from "@/lib/engine";
+import { ForkKnifeIcon } from "@phosphor-icons/react/ssr";
+import Link from "next/link";
 import { getAppearance } from "@/lib/appearance";
 
 /**
@@ -238,6 +254,88 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
               addSportAction={addWeeklySport}
               deleteSportAction={(id) => deleteWeeklySport.bind(null, id)}
             />
+          </>
+        ) : ecran === "courses" || ecran === "courses-vide" || ecran === "courses-sans-budget" ? (
+          <>
+            <PageHeader title="Courses" />
+            <div className="grid gap-5 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] md:items-start md:gap-6">
+              <div className="grid gap-5 md:order-2">
+                <BudgetCard
+                  budget={ecran === "courses" ? 50 : null}
+                  status={budgetStatus(ecran === "courses" ? 50 : null, ecran === "courses" ? SAMPLE_PURCHASES : [], SAMPLE_BUDGET_WEEK)}
+                  href="/apercu?ecran=courses-budget"
+                />
+                <AddItemForm action={addItem} />
+                <Link href="/apercu?ecran=courses-repas" className={buttonClasses("secondary", "md", "w-full")}>
+                  <ForkKnifeIcon size={18} aria-hidden="true" /> Depuis mes repas
+                </Link>
+              </div>
+              <ShoppingList
+                items={ecran === "courses-vide" ? [] : SAMPLE_SHOPPING}
+                itemHref={() => "/apercu?ecran=courses-article"}
+                toggleAction={toggleItem}
+                clearAction={clearChecked}
+              />
+            </div>
+          </>
+        ) : ecran === "courses-article" ? (
+          <>
+            <PageHeader title={SAMPLE_SHOPPING[2].name} eyebrow="Courses" back="/apercu?ecran=courses" />
+            <div className="grid gap-6 md:max-w-xl">
+              <ItemForm item={SAMPLE_SHOPPING[2]} action={updateItem.bind(null, "apercu")} />
+            </div>
+          </>
+        ) : ecran === "courses-repas" ? (
+          <>
+            <PageHeader title="Depuis mes repas" eyebrow="Courses" back="/apercu?ecran=courses" />
+            <div className="grid gap-4 md:max-w-xl">
+              <p className="text-[15px] text-muted">
+                Ce que tu as noté ces 7 derniers jours, recettes dépliées en ingrédients, arrondi à une quantité d&apos;achat. Décoche ce que tu as déjà chez toi.
+              </p>
+              <MealNeedsForm needs={SAMPLE_MEAL_NEEDS} action={addFromMeals} />
+            </div>
+          </>
+        ) : ecran === "courses-budget" || ecran === "courses-budget-vide" ? (
+          <>
+            <PageHeader title="Budget" eyebrow="Courses" back="/apercu?ecran=courses" />
+            <div className="grid gap-4 md:grid-cols-2 md:items-start md:gap-6">
+              <div className="grid gap-4">
+                <Card className="grid gap-5">
+                  <BudgetSummary
+                    budget={ecran === "courses-budget" ? 50 : null}
+                    status={budgetStatus(ecran === "courses-budget" ? 50 : null, ecran === "courses-budget" ? SAMPLE_PURCHASES : [], SAMPLE_BUDGET_WEEK)}
+                  />
+                  <BudgetForm budget={ecran === "courses-budget" ? 50 : null} action={setBudget} />
+                </Card>
+                <DayCostCard
+                  cost={ecran === "courses-budget" ? { perDay: 6.84, coverage: 0.78 } : { perDay: null, coverage: 0.22 }}
+                  days={ecran === "courses-budget" ? 7 : 3}
+                  pricesHref="/apercu?ecran=courses-prix"
+                />
+              </div>
+              <div className="grid gap-4">
+                <Card className="grid gap-4">
+                  <h2 className="text-lg font-semibold">Noter un achat</h2>
+                  <PurchaseForm today={SAMPLE_DAY} action={addPurchase} />
+                </Card>
+                <section aria-labelledby="achats-titre" className="grid gap-2">
+                  <h2 id="achats-titre" className="label-caps">
+                    Achats des cinq dernières semaines
+                  </h2>
+                  <PurchaseList purchases={ecran === "courses-budget" ? SAMPLE_PURCHASES : []} deleteAction={deletePurchase} />
+                </section>
+              </div>
+            </div>
+          </>
+        ) : ecran === "courses-prix" ? (
+          <>
+            <PageHeader title="Prix au kilo" eyebrow="Courses" back="/apercu?ecran=courses-budget" />
+            <div className="grid gap-4 md:max-w-xl">
+              <p className="text-[15px] text-muted">
+                Les aliments de tes 7 derniers jours, du plus mangé au moins mangé. Quelques prix suffisent : ils servent à estimer ta liste et ce que tu dépenses par jour.
+              </p>
+              <PricesForm foods={SAMPLE_MEAL_NEEDS} action={savePrices} />
+            </div>
           </>
         ) : ecran === "amis" || ecran === "amis-vide" ? (
           <>

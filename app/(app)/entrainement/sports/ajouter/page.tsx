@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { ActivityForm } from "@/components/training/activity-form";
 import { ActivityRepeat } from "@/components/training/activity-repeat";
+import { buttonClasses } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import { getProfile } from "@/lib/auth";
 import { localDate } from "@/lib/dates";
@@ -39,6 +41,9 @@ export default async function AddActivityPage() {
           today={today}
           weightKg={weightKg}
         />
+        <Link href="/entrainement/sports/importer" className={buttonClasses("ghost", "md", "justify-self-start")}>
+          Importer un fichier GPX
+        </Link>
       </div>
     </>
   );

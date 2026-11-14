@@ -13,7 +13,7 @@ Format : une entrée par version (semver), du plus récent au plus ancien. Les m
 - Fonte ne propose aucun complément ni aucune dose : l'écran le dit et renvoie au médecin ou au pharmacien.
 - Accueil : une carte Compléments seulement s'il en reste à cocher aujourd'hui.
 - Export : `stock.csv`, `complements.csv`, `complements-prises.csv`. Pages Confidentialité et Supprimer mon compte mises à jour.
-- Migration non destructive appliquée : `20261120000000_stock_complements.sql` (tables `stock_items`, `supplements`, `supplement_logs`), avec 12 tests RLS. Aucun fichier destructif. Aucune dépendance ajoutée.
+- Migrations non destructives appliquées : `20261120000000_stock_complements.sql` (tables `stock_items`, `supplements`, `supplement_logs`) et `20261120010000_complements_index.sql` (index demandé par les conseils Supabase), avec 12 tests RLS. Aucun fichier destructif. Aucune dépendance ajoutée.
 
 ### v0.10 : liste de courses et budget
 

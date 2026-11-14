@@ -61,9 +61,9 @@ Chaque table porte un `user_id`. Les catalogues communs (exercices, aliments de 
 | Activités | `activities` (v0.8 : sports additionnels ; colonnes d'endurance en v0.11), `activity_segments`, `hr_zones`, `race_plans` | v0.8, v0.11 |
 | Forme et bilans | `daily_checkins` (v0.8), `weekly_reviews`, `review_adjustments` | v0.8, v0.10 |
 | Amis | `friendships`, `friend_invites`, `share_grants` (v0.9) ; `group_sessions`, `group_participants`, `group_events` (v0.9.1) | v0.9, v0.9.1 |
-| Courses | `food_prices`, `shopping_lists`, `shopping_items`, `stock_items`, `budgets` | v0.10 |
-| Compléments | `supplements`, `supplement_logs` | v0.10 |
-| Rappels | `push_subscriptions`, `reminder_settings` | v0.10 |
+| Courses | `shopping_items`, `food_prices`, `purchases`, `profiles.weekly_food_budget` (v0.10) ; `stock_items` | v0.10, v0.10.1 |
+| Compléments | `supplements`, `supplement_logs` | v0.10.1 |
+| Rappels | `push_subscriptions`, `reminder_settings` | v0.10.2 |
 | Intégrations | `oauth_connections`, `personal_tokens`, `import_jobs` | v0.12 |
 
 ### Partage entre amis (v0.9)
@@ -82,6 +82,14 @@ Chaque table porte un `user_id`. Les catalogues communs (exercices, aliments de 
 - `groupBoard` et `groupFeed` (`lib/engine/group.ts`) résument le fil par participant ; `getGroupSession` (`app/(app)/amis/seance/data.ts`) les calcule à chaque rendu.
 - `LiveRefresh` (`components/friends/live-refresh.tsx`) écoute Realtime et demande au serveur de redessiner (`router.refresh()`) ; il recharge aussi toutes les 15 secondes tant que l'écran est visible. Aucune donnée ne transite par le client navigateur : il ne fait que signaler qu'il y a du nouveau.
 - Écrans : `/amis/seance/nouvelle`, `/amis/seance/[id]`, et un bandeau dans Amis et Entraînement.
+
+### Courses et budget (v0.10)
+
+- Une seule liste par personne (`shopping_items`) : nom, quantité en clair, rayon, coché ou non. Un article venu des repas garde `food_id` et `grams`, ce qui permet d'estimer son coût ; un article écrit à la main n'a ni l'un ni l'autre.
+- `lib/engine/groceries.ts` : `guessAisle` (mots-clés, début de mot), `ingredientsEaten` (recettes dépliées au prorata), `purchaseGrams` (arrondi au-dessus : 50 g, 100 g, 250 g), `listCost`, `budgetStatus` (semaine du lundi, moyenne des semaines précédentes notées), `dayCost` (jamais extrapolé, pas de chiffre sous 50 % de calories couvertes).
+- « Depuis mes repas » recalcule les quantités côté serveur à l'envoi (`addFromMeals`) : le formulaire n'envoie que les aliments cochés.
+- Prix au kilo (`food_prices`) et achats (`purchases`) sont saisis à la main ; euros seulement. Le budget est une colonne du profil, vide par défaut.
+- Écrans : `/courses`, `/courses/article/[id]`, `/courses/repas`, `/courses/budget`, `/courses/prix`.
 
 ## Interfaces prévues
 

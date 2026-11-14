@@ -81,6 +81,13 @@ Les données de santé (poids, mensurations, photos, forme, nutrition) sont des 
 - Temps réel : seules `group_events` et `group_participants` sont publiées, et Realtime applique leurs politiques de lecture. Le client navigateur (`lib/supabase/browser.ts`) n'a que la clé publique et la session de la personne.
 - Testé dans `supabase/tests/rls-seances-communes.test.ts` (12 tests).
 
+## Courses et budget (v0.10)
+
+- `shopping_items`, `food_prices` et `purchases` ont les quatre politiques limitées à `user_id = (select auth.uid())`. Un article ou un prix ne peut viser qu'un aliment du catalogue ou à soi (`food_is_usable`).
+- Rien de ces tables n'est partagé avec les amis : aucune fonction `friend_*` ne les lit.
+- Le budget (`profiles.weekly_food_budget`) n'a pas de valeur par défaut.
+- Testé dans `supabase/tests/rls-courses.test.ts` (12 tests).
+
 ## Fichiers importés
 
 Taille maximale et type vérifiés avant lecture (CSV 5 Mo, GPX et FIT 20 Mo, export Apple Santé lu sur le téléphone). Chaque ligne validée par zod ; une ligne invalide est rejetée et signalée, jamais insérée partiellement.

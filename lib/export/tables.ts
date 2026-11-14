@@ -33,7 +33,7 @@ const food = (column = "food_id", as = "food_name"): Ref => ({ column, from: "fo
  * ceux du catalogue qu'elle utilise sont nommés dans `catalog`.
  */
 export const EXPORT_TABLES: ExportTable[] = [
-  { table: "profiles", file: "profil", label: "Profil", order: ["user_id"] },
+  { table: "profiles", file: "profil", label: "Profil (weekly_food_budget : budget courses de la semaine, en euros)", order: ["user_id"] },
   { table: "goals", file: "objectifs", label: "Objectifs", order: ["created_at", "id"] },
   { table: "user_modules", file: "modules", label: "Modules activés", order: ["module"] },
   { table: "user_roles", file: "roles", label: "Rôle dans l'app", order: ["role"] },
@@ -77,6 +77,9 @@ export const EXPORT_TABLES: ExportTable[] = [
   { table: "saved_meal_items", file: "repas-enregistres-aliments", label: "Aliments des repas enregistrés", order: ["saved_meal_id", "position", "id"], refs: [food()] },
   { table: "food_logs", file: "journal-alimentaire", label: "Journal alimentaire (grammes mangés)", order: ["eaten_on", "created_at", "id"], refs: [food()] },
   { table: "nutrition_targets", file: "cibles", label: "Cibles par type de jour", order: ["day_type"] },
+  { table: "shopping_items", file: "courses", label: "Liste de courses (checked_at : dans le panier)", order: ["created_at", "id"], refs: [food()] },
+  { table: "food_prices", file: "prix", label: "Prix au kilo saisis, en euros", order: ["food_id"], refs: [food()] },
+  { table: "purchases", file: "achats", label: "Achats notés (montant du ticket, en euros)", order: ["purchased_on", "id"] },
   { table: "body_weights", file: "pesees", label: "Pesées", order: ["measured_on", "id"] },
   { table: "body_measurements", file: "mensurations", label: "Mensurations", order: ["measured_on", "site", "id"] },
   {

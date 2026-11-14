@@ -86,6 +86,7 @@ import {
   SAMPLE_PURCHASES,
   SAMPLE_SHOPPING,
   SAMPLE_STOCK,
+  SAMPLE_SUPPLEMENTS,
   SAMPLE_BLOCKS,
   SAMPLE_CHECKINS,
   SAMPLE_DAY,
@@ -139,6 +140,11 @@ import { ForkKnifeIcon, PackageIcon } from "@phosphor-icons/react/ssr";
 import { AddStockForm, StockItemForm } from "@/components/groceries/stock-forms";
 import { StockList } from "@/components/groceries/stock-list";
 import Link from "next/link";
+import { SupplementForm } from "@/components/supplements/supplement-form";
+import { SupplementsView } from "@/components/supplements/supplements-view";
+import { TodaySupplementsCard } from "@/components/supplements/today-card";
+import { addSupplement, toggleTaken, updateSupplement } from "@/app/(app)/nutrition/complements/actions";
+import { SUPPLEMENT_NOTICE } from "@/lib/supplements";
 import { getAppearance } from "@/lib/appearance";
 
 /**
@@ -362,6 +368,28 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
             <PageHeader title={SAMPLE_STOCK[1].name} eyebrow="Mon stock" back="/apercu?ecran=stock" />
             <div className="md:max-w-xl">
               <StockItemForm item={SAMPLE_STOCK[1]} action={updateStockItem.bind(null, "apercu")} />
+            </div>
+          </>
+        ) : ecran === "complements" || ecran === "complements-vide" ? (
+          <>
+            <PageHeader title="Compléments" eyebrow="Nutrition" back="/apercu?ecran=nutrition" />
+            <SupplementsView
+              supplements={ecran === "complements" ? SAMPLE_SUPPLEMENTS : []}
+              editHref={() => "/apercu?ecran=complement"}
+              newHref="/apercu?ecran=complement-nouveau"
+              toggleAction={toggleTaken}
+            />
+          </>
+        ) : ecran === "complement" || ecran === "complement-nouveau" ? (
+          <>
+            <PageHeader title={ecran === "complement" ? SAMPLE_SUPPLEMENTS[1].name : "Nouveau complément"} eyebrow="Compléments" back="/apercu?ecran=complements" />
+            <div className="grid gap-5 md:max-w-xl">
+              {ecran === "complement" ? (
+                <SupplementForm supplement={SAMPLE_SUPPLEMENTS[1]} action={updateSupplement.bind(null, "apercu")} submitLabel="Enregistrer" />
+              ) : (
+                <SupplementForm action={addSupplement} submitLabel="Ajouter" />
+              )}
+              <p className="text-[13px] text-muted">{SUPPLEMENT_NOTICE}</p>
             </div>
           </>
         ) : ecran === "amis" || ecran === "amis-vide" ? (
@@ -765,6 +793,7 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
                   <p className="text-[15px] text-muted">Rythme visé : 0,25 à 0,5 kg par semaine.</p>
                 </Card>
                 <TodayNutritionCard totals={sumNutrients(SAMPLE_TODAY.map((e) => e.nutrients))} target={SAMPLE_TARGETS.entrainement} dayType="entrainement" />
+                <TodaySupplementsCard supplements={SAMPLE_SUPPLEMENTS} href="/apercu?ecran=complements" />
                 <Card className="grid gap-3">
                   <div className="flex items-baseline justify-between">
                     <h2 className="text-lg font-semibold">Volume, 8 semaines</h2>

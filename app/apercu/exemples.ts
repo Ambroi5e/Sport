@@ -1,4 +1,6 @@
 import type { MealNeed, Purchase, ShoppingItem, StockItem } from "@/lib/groceries";
+import type { Supplement } from "@/lib/supplements";
+import { adherence, type SupplementMoment } from "@/lib/engine";
 import type { ProgramViewData } from "@/components/training/program-view";
 import type { LoggerBlock, LoggerHistory } from "@/components/training/workout-logger";
 import {
@@ -737,4 +739,22 @@ export const SAMPLE_STOCK: StockItem[] = [
   stock("s-avoine", "Flocons d'avoine", "500 g", null, 500),
   stock("s-riz", "Riz basmati", "250 g", null, 250),
   stock("s-thon", "Thon en boîte", "3 boîtes", null),
+];
+
+const supplement = (id: string, name: string, dose: string | null, moment: SupplementMoment, taken: string[], addedOn = "2026-09-01", paused = false): Supplement => ({
+  id,
+  name,
+  dose,
+  moment,
+  paused,
+  takenToday: taken.includes(SAMPLE_DAY),
+  adherence: adherence(taken, addedOn, SAMPLE_DAY),
+});
+
+export const SAMPLE_SUPPLEMENTS: Supplement[] = [
+  supplement("k-creatine", "Créatine", "5 g", "matin", ["2026-11-01", "2026-11-02", "2026-11-03", "2026-11-04", "2026-11-05", "2026-11-06", "2026-11-07"]),
+  supplement("k-vitd", "Vitamine D", "1 goutte", "matin", ["2026-11-01", "2026-11-03", "2026-11-04", "2026-11-06"]),
+  supplement("k-omega", "Oméga-3", "2 gélules", "midi", ["2026-11-06"], "2026-11-06"),
+  supplement("k-magnesium", "Magnésium", "1 comprimé", "coucher", ["2026-11-02", "2026-11-05", "2026-11-06"]),
+  supplement("k-zinc", "Zinc", null, "soir", [], "2026-09-01", true),
 ];

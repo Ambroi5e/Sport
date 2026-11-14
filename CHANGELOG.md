@@ -4,6 +4,17 @@ Format : une entrée par version (semver), du plus récent au plus ancien. Les m
 
 ## [Non publié]
 
+### v0.10.3 : rappels push
+
+- Réglages > Rappels : quatre rappels au choix, tous éteints par défaut, chacun à son heure. Séance du jour (les jours cochés), forme du jour, compléments, bilan du dimanche.
+- Un rappel ne part que s'il sert encore (séance pas commencée, check-in pas fait, prise à cocher, bilan pas enregistré), une fois par jour au plus.
+- « Activer sur cet appareil » : la permission n'est demandée qu'à ce tap. Se déconnecter arrête les rappels sur l'appareil. Sur iPhone, l'écran explique qu'il faut installer l'app sur l'écran d'accueil.
+- Le signal est vide : le service de notifications du navigateur (Google, Apple, Mozilla, Microsoft) ne reçoit aucune donnée. Le texte est demandé à Fonte par le téléphone, avec la session de la personne.
+- Envoi par Supabase (choix du 2026-11-14) : tâche `pg_cron` toutes les 5 minutes, Edge Function `rappels` sans secret ni accès à la base, clés VAPID dans Supabase Vault. Rien à régler dans Vercel.
+- Export : `rappels.csv`, `rappels-appareils.csv`, `rappels-envoyes.csv`. Pages Confidentialité et Supprimer mon compte mises à jour.
+- Migration non destructive appliquée : `20261122000000_rappels.sql` (tables `reminder_settings`, `push_subscriptions`, `reminder_log`, schéma `private`), avec 25 tests en base et 16 tests de la signature. Aucune dépendance ajoutée.
+- En attente de validation : `pending-destructive/20261122010000_rappels_nettoyage.sql` (retire les appareils dont l'adresse est périmée), `pending-destructive/20261122020000_rappels_sans_anon.sql` (retire au rôle `anon` le droit de lire la clé publique) et `pending-destructive/20261122030000_rappels_pg_net_schema.sql` (range l'extension `pg_net` hors du schéma `public`, signalé par l'audit Supabase).
+
 ### v0.10.2 : bilan du dimanche
 
 - Bilan de la semaine (depuis Progrès et l'accueil) : cinq rubriques en un chiffre et une phrase. Entraînement (séances faites sur prévues, séries, sports), nutrition (moyenne des jours notés face aux cibles), poids (moyenne et écart avec la semaine d'avant, rythme face à l'objectif), forme (moyenne des check-ins), courses (dépensé sur budget).

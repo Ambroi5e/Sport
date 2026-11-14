@@ -57,6 +57,24 @@ Supabase limite alors l'envoi à 30 e-mails par heure (Authentication > Rate Lim
 
 Depuis une fenêtre privée, demandez un code de connexion avec une adresse qui n'est pas membre du projet Supabase. Le code doit arriver en moins d'une minute ; sinon, regardez les indésirables puis les journaux d'envoi du service (Brevo : *Transactionnel > Journaux*). Les modèles d'e-mail (`supabase/templates/`) ne changent pas.
 
+## Rappels push
+
+Les rappels sont envoyés par votre projet Supabase. Sans cette étape, l'app fonctionne et l'écran Rappels indique qu'ils ne sont pas installés.
+
+1. Déployez la fonction : `npx supabase functions deploy rappels --no-verify-jwt`.
+2. Générez une paire de clés VAPID (par exemple `npx web-push generate-vapid-keys --json`, ou `generateVapidKeys` de `supabase/functions/rappels/vapid.ts`). La clé privée doit être au format JWK.
+3. Dans l'éditeur SQL de Supabase, rangez trois secrets dans Vault :
+
+   ```sql
+   select vault.create_secret('https://<ref>.supabase.co/functions/v1/rappels', 'rappels_function_url');
+   select vault.create_secret('<clé publique, base64url>', 'rappels_vapid_public');
+   select vault.create_secret('<clé privée, JWK en JSON>', 'rappels_vapid_private_jwk');
+   ```
+
+4. La tâche `fonte-rappels` (toutes les 5 minutes) est créée par la migration quand `pg_cron` et `pg_net` sont disponibles. Vérifiez-la avec `select jobname, schedule from cron.job;`.
+
+Ne changez pas les clés une fois des appareils abonnés : ils devraient tous réactiver les rappels.
+
 ## Mises à jour
 
 Récupérez les changements du dépôt d'origine, puis `npx supabase db push` pour appliquer les nouvelles migrations. Les migrations destructives sont toujours signalées dans le CHANGELOG.

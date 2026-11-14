@@ -63,7 +63,7 @@ Chaque table porte un `user_id`. Les catalogues communs (exercices, aliments de 
 | Amis | `friendships`, `friend_invites`, `share_grants` (v0.9) ; `group_sessions`, `group_participants`, `group_events` (v0.9.1) | v0.9, v0.9.1 |
 | Courses | `shopping_items`, `food_prices`, `purchases`, `profiles.weekly_food_budget` (v0.10) ; `stock_items` (v0.10.1) | v0.10, v0.10.1 |
 | Compléments | `supplements`, `supplement_logs` | v0.10.1 |
-| Rappels | `push_subscriptions`, `reminder_settings` | v0.10.3 |
+| Rappels | `reminder_settings`, `push_subscriptions`, `reminder_log` ; fonctions d'envoi dans le schéma `private` | v0.10.3 |
 | Intégrations | `oauth_connections`, `personal_tokens`, `import_jobs` | v0.12 |
 
 ### Partage entre amis (v0.9)
@@ -105,6 +105,17 @@ Chaque table porte un `user_id`. Les catalogues communs (exercices, aliments de 
 - `reviewWeek` choisit la semaine montrée d'office : celle en cours le dimanche, sinon la précédente.
 - Seuls le ressenti (1 à 5) et la note sont stockés (`weekly_reviews`, une ligne par semaine). `review_adjustments`, prévue au cadrage, n'existe pas : l'ajustement des calories reste l'alerte de rythme (`paceAlert`), appliquée à la main dans Cibles.
 - Écran : `/progres/bilan` (`?semaine=AAAA-MM-JJ` pour une autre semaine).
+
+### Rappels push (v0.10.3)
+
+- **Réglages** : `reminder_settings`, une ligne par personne, une heure par rappel (vide = éteint) et les jours du rappel de séance. Heures dans le fuseau du profil.
+- **Appareils** : `push_subscriptions` ne garde que l'adresse du signal (`endpoint`) donnée par le navigateur, limitée aux services de notifications connus (contrainte en base, `isPushEndpoint` dans l'action et dans la fonction). Pas de clé de chiffrement : le signal part vide.
+- **Qui doit recevoir quoi** : `private.due_reminders(now)`, en SQL. Heure locale atteinte depuis moins d'une heure, pas encore envoyé ce jour-là (`reminder_log`, une ligne par personne et par rappel), encore utile, au moins un appareil abonné.
+- **Envoi** : `pg_cron` lance `private.dispatch_reminders()` toutes les 5 minutes. Elle note l'envoi puis poste à l'Edge Function `rappels` (`pg_net`) les adresses et la paire de clés VAPID lue dans Supabase Vault (`rappels_function_url`, `rappels_vapid_public`, `rappels_vapid_private_jwk`). Sans ces trois secrets, elle ne fait rien.
+- **Edge Function `rappels`** (`supabase/functions/rappels`) : relais sans mémoire. Elle signe un jeton VAPID ES256 par service (`vapid.ts`, WebCrypto seul, testé avec Vitest) et envoie un signal sans contenu ; elle répond avec les adresses périmées (404, 410). Elle n'a ni secret ni accès à la base.
+- **Affichage** : le service worker (`public/sw.js`) reçoit le signal, demande `/reglages/rappels/a-afficher` avec la session de la personne (les rappels partis depuis moins de 30 minutes, textes dans `lib/reminders.ts`) et affiche. Sans réseau ou sans session : « Un rappel t'attend ». Un tap ouvre la page du rappel.
+- **Abonnement** : `PushDevice` (`components/settings/push-device.tsx`) demande la permission au tap, abonne avec la clé publique (`public.push_public_key()`) et enregistre l'adresse. La déconnexion désabonne l'appareil.
+- Écran : `/reglages/rappels`.
 
 ## Interfaces prévues
 

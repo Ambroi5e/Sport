@@ -24,7 +24,17 @@ export default async function ActivityPage({ params }: { params: Promise<{ id: s
       <div className="grid gap-6 md:max-w-2xl">
         <ActivityForm
           action={saveActivity.bind(null, activity.id)}
-          defaults={{ sport: activity.sport, label: activity.label ?? "", minutes: activity.minutes, intensity: activity.intensity, date: activity.date }}
+          defaults={{
+            sport: activity.sport,
+            label: activity.label ?? "",
+            minutes: activity.minutes,
+            intensity: activity.intensity,
+            date: activity.date,
+            distanceM: activity.distanceM,
+            extraSeconds: activity.seconds % 60,
+            elevationM: activity.elevationM,
+            avgHr: activity.avgHr,
+          }}
           sports={SPORTS}
           today={localDate(profile!.timezone)}
           weightKg={activity.weightKg ?? latest}

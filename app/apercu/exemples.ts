@@ -1,7 +1,7 @@
 import type { MealNeed, Purchase, ShoppingItem, StockItem } from "@/lib/groceries";
 import type { Supplement } from "@/lib/supplements";
 import type { SavedReview } from "@/lib/review";
-import { weekReview } from "@/lib/engine";
+import { weekReview, type Outing } from "@/lib/engine";
 import { adherence, type SupplementMoment } from "@/lib/engine";
 import type { ProgramViewData } from "@/components/training/program-view";
 import type { LoggerBlock, LoggerHistory } from "@/components/training/workout-logger";
@@ -492,13 +492,16 @@ export const SAMPLE_REPLACE = [
   { id: "ex-ecarte", name: "Écarté à la poulie", detail: "Poulie · Pectoraux", liked: false },
 ];
 
+const plain = { distanceM: null, elevationM: null, avgHr: null };
 const activityRows: Omit<Activity, "kcal" | "weightKg">[] = [
-  { id: "act-1", date: "2026-11-04", sport: "padel", label: null, minutes: 90, intensity: "intense" },
-  { id: "act-2", date: "2026-11-01", sport: "foot", label: null, minutes: 60, intensity: "moderee" },
-  { id: "act-3", date: "2026-10-28", sport: "padel", label: null, minutes: 90, intensity: "moderee" },
-  { id: "act-4", date: "2026-10-25", sport: "escalade", label: null, minutes: 120, intensity: "legere" },
-  { id: "act-5", date: "2026-10-21", sport: "padel", label: null, minutes: 90, intensity: "intense" },
-  { id: "act-6", date: "2026-10-18", sport: "autre", label: "Paddle", minutes: 60, intensity: "legere" },
+  { id: "act-1", date: "2026-11-04", sport: "padel", label: null, minutes: 90, seconds: 5400, intensity: "intense", ...plain },
+  { id: "act-0", date: "2026-11-03", sport: "course", label: null, minutes: 51, seconds: 51 * 60 + 12, intensity: "moderee", distanceM: 10_200, elevationM: 85, avgHr: 156 },
+  { id: "act-2", date: "2026-11-01", sport: "foot", label: null, minutes: 60, seconds: 3600, intensity: "moderee", ...plain },
+  { id: "act-7", date: "2026-10-30", sport: "natation", label: null, minutes: 40, seconds: 2400, intensity: "legere", distanceM: 1500, elevationM: null, avgHr: null },
+  { id: "act-3", date: "2026-10-28", sport: "padel", label: null, minutes: 90, seconds: 5400, intensity: "moderee", ...plain },
+  { id: "act-4", date: "2026-10-25", sport: "escalade", label: null, minutes: 120, seconds: 7200, intensity: "legere", ...plain },
+  { id: "act-5", date: "2026-10-21", sport: "padel", label: null, minutes: 90, seconds: 5400, intensity: "intense", ...plain },
+  { id: "act-6", date: "2026-10-18", sport: "autre", label: "Paddle", minutes: 60, seconds: 3600, intensity: "legere", ...plain },
 ];
 const activityKcal = activitiesKcal(activityRows, SAMPLE_WEIGHTS);
 
@@ -813,4 +816,21 @@ export const SAMPLE_REVIEWS: SavedReview[] = [
   { weekStart: "2026-10-26", feeling: 4, note: "Quatre séances faites, sommeil correct. Trop peu mangé jeudi : préparer le repas la veille." },
   { weekStart: "2026-10-19", feeling: 2, note: "Semaine chargée au travail, deux séances sautées." },
   { weekStart: "2026-10-12", feeling: 5, note: null },
+];
+
+/** Dix semaines de course (deux à trois sorties, une longue le dimanche) et un peu de natation. */
+export const SAMPLE_OUTINGS: Outing[] = [
+  ...Array.from({ length: 10 }, (_, w) => {
+    const sunday = shiftDay("2026-11-01", -7 * w);
+    const long = 16 - w * 0.6 + wobble(w) * 1.5;
+    return [
+      { id: `run-l${w}`, date: sunday, sport: "course", distanceM: Math.round(long * 100) * 10, seconds: Math.round(long * (322 + wobble(w + 3) * 6)), elevationM: 90 + Math.round(wobble(w) * 60) },
+      { id: `run-t${w}`, date: shiftDay(sunday, -3), sport: "course", distanceM: 8000 + (w % 3) * 1000, seconds: Math.round((8 + (w % 3)) * (291 + w * 2)), elevationM: 40 },
+      ...(w % 2 === 0 ? [{ id: `run-e${w}`, date: shiftDay(sunday, -5), sport: "course", distanceM: 6000, seconds: 6 * 335, elevationM: 25 }] : []),
+    ];
+  }).flat(),
+  { id: "run-now", date: "2026-11-03", sport: "course", distanceM: 10_200, seconds: 51 * 60 + 12, elevationM: 85 },
+  { id: "run-semi", date: "2026-10-11", sport: "course", distanceM: 21_100, seconds: 1 * 3600 + 52 * 60 + 40, elevationM: 120 },
+  { id: "swim-1", date: "2026-10-30", sport: "natation", distanceM: 1500, seconds: 2400 },
+  { id: "swim-2", date: "2026-10-16", sport: "natation", distanceM: 1200, seconds: 2040 },
 ];

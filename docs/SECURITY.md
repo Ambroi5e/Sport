@@ -88,6 +88,13 @@ Les données de santé (poids, mensurations, photos, forme, nutrition) sont des 
 - Le budget (`profiles.weekly_food_budget`) n'a pas de valeur par défaut.
 - Testé dans `supabase/tests/rls-courses.test.ts` (12 tests).
 
+## Stock et compléments (v0.10.1)
+
+- `stock_items`, `supplements` et `supplement_logs` ont les quatre politiques limitées à `user_id = (select auth.uid())`. Un article du stock ne peut viser qu'un aliment du catalogue ou à soi.
+- Une prise ne peut viser que ses propres compléments : clé étrangère composée `(supplement_id, user_id)`.
+- Les compléments sont une donnée de santé : ils ne sont partagés avec aucun ami et aucune fonction `friend_*` ne les lit. Fonte ne recommande ni complément ni dose.
+- Testé dans `supabase/tests/rls-stock-complements.test.ts` (12 tests).
+
 ## Fichiers importés
 
 Taille maximale et type vérifiés avant lecture (CSV 5 Mo, GPX et FIT 20 Mo, export Apple Santé lu sur le téléphone). Chaque ligne validée par zod ; une ligne invalide est rejetée et signalée, jamais insérée partiellement.

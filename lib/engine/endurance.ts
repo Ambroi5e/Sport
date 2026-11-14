@@ -36,7 +36,7 @@ export function isFaster(a: Pace, b: Pace): boolean {
   return a.unit === "kmh" ? a.value > b.value : a.value < b.value;
 }
 
-export type Outing = { id: string; date: string; sport: string; distanceM: number | null; seconds: number; elevationM?: number | null };
+export type Outing = { id: string; date: string; sport: string; distanceM: number | null; seconds: number; elevationM?: number | null; avgHr?: number | null };
 
 function shift(date: string, days: number): string {
   return new Date(Date.parse(`${date}T00:00:00Z`) + days * 86_400_000).toISOString().slice(0, 10);

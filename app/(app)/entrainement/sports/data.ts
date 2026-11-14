@@ -146,7 +146,7 @@ export async function getOutings(today: string): Promise<Outing[]> {
   const supabase = await createClient();
   const { data } = await supabase
     .from("activities")
-    .select("id, performed_on, sport, duration_minutes, duration_extra_s, distance_m, elevation_m")
+    .select("id, performed_on, sport, duration_minutes, duration_extra_s, distance_m, elevation_m, avg_hr")
     .eq("user_id", userId)
     .in("sport", [...ENDURANCE_SPORTS])
     .gte("performed_on", addDays(today, -730))
@@ -159,5 +159,6 @@ export async function getOutings(today: string): Promise<Outing[]> {
     distanceM: r.distance_m,
     seconds: r.duration_minutes * 60 + r.duration_extra_s,
     elevationM: r.elevation_m,
+    avgHr: r.avg_hr,
   }));
 }

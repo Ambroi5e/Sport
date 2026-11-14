@@ -638,6 +638,8 @@ export type Database = {
           display_name: string | null
           distance_unit: string
           height_cm: number | null
+          hr_max: number | null
+          hr_rest: number | null
           level: Database["public"]["Enums"]["training_level"] | null
           locale: string
           onboarded_at: string | null
@@ -656,6 +658,8 @@ export type Database = {
           display_name?: string | null
           distance_unit?: string
           height_cm?: number | null
+          hr_max?: number | null
+          hr_rest?: number | null
           level?: Database["public"]["Enums"]["training_level"] | null
           locale?: string
           onboarded_at?: string | null
@@ -674,6 +678,8 @@ export type Database = {
           display_name?: string | null
           distance_unit?: string
           height_cm?: number | null
+          hr_max?: number | null
+          hr_rest?: number | null
           level?: Database["public"]["Enums"]["training_level"] | null
           locale?: string
           onboarded_at?: string | null
@@ -824,6 +830,39 @@ export type Database = {
           created_at?: string
           endpoint?: string
           id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      race_plans: {
+        Row: {
+          created_at: string
+          distance_m: number
+          id: string
+          name: string
+          race_on: string
+          target_seconds: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          distance_m: number
+          id?: string
+          name: string
+          race_on: string
+          target_seconds?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          distance_m?: number
+          id?: string
+          name?: string
+          race_on?: string
+          target_seconds?: number | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: []

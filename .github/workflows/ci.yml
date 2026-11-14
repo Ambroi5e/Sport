@@ -46,6 +46,25 @@ jobs:
       - name: Audit des dépendances de production
         run: npm audit --omit=dev --audit-level=high
 
+  ecrans:
+    name: Écrans (Playwright)
+    runs-on: ubuntu-latest
+    env:
+      # Valeurs factices : l'aperçu n'utilise que des données d'exemple.
+      NEXT_PUBLIC_SUPABASE_URL: https://exemple.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Tous les écrans de l'aperçu, à 375 et 1440 px
+        run: npm run test:e2e
+
   secrets:
     name: Scan des secrets
     runs-on: ubuntu-latest

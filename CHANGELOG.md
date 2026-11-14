@@ -4,6 +4,12 @@ Format : une entrée par version (semver), du plus récent au plus ancien. Les m
 
 ## [Non publié]
 
+### v1.0 (1/3) : garde-fous
+
+- Sept tests de sécurité sur le schéma entier (`supabase/tests/schema-securite.test.ts`) : ils couvrent toutes les tables et fonctions, y compris celles des versions à venir (politiques jamais ouvertes au visiteur ni à `true`, identité vérifiée partout, `search_path` vide sur les fonctions `SECURITY DEFINER`, clé primaire, suppression en cascade avec le compte, pas de vue qui contourne la RLS).
+- Tests de bout en bout des écrans (`e2e/apercu.spec.ts`, `npm run test:e2e`) : les 90 écrans de l'aperçu à 375 et 1440 px, sans erreur console ni défilement horizontal, avec leur titre et leur flèche retour. Nouveau job CI « Écrans (Playwright) ».
+- Aucune fonctionnalité, aucune migration, aucune dépendance ajoutée (Playwright était déjà là).
+
 ### v0.12 : importer une sortie GPX
 
 - « Noter un sport » > « Importer un fichier GPX » : choisis l'export de ta montre ou de ton app, Fonte en tire la date, la distance, le temps en mouvement, le dénivelé positif et la fréquence cardiaque moyenne, puis ouvre le formulaire habituel déjà rempli. Tout reste modifiable avant d'enregistrer.

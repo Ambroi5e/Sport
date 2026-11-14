@@ -1,9 +1,15 @@
 import {
   BasketballIcon,
+  BoatIcon,
   BoxingGloveIcon,
   FootballIcon,
   MountainsIcon,
+  PersonSimpleBikeIcon,
+  PersonSimpleHikeIcon,
+  PersonSimpleRunIcon,
+  PersonSimpleSwimIcon,
   PersonSimpleThrowIcon,
+  PersonSimpleWalkIcon,
   RacquetIcon,
   SneakerMoveIcon,
   SoccerBallIcon,
@@ -14,6 +20,12 @@ import type { Icon } from "@phosphor-icons/react";
 import type { Sport } from "@/lib/sports";
 
 const ICONS: Record<Sport, Icon> = {
+  course: PersonSimpleRunIcon,
+  trail: PersonSimpleHikeIcon,
+  velo: PersonSimpleBikeIcon,
+  natation: PersonSimpleSwimIcon,
+  rameur: BoatIcon,
+  marche: PersonSimpleWalkIcon,
   padel: RacquetIcon,
   tennis: TennisBallIcon,
   squash: RacquetIcon,

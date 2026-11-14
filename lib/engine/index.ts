@@ -18,3 +18,4 @@ export * from "./groceries";
 export * from "./stock";
 export * from "./supplements";
 export * from "./review";
+export * from "./endurance";

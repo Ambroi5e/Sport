@@ -92,6 +92,9 @@ export const EXPORT_TABLES: ExportTable[] = [
     order: ["checkin_on"],
   },
   { table: "weekly_reviews", file: "bilans", label: "Bilans de la semaine (ressenti de 1 à 5, 5 = excellente ; note libre)", order: ["week_start"] },
+  { table: "reminder_settings", file: "rappels", label: "Rappels : heure de chacun (vide = éteint), jours du rappel de séance (1 = lundi … 7 = dimanche)", order: ["user_id"] },
+  { table: "push_subscriptions", file: "rappels-appareils", label: "Appareils abonnés aux rappels (adresse du signal donnée par le navigateur)", order: ["created_at", "id"] },
+  { table: "reminder_log", file: "rappels-envoyes", label: "Dernier envoi de chaque rappel", order: ["kind"] },
   { table: "progress_photos", file: "photos", label: "Photos de progression (fichiers dans photos/)", order: ["taken_on", "id"] },
 ];
 

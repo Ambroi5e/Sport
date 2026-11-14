@@ -17,7 +17,7 @@
 | Compression des images | à faire | photos de progrès compressées en WebP sur le téléphone (v0.5) |
 | Vitesse de chargement | à faire | Lighthouse mobile ≥ 90 |
 | Contraste AA | à faire | tokens vérifiés dans `docs/DESIGN.md` |
-| Responsive 375 à 1440 px | à faire | captures Playwright |
+| Responsive 375 à 1440 px | vérifié en CI | `e2e/apercu.spec.ts` : aucun défilement horizontal sur les 90 écrans de l'aperçu, à 375 et 1440 px |
 | Page 404 personnalisée | à faire | v0.1 |
 | Liens cassés | à faire | |
 | Validation des formulaires | à faire | zod côté serveur, messages au flou |

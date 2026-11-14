@@ -41,7 +41,7 @@ npm run dev          # serveur local
 npm run lint         # oxlint
 npm run typecheck    # tsc --noEmit
 npm test             # Vitest (moteur + RLS si DATABASE_URL_TEST est défini)
-npm run test:e2e     # Playwright, --trace off
+npm run test:e2e     # Playwright, --trace off : tous les écrans de /apercu à 375 et 1440 px
 npm run build
 ```
 

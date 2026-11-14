@@ -127,6 +127,10 @@ Les données de santé (poids, mensurations, photos, forme, nutrition) sont des 
 - Le contenu du fichier n'est jamais inséré comme HTML : seuls des nombres en sont tirés, et le nom du fichier est affiché comme texte par React.
 - Taille limitée à 20 Mo avant lecture.
 
+## Garde-fous du schéma (v1.0)
+
+- `supabase/tests/schema-securite.test.ts` vérifie les règles de ce document sur toutes les tables et fonctions à la fois : une migration future qui oublie la RLS par identité, ouvre une politique au visiteur, crée une fonction `SECURITY DEFINER` sans `search_path` vide, une table sans cascade vers le compte ou une vue sans `security_invoker` fait échouer la CI.
+
 ## Rappels push (v0.10.3)
 
 - `reminder_settings`, `push_subscriptions` et `reminder_log` ont les quatre politiques limitées à `user_id = (select auth.uid())`.

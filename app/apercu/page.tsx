@@ -63,9 +63,14 @@ import { ActivitiesView } from "@/components/training/activities-view";
 import { EnduranceView } from "@/components/training/endurance-view";
 import { HyroxForm } from "@/components/training/hyrox-form";
 import { HyroxView } from "@/components/training/hyrox-view";
+import { HrZonesView } from "@/components/training/hr-zones-view";
+import { RacePlanForm } from "@/components/training/race-plan-form";
+import { RacePlansView } from "@/components/training/race-plans-view";
 import { ActivityForm } from "@/components/training/activity-form";
 import { ActivityRepeat } from "@/components/training/activity-repeat";
 import { saveHyrox } from "@/app/(app)/entrainement/hyrox/actions";
+import { saveRacePlan } from "@/app/(app)/entrainement/endurance/objectifs/actions";
+import { saveHeartRates } from "@/app/(app)/entrainement/endurance/zones/actions";
 import { saveActivity } from "@/app/(app)/entrainement/sports/actions";
 import { saveCheckin } from "@/app/(app)/progres/forme/actions";
 import { GroupBoard } from "@/components/friends/group-board";
@@ -86,6 +91,8 @@ import { currentWeek, movingAverage, paceAlert, rateStatus, sumNutrients, weekly
 import {
   SAMPLE_ACTIVITIES,
   SAMPLE_OUTINGS,
+  SAMPLE_OUTINGS_HR,
+  SAMPLE_RACE_PLANS,
   SAMPLE_BUDGET_WEEK,
   SAMPLE_MEAL_NEEDS,
   SAMPLE_PURCHASES,
@@ -494,6 +501,10 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
               addHref="/apercu?ecran=sortie-ajouter"
               sportHref={(s) => `/apercu?ecran=${s === "natation" ? "endurance-natation" : "endurance"}`}
               outingHref={() => "/apercu?ecran=sortie-ajouter"}
+              links={[
+                { href: "/apercu?ecran=objectifs", label: "Objectifs de course" },
+                { href: "/apercu?ecran=zones", label: "Zones cardiaques" },
+              ]}
             />
           </>
         ) : ecran === "hyrox" || ecran === "hyrox-ancienne" || ecran === "hyrox-vide" ? (
@@ -513,6 +524,36 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
             <div className="md:max-w-3xl">
               <HyroxForm action={saveHyrox.bind(null, null)} defaults={{ date: SAMPLE_HYROX[0].date, seconds: SAMPLE_HYROX[0].seconds, splits: SAMPLE_HYROX[0].splits }} today={SAMPLE_DAY} />
             </div>
+          </>
+        ) : ecran === "objectifs" || ecran === "objectifs-vide" ? (
+          <>
+            <PageHeader title="Objectifs de course" back="/apercu?ecran=endurance" />
+            <RacePlansView
+              plans={ecran === "objectifs-vide" ? [] : SAMPLE_RACE_PLANS}
+              outings={SAMPLE_OUTINGS}
+              today={SAMPLE_DAY}
+              addHref="/apercu?ecran=objectif-ajouter"
+              editHref={() => "/apercu?ecran=objectif-ajouter"}
+            />
+          </>
+        ) : ecran === "objectif-ajouter" ? (
+          <>
+            <PageHeader title="Ajouter une course" back="/apercu?ecran=objectifs" />
+            <div className="md:max-w-2xl">
+              <RacePlanForm action={saveRacePlan.bind(null, null)} defaults={{ name: "Semi de Paris", date: "2027-03-07", distanceM: 21_097, targetSeconds: 6300 }} today={SAMPLE_DAY} />
+            </div>
+          </>
+        ) : ecran === "zones" || ecran === "zones-estimees" || ecran === "zones-vide" ? (
+          <>
+            <PageHeader title="Zones cardiaques" back="/apercu?ecran=endurance" />
+            <HrZonesView
+              hrMax={ecran === "zones" ? 188 : null}
+              hrRest={ecran === "zones" ? 52 : null}
+              birthYear={ecran === "zones-estimees" ? 1994 : null}
+              outings={ecran === "zones-vide" ? [] : SAMPLE_OUTINGS_HR}
+              today={SAMPLE_DAY}
+              action={saveHeartRates}
+            />
           </>
         ) : ecran === "sortie-ajouter" ? (
           <>

@@ -59,11 +59,11 @@ Chaque table porte un `user_id`. Les catalogues communs (exercices, aliments de 
 | Plan prédictif | `programs` (réglages et objectif chiffré), `exercise_preferences`, `workout_templates.program_id` : les séances du programme sont des modèles, les charges prévues se calculent à la lecture | v0.6 |
 | Planning | `weekly_sports` (sports fixes de la semaine type), `session_pins` (séance déplacée à la main, pour une semaine), `blocked_days` (jour libéré), `workouts.is_light` ; le planning lui-même se calcule à la lecture | v0.8.1 |
 | Activités | `activities` (v0.8 : sports additionnels ; colonnes d'endurance en v0.11), `activity_segments`, `hr_zones`, `race_plans` | v0.8, v0.11 |
-| Forme et bilans | `daily_checkins` (v0.8), `weekly_reviews`, `review_adjustments` | v0.8, v0.10 |
+| Forme et bilans | `daily_checkins` (v0.8), `weekly_reviews` (v0.10.2) | v0.8, v0.10.2 |
 | Amis | `friendships`, `friend_invites`, `share_grants` (v0.9) ; `group_sessions`, `group_participants`, `group_events` (v0.9.1) | v0.9, v0.9.1 |
 | Courses | `shopping_items`, `food_prices`, `purchases`, `profiles.weekly_food_budget` (v0.10) ; `stock_items` (v0.10.1) | v0.10, v0.10.1 |
 | Compléments | `supplements`, `supplement_logs` | v0.10.1 |
-| Rappels | `push_subscriptions`, `reminder_settings` | v0.10.2 |
+| Rappels | `push_subscriptions`, `reminder_settings` | v0.10.3 |
 | Intégrations | `oauth_connections`, `personal_tokens`, `import_jobs` | v0.12 |
 
 ### Partage entre amis (v0.9)
@@ -97,6 +97,14 @@ Chaque table porte un `user_id`. Les catalogues communs (exercices, aliments de 
 - `lib/engine/stock.ts` : `expiryOf` (périmé, à finir à 3 jours ou moins, sinon tranquille), `sortStock`, `stockByFood` (grammes non périmés par aliment), `missingGrams`. `mealNeeds` déduit le stock avant l'arrondi d'achat. Le stock n'est pas décompté à chaque repas noté : il se tient à la main.
 - Compléments : `supplements` (nom, dose en clair, moment, pause) et `supplement_logs` (une ligne par complément et par jour). `adherence` (`lib/engine/supplements.ts`) ne compte pas les jours d'avant l'ajout. Aucun catalogue : rien n'est proposé.
 - Écrans : `/courses/stock`, `/courses/stock/[id]`, `/nutrition/complements`, `/nutrition/complements/nouveau`, `/nutrition/complements/[id]`.
+
+### Bilan du dimanche (v0.10.2)
+
+- `weekReview` (`lib/engine/review.ts`) calcule une semaine du lundi au dimanche à partir des séances, sports, séries, journal, cibles, pesées, check-ins et achats. Une rubrique sans assez de données reste à `null` : quatre jours notés au moins pour la nutrition, deux pesées pour le poids.
+- `reviewLines` (`lib/review.ts`) met chaque rubrique en mots, avec un ton écrit (« Bien », « À regarder ») que la couleur ne fait que doubler.
+- `reviewWeek` choisit la semaine montrée d'office : celle en cours le dimanche, sinon la précédente.
+- Seuls le ressenti (1 à 5) et la note sont stockés (`weekly_reviews`, une ligne par semaine). `review_adjustments`, prévue au cadrage, n'existe pas : l'ajustement des calories reste l'alerte de rythme (`paceAlert`), appliquée à la main dans Cibles.
+- Écran : `/progres/bilan` (`?semaine=AAAA-MM-JJ` pour une autre semaine).
 
 ## Interfaces prévues
 

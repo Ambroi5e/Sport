@@ -95,6 +95,12 @@ Les données de santé (poids, mensurations, photos, forme, nutrition) sont des 
 - Les compléments sont une donnée de santé : ils ne sont partagés avec aucun ami et aucune fonction `friend_*` ne les lit. Fonte ne recommande ni complément ni dose.
 - Testé dans `supabase/tests/rls-stock-complements.test.ts` (12 tests).
 
+## Bilan du dimanche (v0.10.2)
+
+- `weekly_reviews` a les quatre politiques limitées à `user_id = (select auth.uid())`. La note est du texte libre de la personne : elle n'est montrée à aucun ami et aucune fonction `friend_*` ne la lit.
+- Le bilan ne stocke aucun chiffre : il relit les tables de la personne avec ses propres droits.
+- Testé dans `supabase/tests/rls-bilans.test.ts` (4 tests).
+
 ## Fichiers importés
 
 Taille maximale et type vérifiés avant lecture (CSV 5 Mo, GPX et FIT 20 Mo, export Apple Santé lu sur le téléphone). Chaque ligne validée par zod ; une ligne invalide est rejetée et signalée, jamais insérée partiellement.

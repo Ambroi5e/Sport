@@ -42,7 +42,8 @@ Tableau de bord, musculation, endurance, Hyrox, sports additionnels, planning in
 | v0.9.1 | Séances communes en temps réel |
 | v0.10 | Liste de courses par rayon, « Depuis mes repas », prix au kilo, budget de la semaine |
 | v0.10.1 | Stock et compléments |
-| v0.10.2 | Rappels push et bilan du dimanche |
+| v0.10.2 | Bilan du dimanche |
+| v0.10.3 | Rappels push |
 | v0.11 | Endurance, Hyrox, plans de course |
 | v0.12 | Imports Strong, Hevy, CSV, GPX, FIT, Apple Santé, Strava en option |
 | v1.0 | Audit sécurité, tests end-to-end complets, auto-hébergement, checklist web |

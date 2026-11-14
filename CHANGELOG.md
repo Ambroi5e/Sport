@@ -4,6 +4,18 @@ Format : une entrée par version (semver), du plus récent au plus ancien. Les m
 
 ## [Non publié]
 
+### v0.10.2 : bilan du dimanche
+
+- Bilan de la semaine (depuis Progrès et l'accueil) : cinq rubriques en un chiffre et une phrase. Entraînement (séances faites sur prévues, séries, sports), nutrition (moyenne des jours notés face aux cibles), poids (moyenne et écart avec la semaine d'avant, rythme face à l'objectif), forme (moyenne des check-ins), courses (dépensé sur budget).
+- Une rubrique sans données dit ce qui manque au lieu d'afficher un zéro trompeur. Pas de note globale ni de score.
+- Le bilan reprend l'alerte de rythme existante (±200 kcal après deux semaines hors fourchette) et renvoie vers Cibles ; rien n'est appliqué seul.
+- Ton ressenti : cinq niveaux en un tap et une note libre facultative. C'est la seule chose enregistrée ; les chiffres se recalculent à la lecture.
+- Le dimanche, le bilan montre la semaine en cours ; les autres jours, la semaine passée. Flèches pour remonter le temps, liste des bilans précédents.
+- Accueil : une carte « Ton bilan de la semaine est prêt » le dimanche et le lundi, tant qu'il n'est pas fait.
+- Export : `bilans.csv`. Pages Confidentialité et Supprimer mon compte mises à jour.
+- Migration non destructive appliquée : `20261121000000_bilans.sql` (table `weekly_reviews`), avec 4 tests RLS. Aucun fichier destructif. Aucune dépendance ajoutée.
+- La v0.10.2 de la spec est découpée : v0.10.2 bilan du dimanche, v0.10.3 rappels push.
+
 ### v0.10.1 : stock et compléments
 
 - Mon stock (depuis Courses) : ce qu'on a chez soi, avec une date de péremption facultative. Le plus urgent est en haut, et la péremption est écrite en mots : « Périmé depuis 2 jours », « À finir demain », « Jusqu'au 21 nov. ». « Fini » retire un article en un tap.

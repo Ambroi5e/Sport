@@ -17,6 +17,8 @@ import { ADAPT_HINTS, dayWord } from "@/lib/planning";
 import { getTrainingSetsSince } from "./entrainement/data";
 import { getWeekContext } from "./entrainement/semaine/data";
 import { saveCheckin } from "./progres/forme/actions";
+import { TodaySupplementsCard } from "@/components/supplements/today-card";
+import { getSupplements } from "./nutrition/complements/data";
 import { getDayLogs, getDayType, getTargets } from "./nutrition/data";
 import { getPrimaryGoal, getWeightSummary } from "./weight-data";
 
@@ -28,12 +30,13 @@ export default async function HomePage() {
   const monday = weekStart(weight.today);
   // Musculation et force : le volume des 8 dernières semaines a sa place sur l'accueil.
   const strengthGoal = goal ? HIGH_PROTEIN_GOALS.has(goal.type) : false;
-  const [meals, targets, dayType, sets, planning] = await Promise.all([
+  const [meals, targets, dayType, sets, planning, supplements] = await Promise.all([
     getDayLogs(weight.today),
     getTargets(),
     getDayType(weight.today, profile.training_days),
     strengthGoal ? getTrainingSetsSince(addDays(monday, -49)) : Promise.resolve([]),
     getWeekContext(),
+    getSupplements(weight.today, profile.timezone),
   ]);
   const { plan, checkin } = planning;
   const inWeek = <T extends { date: string }>(list: readonly T[]) => list.filter((x) => x.date >= monday).map((x) => x.date);
@@ -139,6 +142,7 @@ export default async function HomePage() {
           ) : null}
 
           <TodayNutritionCard totals={sumNutrients(meals.map((m) => m.nutrients))} target={targets[dayType] ?? null} dayType={dayType} />
+          <TodaySupplementsCard supplements={supplements} href="/nutrition/complements" />
 
           {strengthGoal && sets.length ? (
             <Card aria-labelledby="volume-titre" className="grid gap-3">

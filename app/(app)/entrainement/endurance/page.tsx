@@ -25,6 +25,10 @@ export default async function EndurancePage({ searchParams }: { searchParams: Pr
         addHref="/entrainement/sports/ajouter"
         sportHref={(s) => `/entrainement/endurance?sport=${s}`}
         outingHref={(id) => `/entrainement/sports/${id}`}
+        links={[
+          { href: "/entrainement/endurance/objectifs", label: "Objectifs de course" },
+          { href: "/entrainement/endurance/zones", label: "Zones cardiaques" },
+        ]}
       />
     </>
   );

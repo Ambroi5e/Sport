@@ -2,6 +2,7 @@ import type { MealNeed, Purchase, ShoppingItem, StockItem } from "@/lib/grocerie
 import type { Supplement } from "@/lib/supplements";
 import type { SavedReview } from "@/lib/review";
 import { weekReview, type HyroxRace, type Outing } from "@/lib/engine";
+import type { RacePlan } from "@/lib/races";
 import { adherence, type SupplementMoment } from "@/lib/engine";
 import type { ProgramViewData } from "@/components/training/program-view";
 import type { LoggerBlock, LoggerHistory } from "@/components/training/workout-logger";
@@ -843,3 +844,15 @@ export const SAMPLE_HYROX: HyroxRace[] = [
   { id: "hyrox-2", date: "2026-06-14", seconds: 1 * 3600 + 31 * 60 + 2, splits: HYROX_NOV.map((s, i) => s + [14, -6, 9, 22, 11, -4, 18, 7, 16, 12, 21, -3, 25, 9, 31, 28][i]) },
   { id: "hyrox-1", date: "2026-02-08", seconds: 1 * 3600 + 38 * 60 + 47, splits: null },
 ];
+
+/** Un semi dans quatre mois avec un temps visé, un 10 km sans, une course passée. */
+export const SAMPLE_RACE_PLANS: RacePlan[] = [
+  { id: "plan-semi", name: "Semi de Paris", date: "2027-03-07", distanceM: 21_097, targetSeconds: 1 * 3600 + 45 * 60 },
+  { id: "plan-10", name: "10 km du quartier", date: "2026-11-22", distanceM: 10_000, targetSeconds: null },
+  { id: "plan-passe", name: "20 km de Paris", date: "2026-10-11", distanceM: 20_000, targetSeconds: 1 * 3600 + 48 * 60 },
+];
+
+/** Les sorties de course avec une fréquence moyenne : faciles le dimanche, soutenues en semaine. */
+export const SAMPLE_OUTINGS_HR: Outing[] = SAMPLE_OUTINGS.map((o, i) =>
+  o.sport === "course" ? { ...o, avgHr: o.id.startsWith("run-t") ? 164 + (i % 3) * 3 : o.id.startsWith("run-l") ? 146 + (i % 4) : 138 + (i % 5) } : o,
+);

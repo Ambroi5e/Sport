@@ -33,7 +33,7 @@ const food = (column = "food_id", as = "food_name"): Ref => ({ column, from: "fo
  * ceux du catalogue qu'elle utilise sont nommés dans `catalog`.
  */
 export const EXPORT_TABLES: ExportTable[] = [
-  { table: "profiles", file: "profil", label: "Profil (weekly_food_budget : budget courses de la semaine, en euros)", order: ["user_id"] },
+  { table: "profiles", file: "profil", label: "Profil (weekly_food_budget : budget courses de la semaine, en euros ; hr_max et hr_rest : fréquence cardiaque maximale et de repos)", order: ["user_id"] },
   { table: "goals", file: "objectifs", label: "Objectifs", order: ["created_at", "id"] },
   { table: "user_modules", file: "modules", label: "Modules activés", order: ["module"] },
   { table: "user_roles", file: "roles", label: "Rôle dans l'app", order: ["role"] },
@@ -91,6 +91,7 @@ export const EXPORT_TABLES: ExportTable[] = [
     label: "Forme du jour (1 à 5 : sommeil et énergie, 5 = très bien ; courbatures et stress, 5 = forts)",
     order: ["checkin_on"],
   },
+  { table: "race_plans", file: "objectifs-course", label: "Objectifs de course (distance en mètres, temps visé en secondes)", order: ["race_on", "id"] },
   { table: "weekly_reviews", file: "bilans", label: "Bilans de la semaine (ressenti de 1 à 5, 5 = excellente ; note libre)", order: ["week_start"] },
   { table: "reminder_settings", file: "rappels", label: "Rappels : heure de chacun (vide = éteint), jours du rappel de séance (1 = lundi … 7 = dimanche)", order: ["user_id"] },
   { table: "push_subscriptions", file: "rappels-appareils", label: "Appareils abonnés aux rappels (adresse du signal donnée par le navigateur)", order: ["created_at", "id"] },

@@ -8,7 +8,7 @@
  * et le paddleball.
  *
  * Endurance (v0.11) : mêmes sections du Compendium (Running, Walking, Bicycling,
- * Water Activities, Conditioning Exercise). Une course ou une marche dont on connaît
+ * Water Activities, Conditioning Exercise). Hyrox (v0.11.1) : Conditioning Exercise. Une course ou une marche dont on connaît
  * la distance prend le MET de sa vitesse (`speedMet`) plutôt que celui de l'intensité.
  */
 
@@ -35,6 +35,7 @@ export const SPORT_METS: Readonly<Record<string, readonly [legere: number, moder
   natation: [5.8, 8.0, 9.8], // longueurs lentes (18240), crawl moyen (18290), longueurs rapides (18230)
   rameur: [5.0, 7.5, 11.0], // moins de 100 W (02071), 100 à 149 W (02072), 150 à 199 W (02073)
   marche: [3.8, 4.8, 6.0], // 4,5 à 5,5 km/h (17190), 5,6 à 6,3 km/h (17200), randonnée tout-terrain (17080)
+  hyrox: [5.0, 7.5, 11.0], // circuit modéré (02035), circuit soutenu (02040), intervalles à haute intensité (02214)
   autre: [4.0, 6.0, 8.0], // repères : 3 à 6 MET modéré, 6 et plus vigoureux
 };
 

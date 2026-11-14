@@ -28,6 +28,7 @@ export function EnduranceView({
   addHref,
   sportHref,
   outingHref,
+  links = [],
 }: {
   outings: Outing[];
   sport: EnduranceSport;
@@ -35,6 +36,8 @@ export function EnduranceView({
   addHref: string;
   sportHref: (sport: EnduranceSport) => string;
   outingHref: (id: string) => string;
+  /** Liens vers les objectifs de course et les zones cardiaques. */
+  links?: { href: string; label: string }[];
 }) {
   const practiced = ENDURANCE_SPORTS.filter((s) => outings.some((o) => o.sport === s));
   if (practiced.length === 0) {
@@ -46,6 +49,15 @@ export function EnduranceView({
         <Link href={addHref} className={buttonClasses("primary", "lg", "w-full sm:w-auto sm:justify-self-start")}>
           <PlusIcon size={20} weight="bold" aria-hidden="true" /> Noter une sortie
         </Link>
+        {links.length ? (
+          <nav aria-label="Aller plus loin" className="grid gap-2 sm:grid-cols-2 sm:justify-self-start">
+            {links.map((l) => (
+              <Link key={l.href} href={l.href} className={buttonClasses("secondary", "md", "w-full")}>
+                {l.label}
+              </Link>
+            ))}
+          </nav>
+        ) : null}
       </div>
     );
   }
@@ -117,6 +129,15 @@ export function EnduranceView({
               <p className="text-[15px] text-muted">Note la distance d&apos;une sortie pour voir tes records.</p>
             )}
           </Card>
+          {links.length ? (
+          <nav aria-label="Aller plus loin" className="grid gap-2 sm:grid-cols-2 sm:justify-self-start">
+            {links.map((l) => (
+              <Link key={l.href} href={l.href} className={buttonClasses("secondary", "md", "w-full")}>
+                {l.label}
+              </Link>
+            ))}
+          </nav>
+        ) : null}
         </div>
 
         <Card aria-labelledby="endurance-volume-titre" className="grid content-start gap-3">

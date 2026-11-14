@@ -4,6 +4,18 @@ Format : une entrée par version (semver), du plus récent au plus ancien. Les m
 
 ## [Non publié]
 
+### v0.11 : endurance
+
+- Six sports de plus dans « Noter un sport » : course à pied, trail, vélo, natation, rameur, marche. Pour eux, le formulaire demande aussi la distance (en km, en mètres pour la natation et le rameur) et les secondes ; dénivelé et fréquence cardiaque moyenne sont sous « Plus de détails ». Tout est facultatif.
+- Allure affichée dès la saisie, dans l'unité du sport : min/km, km/h à vélo, min/100 m en natation, min/500 m au rameur.
+- Dépense plus juste pour la course et la marche : avec une distance, Fonte prend le MET de la vitesse (Compendium 2024) plutôt que celui de l'intensité.
+- Nouvel écran Endurance (depuis Entraînement et Sports) : la semaine en cours, les kilomètres des huit dernières semaines, et les records (plus longue sortie, meilleure allure sur les sorties d'au moins 5 km, 10 km, semi, marathon, plus gros dénivelé). Un record d'allure dit de quelle sortie il vient.
+- « Comme la dernière fois » refait une sortie avec sa distance. La liste des sports montre la distance et l'allure.
+- Les sorties sont des activités : planning, charge, semaine de l'accueil, cibles du jour et semaine type les prennent sans changement. Les amis voient le sport, la durée et l'intensité comme avant ; ni la distance, ni le dénivelé, ni la fréquence cardiaque.
+- Export : nouvelles colonnes dans `activites.csv`. Page Confidentialité mise à jour.
+- Migration non destructive appliquée : `20261123000000_endurance.sql` (six valeurs de `activity_sport`, quatre colonnes sur `activities`), avec 8 tests RLS. Aucun fichier destructif. Aucune dépendance ajoutée.
+- La v0.11 de la spec est découpée : v0.11 endurance, v0.11.1 Hyrox, v0.11.2 plans de course.
+
 ### v0.10.3 : rappels push
 
 - Réglages > Rappels : quatre rappels au choix, tous éteints par défaut, chacun à son heure. Séance du jour (les jours cochés), forme du jour, compléments, bilan du dimanche.

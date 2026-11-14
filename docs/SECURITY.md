@@ -101,6 +101,12 @@ Les données de santé (poids, mensurations, photos, forme, nutrition) sont des 
 - Le bilan ne stocke aucun chiffre : il relit les tables de la personne avec ses propres droits.
 - Testé dans `supabase/tests/rls-bilans.test.ts` (4 tests).
 
+## Endurance (v0.11)
+
+- Les colonnes d'endurance vivent dans `activities` : mêmes quatre politiques, rien à ajouter. Bornes en base (distance de 50 m à 1 000 km, secondes de 0 à 59, dénivelé de 0 à 20 000 m, fréquence cardiaque de 30 à 240).
+- La fréquence cardiaque est une donnée de santé : `friend_activities` ne renvoie ni elle, ni la distance, ni le dénivelé (testé).
+- Testé dans `supabase/tests/rls-endurance.test.ts` (8 tests).
+
 ## Rappels push (v0.10.3)
 
 - `reminder_settings`, `push_subscriptions` et `reminder_log` ont les quatre politiques limitées à `user_id = (select auth.uid())`.

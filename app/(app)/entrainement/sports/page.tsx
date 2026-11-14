@@ -17,6 +17,7 @@ export default async function SportsPage() {
         today={localDate(profile!.timezone)}
         addHref="/entrainement/sports/ajouter"
         itemHref={(id) => `/entrainement/sports/${id}`}
+        enduranceHref="/entrainement/endurance"
       />
     </>
   );

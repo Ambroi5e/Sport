@@ -5,7 +5,7 @@ import type { ActivityFormState } from "@/app/(app)/entrainement/sports/actions"
 import { Card } from "@/components/ui/card";
 import { SubmitButton } from "@/components/ui/submit-button";
 import type { Intensity } from "@/lib/engine";
-import { activityName, formatMinutes, INTENSITY_LABELS, type Sport } from "@/lib/sports";
+import { activityName, distanceInput, formatDistance, formatMinutes, INTENSITY_LABELS, type Sport } from "@/lib/sports";
 
 /**
  * « Comme la dernière fois » : la dernière activité refaite aujourd'hui, en un tap.
@@ -17,7 +17,7 @@ export function ActivityRepeat({
   today,
 }: {
   action: (state: ActivityFormState, formData: FormData) => Promise<ActivityFormState>;
-  last: { sport: Sport; label: string | null; minutes: number; intensity: Intensity };
+  last: { sport: Sport; label: string | null; minutes: number; intensity: Intensity; distanceM?: number | null; seconds?: number; elevationM?: number | null };
   today: string;
 }) {
   const [state, formAction] = useActionState(action, {} as ActivityFormState);
@@ -30,7 +30,7 @@ export function ActivityRepeat({
         {activityName(last.sport, last.label)}
         <span className="font-normal text-muted">
           {" "}
-          · {formatMinutes(last.minutes)} · {INTENSITY_LABELS[last.intensity].label.toLowerCase()}
+          {last.distanceM ? `· ${formatDistance(last.distanceM, last.sport)} ` : ""}· {formatMinutes(last.minutes)} · {INTENSITY_LABELS[last.intensity].label.toLowerCase()}
         </span>
       </p>
       <form action={formAction} className="grid gap-2">
@@ -39,6 +39,9 @@ export function ActivityRepeat({
         <input type="hidden" name="minutes" value={last.minutes} />
         <input type="hidden" name="intensity" value={last.intensity} />
         <input type="hidden" name="date" value={today} />
+        {last.distanceM ? <input type="hidden" name="distance" value={distanceInput(last.distanceM, last.sport)} /> : null}
+        {last.seconds ? <input type="hidden" name="seconds" value={last.seconds % 60} /> : null}
+        {last.elevationM ? <input type="hidden" name="elevation" value={last.elevationM} /> : null}
         {state.error ? (
           <p role="alert" className="text-[14px] text-danger">
             {state.error}

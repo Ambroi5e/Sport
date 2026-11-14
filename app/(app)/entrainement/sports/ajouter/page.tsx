@@ -31,6 +31,9 @@ export default async function AddActivityPage() {
             minutes: last?.minutes ?? 60,
             intensity: last?.intensity ?? "moderee",
             date: today,
+            distanceM: last?.distanceM,
+            extraSeconds: last ? last.seconds % 60 : 0,
+            elevationM: last?.elevationM,
           }}
           sports={habits.order}
           today={today}

@@ -15,8 +15,12 @@ export type Database = {
     Tables: {
       activities: {
         Row: {
+          avg_hr: number | null
           created_at: string
+          distance_m: number | null
+          duration_extra_s: number
           duration_minutes: number
+          elevation_m: number | null
           id: string
           intensity: Database["public"]["Enums"]["activity_intensity"]
           label: string | null
@@ -26,8 +30,12 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          avg_hr?: number | null
           created_at?: string
+          distance_m?: number | null
+          duration_extra_s?: number
           duration_minutes: number
+          elevation_m?: number | null
           id?: string
           intensity: Database["public"]["Enums"]["activity_intensity"]
           label?: string | null
@@ -37,8 +45,12 @@ export type Database = {
           user_id?: string
         }
         Update: {
+          avg_hr?: number | null
           created_at?: string
+          distance_m?: number | null
+          duration_extra_s?: number
           duration_minutes?: number
+          elevation_m?: number | null
           id?: string
           intensity?: Database["public"]["Enums"]["activity_intensity"]
           label?: string | null
@@ -1638,6 +1650,12 @@ export type Database = {
         | "escalade"
         | "combat"
         | "autre"
+        | "course"
+        | "trail"
+        | "velo"
+        | "natation"
+        | "rameur"
+        | "marche"
       app_module:
         | "musculation"
         | "endurance"
@@ -1755,6 +1773,12 @@ export const Constants = {
         "escalade",
         "combat",
         "autre",
+        "course",
+        "trail",
+        "velo",
+        "natation",
+        "rameur",
+        "marche",
       ],
       app_module: ["musculation", "endurance", "hyrox", "sports", "nutrition", "courses", "corps", "complements", "planning", "amis"],
       app_role: ["admin"],

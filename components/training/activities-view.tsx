@@ -5,11 +5,32 @@ import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { formatLongDate, weekStart } from "@/lib/dates";
 import type { Activity } from "@/app/(app)/entrainement/sports/data";
-import { activityName, formatKcal, formatMinutes, INTENSITY_LABELS } from "@/lib/sports";
+import { isEndurance, paceOf } from "@/lib/engine";
+import { activityName, formatDistance, formatDuration, formatKcal, formatMinutes, formatPace, INTENSITY_LABELS } from "@/lib/sports";
 import { SportIcon } from "./sport-icon";
 
+/** « 10,2 km · 4:54 /km » pour une sortie mesurée. */
+function outingDetail(a: Activity): string | null {
+  if (!isEndurance(a.sport) || !a.distanceM) return null;
+  const pace = paceOf(a.sport, a.distanceM, a.seconds);
+  return `${formatDistance(a.distanceM, a.sport)}${pace ? ` · ${formatPace(pace)}` : ""}`;
+}
+
 /** Sports notés : la semaine en cours en un coup d'œil, puis les dernières activités. */
-export function ActivitiesView({ activities, today, addHref, itemHref }: { activities: Activity[]; today: string; addHref: string; itemHref: (id: string) => string }) {
+export function ActivitiesView({
+  activities,
+  today,
+  addHref,
+  itemHref,
+  enduranceHref,
+}: {
+  activities: Activity[];
+  today: string;
+  addHref: string;
+  itemHref: (id: string) => string;
+  /** Lien vers les kilomètres et les records, montré dès qu'une sortie d'endurance est notée. */
+  enduranceHref?: string;
+}) {
   const monday = weekStart(today);
   const week = activities.filter((a) => a.date >= monday);
   const minutes = week.reduce((sum, a) => sum + a.minutes, 0);
@@ -41,6 +62,11 @@ export function ActivitiesView({ activities, today, addHref, itemHref }: { activ
           <Link href={addHref} className={buttonClasses("primary", "lg", "w-full")}>
             <PlusIcon size={20} weight="bold" aria-hidden="true" /> Noter un sport
           </Link>
+          {enduranceHref && activities.some((a) => isEndurance(a.sport)) ? (
+            <Link href={enduranceHref} className={buttonClasses("secondary", "md", "w-full")}>
+              Kilomètres et records
+            </Link>
+          ) : null}
         </Card>
         <p className="text-[13px] text-muted">
           Dépense estimée avec les MET du Compendium des activités physiques (2024) et ta pesée la plus proche : un ordre de grandeur, qui ne change pas tes cibles
@@ -50,7 +76,7 @@ export function ActivitiesView({ activities, today, addHref, itemHref }: { activ
 
       {activities.length === 0 ? (
         <EmptyState icon={<SneakerMoveIcon size={22} />} title="Aucun sport noté">
-          Padel, foot, tennis, escalade… Note tes matchs et tes séances en trois taps : ils apparaissent dans ta semaine, avec leur dépense estimée.
+          Course, vélo, padel, foot, escalade… Note tes sorties et tes matchs en trois taps : ils apparaissent dans ta semaine, avec leur dépense estimée.
         </EmptyState>
       ) : (
         <section aria-labelledby="dernieres-activites-titre" className="grid content-start gap-2">
@@ -67,11 +93,11 @@ export function ActivitiesView({ activities, today, addHref, itemHref }: { activ
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-[15px] font-medium">{activityName(a.sport, a.label)}</span>
                     <span className="block text-[13px] text-muted">
-                      {formatLongDate(a.date)} · {INTENSITY_LABELS[a.intensity].label.toLowerCase()}
+                      {formatLongDate(a.date)} · {outingDetail(a) ?? INTENSITY_LABELS[a.intensity].label.toLowerCase()}
                     </span>
                   </span>
                   <span className="shrink-0 text-right">
-                    <span className="font-numeric block text-[20px]">{formatMinutes(a.minutes)}</span>
+                    <span className="font-numeric block text-[20px]">{a.distanceM && a.seconds % 60 ? formatDuration(a.seconds) : formatMinutes(a.minutes)}</span>
                     {a.kcal !== null ? <span className="block text-[12px] text-muted">≈ {new Intl.NumberFormat("fr-FR").format(a.kcal)} kcal</span> : null}
                   </span>
                 </Link>

@@ -5,9 +5,9 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { getProfile, requireUserId } from "@/lib/auth";
 import { addDays, localDate } from "@/lib/dates";
-import { INTENSITIES } from "@/lib/engine";
+import { INTENSITIES, isEndurance } from "@/lib/engine";
 import { isDay } from "@/lib/nutrition";
-import { LABEL_MAX, MAX_DURATION, MIN_DURATION, SPORTS } from "@/lib/sports";
+import { hasElevation, LABEL_MAX, MAX_DISTANCE_M, MAX_DURATION, MAX_ELEVATION_M, MAX_HR, MIN_DISTANCE_M, MIN_DURATION, MIN_HR, parseDistance, SPORTS } from "@/lib/sports";
 import { createClient } from "@/lib/supabase/server";
 
 /** `values` renvoie la saisie quand elle est refusée : le formulaire la garde au lieu de se vider. */
@@ -23,7 +23,7 @@ const schema = z.object({
 });
 
 function refresh() {
-  for (const path of ["/", "/entrainement", "/entrainement/sports", "/nutrition"]) revalidatePath(path);
+  for (const path of ["/", "/entrainement", "/entrainement/sports", "/entrainement/endurance", "/nutrition"]) revalidatePath(path);
 }
 
 /** Crée (`id` vide) ou corrige une activité, puis revient à la liste des sports. */
@@ -57,8 +57,44 @@ export async function saveActivity(id: string | null, _: ActivityFormState, form
   const day = formData.get("date") || today;
   if (!isDay(day) || day > today || day < addDays(today, -730)) return { error: "Choisis une date passée, de moins de deux ans.", values };
 
+  // Endurance : distance, secondes, dénivelé et fréquence cardiaque, tous facultatifs.
+  const text = (name: string) => String(formData.get(name) ?? "").trim();
+  const whole = (name: string) => (/^\d{1,5}$/.test(text(name)) ? Number(text(name)) : NaN);
+  let distanceM: number | null = null;
+  let extraSeconds = 0;
+  let elevationM: number | null = null;
+  let avgHr: number | null = null;
+  if (isEndurance(sport)) {
+    if (text("distance")) {
+      distanceM = parseDistance(text("distance"), sport);
+      if (distanceM === null || distanceM < MIN_DISTANCE_M || distanceM > MAX_DISTANCE_M) return { error: "Indique une distance entre 50 m et 1 000 km.", values };
+    }
+    if (text("seconds")) {
+      extraSeconds = whole("seconds");
+      if (!(extraSeconds >= 0 && extraSeconds <= 59)) return { error: "Les secondes vont de 0 à 59.", values };
+    }
+    if (hasElevation(sport) && text("elevation")) {
+      elevationM = whole("elevation");
+      if (!(elevationM >= 0 && elevationM <= MAX_ELEVATION_M)) return { error: `Indique un dénivelé entre 0 et ${MAX_ELEVATION_M} m.`, values };
+    }
+    if (text("hr")) {
+      avgHr = whole("hr");
+      if (!(avgHr >= MIN_HR && avgHr <= MAX_HR)) return { error: `Indique une fréquence cardiaque entre ${MIN_HR} et ${MAX_HR}.`, values };
+    }
+  }
+
   const supabase = await createClient();
-  const row = { performed_on: day, sport, label: label || null, duration_minutes: minutes, intensity };
+  const row = {
+    performed_on: day,
+    sport,
+    label: label || null,
+    duration_minutes: minutes,
+    intensity,
+    distance_m: distanceM,
+    duration_extra_s: extraSeconds,
+    elevation_m: elevationM,
+    avg_hr: avgHr,
+  };
   const { error } = id ? await supabase.from("activities").update(row).eq("id", z.uuid().parse(id)) : await supabase.from("activities").insert(row);
   if (error) return { error: SAVE_ERROR, values };
 

@@ -58,7 +58,7 @@ Chaque table porte un `user_id`. Les catalogues communs (exercices, aliments de 
 | Nutrition | `foods`, `food_logs`, `nutrition_targets`, `saved_meals`, `saved_meal_items` (v0.4), `foods.is_recipe` et `recipe_items` (v0.6.1) : une recette est un aliment, la dépense réelle se calcule à la lecture (pas de table `tdee_estimates`) | v0.4, v0.6.1 |
 | Plan prédictif | `programs` (réglages et objectif chiffré), `exercise_preferences`, `workout_templates.program_id` : les séances du programme sont des modèles, les charges prévues se calculent à la lecture | v0.6 |
 | Planning | `weekly_sports` (sports fixes de la semaine type), `session_pins` (séance déplacée à la main, pour une semaine), `blocked_days` (jour libéré), `workouts.is_light` ; le planning lui-même se calcule à la lecture | v0.8.1 |
-| Activités | `activities` (v0.8 : sports additionnels ; colonnes d'endurance en v0.11), `activity_segments`, `hr_zones`, `race_plans` | v0.8, v0.11 |
+| Activités | `activities` (v0.8 : sports additionnels ; v0.11 : sports d'endurance, `distance_m`, `duration_extra_s`, `elevation_m`, `avg_hr`) ; à venir : `activity_segments` (v0.11.1), `hr_zones`, `race_plans` (v0.11.2) | v0.8, v0.11 |
 | Forme et bilans | `daily_checkins` (v0.8), `weekly_reviews` (v0.10.2) | v0.8, v0.10.2 |
 | Amis | `friendships`, `friend_invites`, `share_grants` (v0.9) ; `group_sessions`, `group_participants`, `group_events` (v0.9.1) | v0.9, v0.9.1 |
 | Courses | `shopping_items`, `food_prices`, `purchases`, `profiles.weekly_food_budget` (v0.10) ; `stock_items` (v0.10.1) | v0.10, v0.10.1 |
@@ -105,6 +105,15 @@ Chaque table porte un `user_id`. Les catalogues communs (exercices, aliments de 
 - `reviewWeek` choisit la semaine montrée d'office : celle en cours le dimanche, sinon la précédente.
 - Seuls le ressenti (1 à 5) et la note sont stockés (`weekly_reviews`, une ligne par semaine). `review_adjustments`, prévue au cadrage, n'existe pas : l'ajustement des calories reste l'alerte de rythme (`paceAlert`), appliquée à la main dans Cibles.
 - Écran : `/progres/bilan` (`?semaine=AAAA-MM-JJ` pour une autre semaine).
+
+### Endurance (v0.11)
+
+- **Une sortie est une activité** : six valeurs de plus dans `activity_sport` (`course`, `trail`, `velo`, `natation`, `rameur`, `marche`) et quatre colonnes facultatives sur `activities`. La durée exacte est `duration_minutes × 60 + duration_extra_s` : les minutes restent la durée de tout le reste de l'app, les secondes ne servent qu'à l'allure.
+- **Allure** (`paceOf`, `lib/engine/endurance.ts`) : secondes par kilomètre (course, trail, marche), par 100 m (natation), par 500 m (rameur), ou km/h (vélo). Calculée à la lecture, mise en forme par `formatPace` (`lib/sports.ts`).
+- **Dépense** (`activityMet`, `lib/engine/activity.ts`) : pour la course et la marche avec une distance, le MET de la tranche de vitesse la plus proche du Compendium 2024 (`speedMet`) ; sinon le MET de l'intensité, comme les autres sports.
+- **Semaines et records** : `weeklyDistance` (huit semaines du lundi au dimanche) et `enduranceRecords` (plus longue sortie, plus gros dénivelé, meilleure allure parmi les sorties d'au moins chaque seuil de `RECORD_DISTANCES`). Un record d'allure est celui d'une sortie entière, pas un temps sur la distance exacte : les segments arrivent avec les imports (v0.12).
+- **Planning** : `SPORT_MUSCLES` connaît les nouveaux sports (jambes ; dos pour la natation et le rameur), donc la récupération et la charge les comptent.
+- Écran : `/entrainement/endurance` (`?sport=` pour changer de sport ; seuls les sports pratiqués sont proposés). Kilomètres seulement.
 
 ### Rappels push (v0.10.3)
 

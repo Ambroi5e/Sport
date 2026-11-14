@@ -30,7 +30,7 @@ export function DeleteAccountView({
           <li>tes aliments, recettes, repas et ton journal ;</li>
           <li>ta liste de courses, ton stock, tes prix, tes achats et ton budget ;</li>
           <li>tes compléments et tes prises ;</li>
-          <li>tes pesées, mensurations, photos de progression et ta forme du jour ;</li>
+          <li>tes pesées, mensurations, photos de progression, ta forme du jour et tes bilans ;</li>
           <li>tes objectifs et réglages.</li>
         </ul>
         <p className="text-[15px]">Personne ne pourra les récupérer depuis Fonte, pas même l&apos;administrateur.</p>

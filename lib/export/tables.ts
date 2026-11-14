@@ -91,6 +91,7 @@ export const EXPORT_TABLES: ExportTable[] = [
     label: "Forme du jour (1 à 5 : sommeil et énergie, 5 = très bien ; courbatures et stress, 5 = forts)",
     order: ["checkin_on"],
   },
+  { table: "weekly_reviews", file: "bilans", label: "Bilans de la semaine (ressenti de 1 à 5, 5 = excellente ; note libre)", order: ["week_start"] },
   { table: "progress_photos", file: "photos", label: "Photos de progression (fichiers dans photos/)", order: ["taken_on", "id"] },
 ];
 

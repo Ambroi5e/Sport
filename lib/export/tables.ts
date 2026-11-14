@@ -80,6 +80,9 @@ export const EXPORT_TABLES: ExportTable[] = [
   { table: "shopping_items", file: "courses", label: "Liste de courses (checked_at : dans le panier)", order: ["created_at", "id"], refs: [food()] },
   { table: "food_prices", file: "prix", label: "Prix au kilo saisis, en euros", order: ["food_id"], refs: [food()] },
   { table: "purchases", file: "achats", label: "Achats notés (montant du ticket, en euros)", order: ["purchased_on", "id"] },
+  { table: "stock_items", file: "stock", label: "Stock de la maison (expires_on : date de péremption)", order: ["created_at", "id"], refs: [food()] },
+  { table: "supplements", file: "complements", label: "Compléments (paused_at : en pause)", order: ["created_at", "id"] },
+  { table: "supplement_logs", file: "complements-prises", label: "Prises de compléments (une ligne par jour coché)", order: ["taken_on", "supplement_id"] },
   { table: "body_weights", file: "pesees", label: "Pesées", order: ["measured_on", "id"] },
   { table: "body_measurements", file: "mensurations", label: "Mensurations", order: ["measured_on", "site", "id"] },
   {

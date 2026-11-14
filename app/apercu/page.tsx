@@ -85,6 +85,8 @@ import {
   SAMPLE_MEAL_NEEDS,
   SAMPLE_PURCHASES,
   SAMPLE_SHOPPING,
+  SAMPLE_STOCK,
+  SAMPLE_SUPPLEMENTS,
   SAMPLE_BLOCKS,
   SAMPLE_CHECKINS,
   SAMPLE_DAY,
@@ -132,10 +134,17 @@ import { ItemForm } from "@/components/groceries/item-form";
 import { MealNeedsForm } from "@/components/groceries/meal-needs-form";
 import { PurchaseList } from "@/components/groceries/purchase-list";
 import { ShoppingList } from "@/components/groceries/shopping-list";
-import { addFromMeals, addItem, addPurchase, clearChecked, deletePurchase, savePrices, setBudget, toggleItem, updateItem } from "@/app/(app)/courses/actions";
+import { addFromMeals, addItem, addPurchase, addStockItem, clearChecked, deletePurchase, finishStockItem, savePrices, setBudget, storeChecked, toggleItem, updateItem, updateStockItem } from "@/app/(app)/courses/actions";
 import { budgetStatus } from "@/lib/engine";
-import { ForkKnifeIcon } from "@phosphor-icons/react/ssr";
+import { ForkKnifeIcon, PackageIcon } from "@phosphor-icons/react/ssr";
+import { AddStockForm, StockItemForm } from "@/components/groceries/stock-forms";
+import { StockList } from "@/components/groceries/stock-list";
 import Link from "next/link";
+import { SupplementForm } from "@/components/supplements/supplement-form";
+import { SupplementsView } from "@/components/supplements/supplements-view";
+import { TodaySupplementsCard } from "@/components/supplements/today-card";
+import { addSupplement, toggleTaken, updateSupplement } from "@/app/(app)/nutrition/complements/actions";
+import { SUPPLEMENT_NOTICE } from "@/lib/supplements";
 import { getAppearance } from "@/lib/appearance";
 
 /**
@@ -266,15 +275,21 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
                   href="/apercu?ecran=courses-budget"
                 />
                 <AddItemForm action={addItem} />
-                <Link href="/apercu?ecran=courses-repas" className={buttonClasses("secondary", "md", "w-full")}>
-                  <ForkKnifeIcon size={18} aria-hidden="true" /> Depuis mes repas
-                </Link>
+                <div className="grid grid-cols-2 gap-2">
+                  <Link href="/apercu?ecran=courses-repas" className={buttonClasses("secondary", "md", "px-2")}>
+                    <ForkKnifeIcon size={18} aria-hidden="true" /> Depuis mes repas
+                  </Link>
+                  <Link href="/apercu?ecran=stock" className={buttonClasses("secondary", "md", "px-2")}>
+                    <PackageIcon size={18} aria-hidden="true" /> Mon stock
+                  </Link>
+                </div>
               </div>
               <ShoppingList
                 items={ecran === "courses-vide" ? [] : SAMPLE_SHOPPING}
                 itemHref={() => "/apercu?ecran=courses-article"}
                 toggleAction={toggleItem}
                 clearAction={clearChecked}
+                storeAction={storeChecked}
               />
             </div>
           </>
@@ -290,7 +305,7 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
             <PageHeader title="Depuis mes repas" eyebrow="Courses" back="/apercu?ecran=courses" />
             <div className="grid gap-4 md:max-w-xl">
               <p className="text-[15px] text-muted">
-                Ce que tu as noté ces 7 derniers jours, recettes dépliées en ingrédients, arrondi à une quantité d&apos;achat. Décoche ce que tu as déjà chez toi.
+                Ce que tu as noté ces 7 derniers jours, recettes dépliées en ingrédients, arrondi à une quantité d&apos;achat. Ton stock est déduit ; décoche ce que tu as déjà chez toi.
               </p>
               <MealNeedsForm needs={SAMPLE_MEAL_NEEDS} action={addFromMeals} />
             </div>
@@ -335,6 +350,46 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
                 Les aliments de tes 7 derniers jours, du plus mangé au moins mangé. Quelques prix suffisent : ils servent à estimer ta liste et ce que tu dépenses par jour.
               </p>
               <PricesForm foods={SAMPLE_MEAL_NEEDS} action={savePrices} />
+            </div>
+          </>
+        ) : ecran === "stock" || ecran === "stock-vide" ? (
+          <>
+            <PageHeader title="Mon stock" eyebrow="Courses" back="/apercu?ecran=courses" />
+            <div className="grid gap-5 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] md:items-start md:gap-6">
+              <StockList items={ecran === "stock" ? SAMPLE_STOCK : []} today={SAMPLE_DAY} itemHref={() => "/apercu?ecran=stock-article"} finishAction={finishStockItem} />
+              <Card className="grid gap-4">
+                <h2 className="text-lg font-semibold">Ajouter au stock</h2>
+                <AddStockForm action={addStockItem} />
+              </Card>
+            </div>
+          </>
+        ) : ecran === "stock-article" ? (
+          <>
+            <PageHeader title={SAMPLE_STOCK[1].name} eyebrow="Mon stock" back="/apercu?ecran=stock" />
+            <div className="md:max-w-xl">
+              <StockItemForm item={SAMPLE_STOCK[1]} action={updateStockItem.bind(null, "apercu")} />
+            </div>
+          </>
+        ) : ecran === "complements" || ecran === "complements-vide" ? (
+          <>
+            <PageHeader title="Compléments" eyebrow="Nutrition" back="/apercu?ecran=nutrition" />
+            <SupplementsView
+              supplements={ecran === "complements" ? SAMPLE_SUPPLEMENTS : []}
+              editHref={() => "/apercu?ecran=complement"}
+              newHref="/apercu?ecran=complement-nouveau"
+              toggleAction={toggleTaken}
+            />
+          </>
+        ) : ecran === "complement" || ecran === "complement-nouveau" ? (
+          <>
+            <PageHeader title={ecran === "complement" ? SAMPLE_SUPPLEMENTS[1].name : "Nouveau complément"} eyebrow="Compléments" back="/apercu?ecran=complements" />
+            <div className="grid gap-5 md:max-w-xl">
+              {ecran === "complement" ? (
+                <SupplementForm supplement={SAMPLE_SUPPLEMENTS[1]} action={updateSupplement.bind(null, "apercu")} submitLabel="Enregistrer" />
+              ) : (
+                <SupplementForm action={addSupplement} submitLabel="Ajouter" />
+              )}
+              <p className="text-[13px] text-muted">{SUPPLEMENT_NOTICE}</p>
             </div>
           </>
         ) : ecran === "amis" || ecran === "amis-vide" ? (
@@ -738,6 +793,7 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
                   <p className="text-[15px] text-muted">Rythme visé : 0,25 à 0,5 kg par semaine.</p>
                 </Card>
                 <TodayNutritionCard totals={sumNutrients(SAMPLE_TODAY.map((e) => e.nutrients))} target={SAMPLE_TARGETS.entrainement} dayType="entrainement" />
+                <TodaySupplementsCard supplements={SAMPLE_SUPPLEMENTS} href="/apercu?ecran=complements" />
                 <Card className="grid gap-3">
                   <div className="flex items-baseline justify-between">
                     <h2 className="text-lg font-semibold">Volume, 8 semaines</h2>

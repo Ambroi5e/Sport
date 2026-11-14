@@ -61,7 +61,7 @@ Chaque table porte un `user_id`. Les catalogues communs (exercices, aliments de 
 | Activités | `activities` (v0.8 : sports additionnels ; colonnes d'endurance en v0.11), `activity_segments`, `hr_zones`, `race_plans` | v0.8, v0.11 |
 | Forme et bilans | `daily_checkins` (v0.8), `weekly_reviews`, `review_adjustments` | v0.8, v0.10 |
 | Amis | `friendships`, `friend_invites`, `share_grants` (v0.9) ; `group_sessions`, `group_participants`, `group_events` (v0.9.1) | v0.9, v0.9.1 |
-| Courses | `shopping_items`, `food_prices`, `purchases`, `profiles.weekly_food_budget` (v0.10) ; `stock_items` | v0.10, v0.10.1 |
+| Courses | `shopping_items`, `food_prices`, `purchases`, `profiles.weekly_food_budget` (v0.10) ; `stock_items` (v0.10.1) | v0.10, v0.10.1 |
 | Compléments | `supplements`, `supplement_logs` | v0.10.1 |
 | Rappels | `push_subscriptions`, `reminder_settings` | v0.10.2 |
 | Intégrations | `oauth_connections`, `personal_tokens`, `import_jobs` | v0.12 |
@@ -90,6 +90,13 @@ Chaque table porte un `user_id`. Les catalogues communs (exercices, aliments de 
 - « Depuis mes repas » recalcule les quantités côté serveur à l'envoi (`addFromMeals`) : le formulaire n'envoie que les aliments cochés.
 - Prix au kilo (`food_prices`) et achats (`purchases`) sont saisis à la main ; euros seulement. Le budget est une colonne du profil, vide par défaut.
 - Écrans : `/courses`, `/courses/article/[id]`, `/courses/repas`, `/courses/budget`, `/courses/prix`.
+
+### Stock et compléments (v0.10.1)
+
+- `stock_items` reprend la forme d'un article de la liste (nom, quantité en clair, rayon, aliment et poids quand ils sont connus) et ajoute `expires_on`. `storeChecked` copie les articles cochés dans le stock puis les retire de la liste, dans cet ordre : une panne entre les deux laisse un doublon, jamais une perte.
+- `lib/engine/stock.ts` : `expiryOf` (périmé, à finir à 3 jours ou moins, sinon tranquille), `sortStock`, `stockByFood` (grammes non périmés par aliment), `missingGrams`. `mealNeeds` déduit le stock avant l'arrondi d'achat. Le stock n'est pas décompté à chaque repas noté : il se tient à la main.
+- Compléments : `supplements` (nom, dose en clair, moment, pause) et `supplement_logs` (une ligne par complément et par jour). `adherence` (`lib/engine/supplements.ts`) ne compte pas les jours d'avant l'ajout. Aucun catalogue : rien n'est proposé.
+- Écrans : `/courses/stock`, `/courses/stock/[id]`, `/nutrition/complements`, `/nutrition/complements/nouveau`, `/nutrition/complements/[id]`.
 
 ## Interfaces prévues
 

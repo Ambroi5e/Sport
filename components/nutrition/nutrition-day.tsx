@@ -1,4 +1,4 @@
-import { CaretRightIcon, CookieIcon, CookingPotIcon, StarIcon, TargetIcon } from "@phosphor-icons/react/ssr";
+import { CaretRightIcon, CookieIcon, PillIcon, CookingPotIcon, StarIcon, TargetIcon } from "@phosphor-icons/react/ssr";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { addDays } from "@/lib/dates";
@@ -71,6 +71,7 @@ export function NutritionDay({
         <NavRow href="/nutrition/favoris" icon={<StarIcon size={20} />} label="Repas favoris" detail="Un tap pour tout un repas" />
         <NavRow href="/nutrition/recettes" icon={<CookingPotIcon size={20} />} label="Recettes" detail="Tes plats préparés, à la part" />
         <NavRow href="/nutrition/aliments" icon={<CookieIcon size={20} />} label="Mes aliments" detail="Ceux que tu as créés" />
+        <NavRow href="/nutrition/complements" icon={<PillIcon size={20} />} label="Compléments" detail="Ce que tu prends, coché chaque jour" />
       </nav>
     </div>
   );

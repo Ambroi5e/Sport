@@ -7,14 +7,16 @@ import { getProfile } from "@/lib/auth";
 import { localDate } from "@/lib/dates";
 import { MEAL_DAYS } from "@/lib/groceries";
 import { addFromMeals } from "../actions";
-import { getEaten, getPrices, getShoppingList, mealNeeds } from "../data";
+import { stockByFood } from "@/lib/engine";
+import { getEaten, getPrices, getShoppingList, getStock, mealNeeds } from "../data";
 
 export const metadata: Metadata = { title: "Depuis mes repas" };
 
 export default async function FromMealsPage() {
   const profile = (await getProfile())!;
-  const [eaten, prices, list] = await Promise.all([getEaten(localDate(profile.timezone)), getPrices(), getShoppingList()]);
-  const needs = mealNeeds(eaten, prices, list);
+  const today = localDate(profile.timezone);
+  const [eaten, prices, list, stock] = await Promise.all([getEaten(today), getPrices(), getShoppingList(), getStock()]);
+  const needs = mealNeeds(eaten, prices, list, stockByFood(stock, today));
   return (
     <>
       <PageHeader title="Depuis mes repas" eyebrow="Courses" back="/courses" />
@@ -23,7 +25,7 @@ export default async function FromMealsPage() {
           <>
             <p className="text-[15px] text-muted">
               Ce que tu as noté ces {MEAL_DAYS} derniers jours{eaten.days < MEAL_DAYS ? ` (${eaten.days} jour${eaten.days > 1 ? "s" : ""} avec des repas)` : ""}, recettes dépliées en
-              ingrédients, arrondi à une quantité d&apos;achat. Décoche ce que tu as déjà chez toi.
+              ingrédients, arrondi à une quantité d&apos;achat. Ton stock est déduit ; décoche ce que tu as déjà chez toi.
             </p>
             <MealNeedsForm needs={needs} action={addFromMeals} />
           </>

@@ -1,7 +1,8 @@
-import { CheckIcon, ShoppingCartIcon } from "@phosphor-icons/react/ssr";
+import { CheckIcon, PackageIcon, ShoppingCartIcon } from "@phosphor-icons/react/ssr";
 import Link from "next/link";
 import { ConfirmAction } from "@/components/ui/confirm-action";
 import { EmptyState } from "@/components/ui/empty-state";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { RowCheck } from "./row-check";
 import { AISLES, listCost } from "@/lib/engine";
 import { AISLE_LABELS, formatEuros, itemCost, type ShoppingItem } from "@/lib/groceries";
@@ -35,11 +36,14 @@ export function ShoppingList({
   itemHref,
   toggleAction,
   clearAction,
+  storeAction,
 }: {
   items: ShoppingItem[];
   itemHref: (id: string) => string;
   toggleAction: (id: string, checked: boolean) => Promise<void>;
   clearAction: () => Promise<void>;
+  /** Déplace les articles cochés vers le stock. */
+  storeAction: () => Promise<void>;
 }) {
   if (!items.length) {
     return (
@@ -81,7 +85,7 @@ export function ShoppingList({
           ) : null}
         </>
       ) : (
-        <p className="rounded-control border border-line bg-surface p-4 text-[15px]">Tout est dans le panier. Il ne reste qu&apos;à noter le ticket dans Budget.</p>
+        <p className="rounded-control border border-line bg-surface p-4 text-[15px]">Tout est dans le panier. Note le ticket dans Budget, puis range le panier dans ton stock.</p>
       )}
 
       {basket.length ? (
@@ -94,6 +98,11 @@ export function ShoppingList({
               <Row key={item.id} item={item} itemHref={itemHref} toggle={toggleAction} />
             ))}
           </ul>
+          <form action={storeAction}>
+            <SubmitButton variant="secondary" className="w-full" pendingLabel="Rangement…">
+              <PackageIcon size={18} aria-hidden="true" /> Ranger dans mon stock
+            </SubmitButton>
+          </form>
           <div className="justify-self-start">
             <ConfirmAction
               action={clearAction}

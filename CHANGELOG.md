@@ -4,6 +4,17 @@ Format : une entrée par version (semver), du plus récent au plus ancien. Les m
 
 ## [Non publié]
 
+### v0.10.1 : stock et compléments
+
+- Mon stock (depuis Courses) : ce qu'on a chez soi, avec une date de péremption facultative. Le plus urgent est en haut, et la péremption est écrite en mots : « Périmé depuis 2 jours », « À finir demain », « Jusqu'au 21 nov. ». « Fini » retire un article en un tap.
+- Ranger le panier : après les courses, « Ranger dans mon stock » déplace les articles cochés de la liste vers le stock. « Retirer les articles cochés » reste disponible.
+- Depuis mes repas déduit le stock : ce qu'on a déjà (aliment et poids connus, non périmé) est retiré de ce qu'il faut racheter ; un aliment couvert affiche « Assez ».
+- Compléments (depuis Nutrition) : sa propre liste, avec la dose telle qu'on l'écrit et le moment de la journée. Un tap coche la prise du jour ; sous chaque nom, les 7 derniers jours en pastilles et en mots (« 5 jours sur 7 »). Un complément peut être mis en pause sans perdre son historique.
+- Fonte ne propose aucun complément ni aucune dose : l'écran le dit et renvoie au médecin ou au pharmacien.
+- Accueil : une carte Compléments seulement s'il en reste à cocher aujourd'hui.
+- Export : `stock.csv`, `complements.csv`, `complements-prises.csv`. Pages Confidentialité et Supprimer mon compte mises à jour.
+- Migrations non destructives appliquées : `20261120000000_stock_complements.sql` (tables `stock_items`, `supplements`, `supplement_logs`) et `20261120010000_complements_index.sql` (index demandé par les conseils Supabase), avec 12 tests RLS. Aucun fichier destructif. Aucune dépendance ajoutée.
+
 ### v0.10 : liste de courses et budget
 
 - Courses : une seule liste, rangée par rayon dans l'ordre du magasin. On ajoute un article en écrivant son nom ; le rayon est deviné et se corrige d'un tap. Les articles cochés descendent dans le panier, qu'on vide d'un coup.

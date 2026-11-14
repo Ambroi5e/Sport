@@ -1007,6 +1007,99 @@ export type Database = {
         }
         Relationships: []
       }
+      stock_items: {
+        Row: {
+          aisle: Database["public"]["Enums"]["grocery_aisle"]
+          created_at: string
+          expires_on: string | null
+          food_id: string | null
+          grams: number | null
+          id: string
+          name: string
+          quantity: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          aisle?: Database["public"]["Enums"]["grocery_aisle"]
+          created_at?: string
+          expires_on?: string | null
+          food_id?: string | null
+          grams?: number | null
+          id?: string
+          name: string
+          quantity?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          aisle?: Database["public"]["Enums"]["grocery_aisle"]
+          created_at?: string
+          expires_on?: string | null
+          food_id?: string | null
+          grams?: number | null
+          id?: string
+          name?: string
+          quantity?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      supplement_logs: {
+        Row: {
+          created_at: string
+          supplement_id: string
+          taken_on: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          supplement_id: string
+          taken_on: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          supplement_id?: string
+          taken_on?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      supplements: {
+        Row: {
+          created_at: string
+          dose: string | null
+          id: string
+          moment: Database["public"]["Enums"]["supplement_moment"]
+          name: string
+          paused_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          dose?: string | null
+          id?: string
+          moment?: Database["public"]["Enums"]["supplement_moment"]
+          name: string
+          paused_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          dose?: string | null
+          id?: string
+          moment?: Database["public"]["Enums"]["supplement_moment"]
+          name?: string
+          paused_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       template_items: {
         Row: {
           created_at: string
@@ -1530,6 +1623,7 @@ export type Database = {
         | "mensurations"
         | "nutrition"
         | "forme"
+      supplement_moment: "matin" | "midi" | "soir" | "avant_seance" | "apres_seance" | "coucher"
       training_level: "debutant" | "intermediaire" | "avance"
     }
     CompositeTypes: {
@@ -1586,6 +1680,7 @@ export const Constants = {
         "nutrition",
         "forme",
       ],
+      supplement_moment: ["matin", "midi", "soir", "avant_seance", "apres_seance", "coucher"],
       training_level: ["debutant", "intermediaire", "avance"],
     },
   },

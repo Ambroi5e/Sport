@@ -1,4 +1,6 @@
-import type { MealNeed, Purchase, ShoppingItem } from "@/lib/groceries";
+import type { MealNeed, Purchase, ShoppingItem, StockItem } from "@/lib/groceries";
+import type { Supplement } from "@/lib/supplements";
+import { adherence, type SupplementMoment } from "@/lib/engine";
 import type { ProgramViewData } from "@/components/training/program-view";
 import type { LoggerBlock, LoggerHistory } from "@/components/training/workout-logger";
 import {
@@ -694,15 +696,15 @@ export const SAMPLE_SHOPPING: ShoppingItem[] = [
 ];
 
 export const SAMPLE_MEAL_NEEDS: MealNeed[] = [
-  { foodId: "f-skyr", name: "Skyr nature", grams: 1050, buyGrams: 1250, pricePerKg: 4.6, inList: true },
-  { foodId: "f-poulet", name: "Blanc de poulet", grams: 980, buyGrams: 1000, pricePerKg: 11.9, inList: false },
-  { foodId: "f-banane", name: "Banane", grams: 840, buyGrams: 900, pricePerKg: 1.99, inList: false },
-  { foodId: "f-riz", name: "Riz basmati", grams: 620, buyGrams: 700, pricePerKg: 2.4, inList: false },
-  { foodId: "f-brocoli", name: "Brocoli", grams: 540, buyGrams: 600, pricePerKg: 3.2, inList: false },
-  { foodId: "f-coco", name: "Lait de coco", grams: 310, buyGrams: 400, pricePerKg: 4.5, inList: false },
-  { foodId: "f-avoine", name: "Flocons d'avoine", grams: 280, buyGrams: 300, pricePerKg: null, inList: false },
-  { foodId: "f-whey", name: "Whey vanille", grams: 210, buyGrams: 300, pricePerKg: null, inList: false },
-  { foodId: "f-huile", name: "Huile d'olive", grams: 95, buyGrams: 100, pricePerKg: null, inList: false },
+  { foodId: "f-skyr", name: "Skyr nature", grams: 1050, stockGrams: 0, buyGrams: 1250, pricePerKg: 4.6, inList: true },
+  { foodId: "f-poulet", name: "Blanc de poulet", grams: 980, stockGrams: 0, buyGrams: 1000, pricePerKg: 11.9, inList: false },
+  { foodId: "f-banane", name: "Banane", grams: 840, stockGrams: 0, buyGrams: 900, pricePerKg: 1.99, inList: false },
+  { foodId: "f-riz", name: "Riz basmati", grams: 620, stockGrams: 250, buyGrams: 400, pricePerKg: 2.4, inList: false },
+  { foodId: "f-brocoli", name: "Brocoli", grams: 540, stockGrams: 0, buyGrams: 600, pricePerKg: 3.2, inList: false },
+  { foodId: "f-coco", name: "Lait de coco", grams: 310, stockGrams: 0, buyGrams: 400, pricePerKg: 4.5, inList: false },
+  { foodId: "f-avoine", name: "Flocons d'avoine", grams: 280, stockGrams: 500, buyGrams: 0, pricePerKg: null, inList: false },
+  { foodId: "f-whey", name: "Whey vanille", grams: 210, stockGrams: 0, buyGrams: 300, pricePerKg: null, inList: false },
+  { foodId: "f-huile", name: "Huile d'olive", grams: 95, stockGrams: 0, buyGrams: 100, pricePerKg: null, inList: false },
 ];
 
 /** Semaine du lundi 2 novembre 2026 ; `SAMPLE_DAY` tombe dedans. */
@@ -715,4 +717,44 @@ export const SAMPLE_PURCHASES: Purchase[] = [
   { id: "a-5", on: "2026-10-24", amount: 52.3, store: "Supermarché" },
   { id: "a-6", on: "2026-10-17", amount: 44.1, store: "Supermarché" },
   { id: "a-7", on: "2026-10-10", amount: 47.65, store: "Marché" },
+];
+
+const stock = (id: string, name: string, quantity: string | null, expiresOn: string | null, grams: number | null = null): StockItem => ({
+  id,
+  name,
+  quantity,
+  aisle: "autre",
+  foodId: grams === null ? null : `f-${id}`,
+  grams,
+  expiresOn,
+});
+
+/** Déjà trié comme `sortStock` : par date, puis sans date par nom. `SAMPLE_DAY` est le 7 novembre. */
+export const SAMPLE_STOCK: StockItem[] = [
+  stock("s-jambon", "Jambon blanc", "4 tranches", "2026-11-05"),
+  stock("s-skyr", "Skyr nature", "450 g", "2026-11-07", 450),
+  stock("s-poulet", "Blanc de poulet", "600 g", "2026-11-09", 600),
+  stock("s-oeufs", "Œufs", "8", "2026-11-21"),
+  stock("s-coco", "Lait de coco", "400 g", "2027-06-30", 400),
+  stock("s-avoine", "Flocons d'avoine", "500 g", null, 500),
+  stock("s-riz", "Riz basmati", "250 g", null, 250),
+  stock("s-thon", "Thon en boîte", "3 boîtes", null),
+];
+
+const supplement = (id: string, name: string, dose: string | null, moment: SupplementMoment, taken: string[], addedOn = "2026-09-01", paused = false): Supplement => ({
+  id,
+  name,
+  dose,
+  moment,
+  paused,
+  takenToday: taken.includes(SAMPLE_DAY),
+  adherence: adherence(taken, addedOn, SAMPLE_DAY),
+});
+
+export const SAMPLE_SUPPLEMENTS: Supplement[] = [
+  supplement("k-creatine", "Créatine", "5 g", "matin", ["2026-11-01", "2026-11-02", "2026-11-03", "2026-11-04", "2026-11-05", "2026-11-06", "2026-11-07"]),
+  supplement("k-vitd", "Vitamine D", "1 goutte", "matin", ["2026-11-01", "2026-11-03", "2026-11-04", "2026-11-06"]),
+  supplement("k-omega", "Oméga-3", "2 gélules", "midi", ["2026-11-06"], "2026-11-06"),
+  supplement("k-magnesium", "Magnésium", "1 comprimé", "coucher", ["2026-11-02", "2026-11-05", "2026-11-06"]),
+  supplement("k-zinc", "Zinc", null, "soir", [], "2026-09-01", true),
 ];

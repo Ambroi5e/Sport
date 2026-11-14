@@ -114,6 +114,13 @@ Les données de santé (poids, mensurations, photos, forme, nutrition) sont des 
 - `friend_activities` ne renvoie pas les temps (vérifié par un test).
 - Testé dans `supabase/tests/rls-hyrox.test.ts` (9 tests).
 
+## Objectifs de course et zones cardiaques (v0.11.2)
+
+- `race_plans` : RLS activée, quatre politiques limitées à `user_id = (select auth.uid())`, suppression en cascade avec le compte. Aucune fonction `friend_*` ne la lit.
+- `profiles.hr_max` et `hr_rest` sont des données de santé : bornées en base (100 à 240, 25 à 120, repos sous le maximum), jamais partagées aux amis, exportées avec le profil.
+- Les écrans rappellent que zones et prédictions sont des repères généraux, et de consulter un médecin en cas de symptôme ou de doute.
+- Testé dans `supabase/tests/rls-plans-course.test.ts` (11 tests).
+
 ## Rappels push (v0.10.3)
 
 - `reminder_settings`, `push_subscriptions` et `reminder_log` ont les quatre politiques limitées à `user_id = (select auth.uid())`.

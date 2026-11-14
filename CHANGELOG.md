@@ -4,6 +4,16 @@ Format : une entrée par version (semver), du plus récent au plus ancien. Les m
 
 ## [Non publié]
 
+### v0.11.2 : objectifs de course et zones cardiaques
+
+- Objectifs de course (depuis Endurance) : pose une course à pied avec sa date, sa distance et, si tu en as un, un temps visé. L'écran donne le temps qu'il reste, l'allure à tenir et les temps de passage à allure régulière.
+- Temps prévu d'après tes sorties : formule de Riegel sur tes sorties de course d'au moins 3 km des douze dernières semaines. L'écran dit de quelle sortie vient la prévision, l'écart avec le temps visé, et rappelle qu'une sortie d'entraînement n'est pas une course.
+- Zones cardiaques (depuis Endurance) : note ta fréquence maximale et, si tu la connais, ta fréquence de repos. Fonte calcule cinq zones (sur la réserve quand le repos est noté) et le temps passé dans chacune sur huit semaines, d'après la fréquence moyenne de chaque sortie.
+- Sans fréquence maximale notée, elle est estimée par l'âge (208 − 0,7 × âge) et marquée comme estimation.
+- Pas de plan d'entraînement généré ni d'allures d'entraînement : repères généraux, avec rappel de consulter un médecin en cas de symptôme ou de doute.
+- Export : `objectifs-course.csv`, et les deux fréquences dans le profil. Pages Confidentialité et Supprimer mon compte mises à jour.
+- Migration non destructive appliquée : `20261125000000_plans_course.sql` (table `race_plans`, colonnes `hr_max` et `hr_rest` sur `profiles`), avec 11 tests RLS. Pas de table `hr_zones` : les zones se calculent. Aucun fichier destructif. Aucune dépendance ajoutée.
+
 ### v0.11.1 : Hyrox
 
 - Nouvel écran Hyrox (depuis Entraînement) : note une course ou une simulation avec son temps total et, si tu les as, ses seize temps (huit courses de 1 km, huit ateliers). Les chiffres se tapent au pavé numérique, les deux-points se placent seuls.

@@ -58,7 +58,7 @@ Chaque table porte un `user_id`. Les catalogues communs (exercices, aliments de 
 | Nutrition | `foods`, `food_logs`, `nutrition_targets`, `saved_meals`, `saved_meal_items` (v0.4), `foods.is_recipe` et `recipe_items` (v0.6.1) : une recette est un aliment, la dépense réelle se calcule à la lecture (pas de table `tdee_estimates`) | v0.4, v0.6.1 |
 | Plan prédictif | `programs` (réglages et objectif chiffré), `exercise_preferences`, `workout_templates.program_id` : les séances du programme sont des modèles, les charges prévues se calculent à la lecture | v0.6 |
 | Planning | `weekly_sports` (sports fixes de la semaine type), `session_pins` (séance déplacée à la main, pour une semaine), `blocked_days` (jour libéré), `workouts.is_light` ; le planning lui-même se calcule à la lecture | v0.8.1 |
-| Activités | `activities` (v0.8 : sports additionnels ; v0.11 : sports d'endurance, `distance_m`, `duration_extra_s`, `elevation_m`, `avg_hr` ; v0.11.1 : sport `hyrox`, `hyrox_splits`) ; à venir : `hr_zones`, `race_plans` (v0.11.2) | v0.8, v0.11, v0.11.1 |
+| Activités | `activities` (v0.8 : sports additionnels ; v0.11 : sports d'endurance, `distance_m`, `duration_extra_s`, `elevation_m`, `avg_hr` ; v0.11.1 : sport `hyrox`, `hyrox_splits`) ; `race_plans` (v0.11.2 ; les zones cardiaques se calculent depuis `profiles.hr_max` et `hr_rest`, sans table) | v0.8, v0.11, v0.11.1, v0.11.2 |
 | Forme et bilans | `daily_checkins` (v0.8), `weekly_reviews` (v0.10.2) | v0.8, v0.10.2 |
 | Amis | `friendships`, `friend_invites`, `share_grants` (v0.9) ; `group_sessions`, `group_participants`, `group_events` (v0.9.1) | v0.9, v0.9.1 |
 | Courses | `shopping_items`, `food_prices`, `purchases`, `profiles.weekly_food_budget` (v0.10) ; `stock_items` (v0.10.1) | v0.10, v0.10.1 |
@@ -121,6 +121,13 @@ Chaque table porte un `user_id`. Les catalogues communs (exercices, aliments de 
 - **Moteur** (`lib/engine/hyrox.ts`) : `hyroxSummary` (course, ateliers, transitions = temps total moins les seize segments, tenue de l'allure), `hyroxDeltas` (écart avec la course d'avant), `hyroxBests` (record par segment et somme des meilleurs), `parseClock` (« 4:35 », « 1:24:35 »). Rien n'est sommé tant qu'il manque un temps.
 - **Saisie** : `/entrainement/hyrox/ajouter` et `/entrainement/hyrox/[id]` (`HyroxForm`, `saveHyrox`). `clockInput` (`lib/hyrox.ts`) place les deux-points pendant la frappe. Une course Hyrox ouverte depuis Sports est renvoyée vers cet écran.
 - **Écran** : `/entrainement/hyrox` (`?course=` pour voir une course plus ancienne). Dépense : MET du Compendium 2024 (02035, 02040, 02214).
+
+### Objectifs de course et zones cardiaques (v0.11.2)
+
+- **Objectif** : table `race_plans` (nom, date, distance de 1 à 250 km, temps visé facultatif). Course à pied seulement.
+- **Prédiction** (`predictRace`, `lib/engine/race.ts`) : formule de Riegel, T2 = T1 × (D2 / D1)^1,06, sur les sorties de course d'au moins 3 km des 12 dernières semaines ; la plus rapide gagne et l'écran nomme la sortie. `racePassages` donne les passages à allure régulière. Aucun plan d'entraînement n'est généré.
+- **Zones** (`hrZones`) : cinq tranches de 50 à 100 % de `profiles.hr_max`, ou de la réserve (Karvonen) quand `hr_rest` est noté. Sans `hr_max`, estimation de Tanaka (208 − 0,7 × âge) depuis `birth_year`, marquée comme telle. `hrZoneTime` range chaque sortie entière dans la zone de sa fréquence moyenne.
+- Écrans : `/entrainement/endurance/objectifs` (liste, `ajouter`, `[id]`) et `/entrainement/endurance/zones`, liés depuis l'écran Endurance.
 
 ### Rappels push (v0.10.3)
 

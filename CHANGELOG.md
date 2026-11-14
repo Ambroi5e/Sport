@@ -4,6 +4,14 @@ Format : une entrée par version (semver), du plus récent au plus ancien. Les m
 
 ## [Non publié]
 
+### v0.12 : importer une sortie GPX
+
+- « Noter un sport » > « Importer un fichier GPX » : choisis l'export de ta montre ou de ton app, Fonte en tire la date, la distance, le temps en mouvement, le dénivelé positif et la fréquence cardiaque moyenne, puis ouvre le formulaire habituel déjà rempli. Tout reste modifiable avant d'enregistrer.
+- Le fichier est lu sur l'appareil : la trace GPS n'est ni envoyée ni gardée. Seuls les totaux sont enregistrés.
+- Durée : temps en mouvement, sans les arrêts de plus d'une minute. Dénivelé : montées cumulées avec un seuil de 3 m. Sport proposé d'après le type du fichier.
+- Aucune migration, aucune nouvelle table, aucune dépendance (lecture du GPX dans `lib/engine/gpx.ts`, 20 tests).
+- La v0.12 de la spec est découpée : v0.12 GPX, v0.12.1 Strong et Hevy, v0.12.2 FIT et Apple Santé.
+
 ### v0.11.2 : objectifs de course et zones cardiaques
 
 - Objectifs de course (depuis Endurance) : pose une course à pied avec sa date, sa distance et, si tu en as un, un temps visé. L'écran donne le temps qu'il reste, l'allure à tenir et les temps de passage à allure régulière.

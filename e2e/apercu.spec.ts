@@ -14,7 +14,7 @@ const SCREENS = [
   "accueil-bilan", "accueil-forme", "onboarding", "reglages", "donnees", "supprimer", "rappels", "rappels-vide",
   "seance", "exercice", "exercices", "modele", "programme", "programme-nouveau", "programme-remplacer", "programme-vide",
   "semaine", "semaine-basse", "semaine-deplacer", "semaine-forme", "semaine-type",
-  "sports", "sports-vide", "sport-ajouter", "sortie-ajouter", "import-gpx", "import-gpx-vide",
+  "sports", "sports-vide", "sport-ajouter", "sortie-ajouter", "import-gpx", "import-gpx-vide", "import-seances", "import-seances-vide",
   "endurance", "endurance-natation", "endurance-vide", "objectifs", "objectifs-vide", "objectif-ajouter", "zones", "zones-estimees", "zones-vide",
   "hyrox", "hyrox-ancienne", "hyrox-vide", "hyrox-ajouter",
   "nutrition-vide", "nutrition-ajouter", "nutrition-aliment", "nutrition-quantite", "nutrition-quantite-recette", "nutrition-cibles", "nutrition-cibles-attente",

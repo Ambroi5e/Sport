@@ -249,3 +249,11 @@ export async function getExerciseNames(ids: string[]): Promise<Record<string, st
   const { data } = await supabase.from("exercises").select("id, name").in("id", ids);
   return Object.fromEntries((data ?? []).map((e) => [e.id, e.name]));
 }
+
+/** Exercices proposés à l'import : catalogue et exercices personnels non archivés. */
+export async function getExerciseChoices(): Promise<{ id: string; slug: string | null; name: string }[]> {
+  await requireUserId();
+  const supabase = await createClient();
+  const { data } = await supabase.from("exercises").select("id, slug, name").is("archived_at", null).order("name");
+  return data ?? [];
+}

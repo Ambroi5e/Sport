@@ -1,6 +1,7 @@
-import { ClockCounterClockwiseIcon } from "@phosphor-icons/react/ssr";
+import { ClockCounterClockwiseIcon, FileArrowUpIcon } from "@phosphor-icons/react/ssr";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { buttonClasses } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { getProfile } from "@/lib/auth";
@@ -24,10 +25,22 @@ export default async function HistoryPage() {
 
   return (
     <>
-      <PageHeader back="/entrainement" title="Historique" />
+      <PageHeader
+        back="/entrainement"
+        title="Historique"
+        action={
+          <Link href="/entrainement/historique/importer" className={buttonClasses("secondary", "md", "shrink-0")}>
+            <FileArrowUpIcon size={20} aria-hidden="true" /> <span className="max-sm:sr-only">Importer</span>
+          </Link>
+        }
+      />
       {weeks.length === 0 ? (
         <EmptyState icon={<ClockCounterClockwiseIcon size={22} />} title="Aucune séance terminée">
-          Tes séances apparaîtront ici, regroupées par semaine, dès que tu en auras terminé une.
+          Tes séances apparaîtront ici, regroupées par semaine, dès que tu en auras terminé une. Tu viens de Strong ou de Hevy ?{" "}
+          <Link href="/entrainement/historique/importer" className="underline underline-offset-2">
+            Importe ton historique
+          </Link>
+          .
         </EmptyState>
       ) : (
         <div className="grid gap-6 md:max-w-2xl">

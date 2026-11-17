@@ -28,6 +28,8 @@ export type StrengthImport = {
 export const STRENGTH_MAX_BYTES = 20 * 1024 * 1024;
 export const IMPORT_MAX_SETS = 50;
 export const IMPORT_MAX_EXERCISES = 99;
+/** Séances envoyées par appel : reste sous la limite de taille d'une Server Action. */
+export const IMPORT_BATCH = 50;
 const LB = 0.45359237;
 
 /** Découpe un CSV (guillemets doublés, retours à la ligne entre guillemets). */

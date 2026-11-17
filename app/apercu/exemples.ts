@@ -856,3 +856,33 @@ export const SAMPLE_RACE_PLANS: RacePlan[] = [
 export const SAMPLE_OUTINGS_HR: Outing[] = SAMPLE_OUTINGS.map((o, i) =>
   o.sport === "course" ? { ...o, avgHr: o.id.startsWith("run-t") ? 164 + (i % 3) * 3 : o.id.startsWith("run-l") ? 146 + (i % 4) : 138 + (i % 5) } : o,
 );
+
+/** Import Strong (v0.12.1) : catalogue proposé et extrait d'export. */
+export const SAMPLE_IMPORT_CHOICES = [
+  { id: "ex-dc", slug: "developpe-couche-barre", name: "Développé couché" },
+  { id: "ex-squat", slug: "squat", name: "Squat" },
+  { id: "ex-sdt", slug: "souleve-de-terre", name: "Soulevé de terre" },
+  { id: "ex-tractions", slug: "tractions-pronation", name: "Tractions pronation" },
+  { id: "ex-lat", slug: "elevations-laterales", name: "Élévations latérales" },
+  { id: "ex-gainage", slug: "gainage", name: "Gainage" },
+  { id: "ex-perso", slug: null, name: "Pull-over à la machine du club" },
+];
+
+export const SAMPLE_STRONG_CSV = [
+  "Date,Workout Name,Duration,Exercise Name,Set Order,Weight,Reps,Distance,Seconds,Notes,Workout Notes,RPE",
+  ...["2026-09-07 18:30:00", "2026-09-14 18:35:00", "2026-09-21 18:20:00", "2026-09-28 18:40:00"].flatMap((d, i) => [
+    `${d},Haut A,1h 5m,Bench Press (Barbell),W,40,10,0,0,,,`,
+    `${d},Haut A,1h 5m,Bench Press (Barbell),1,${75 + i * 2.5},6,0,0,,,`,
+    `${d},Haut A,1h 5m,Bench Press (Barbell),2,${75 + i * 2.5},6,0,0,,,`,
+    `${d},Haut A,1h 5m,Pull Up,1,0,8,0,0,,,`,
+    `${d},Haut A,1h 5m,Lateral Raise (Dumbbell),1,10,15,0,0,,,`,
+    `${d},Haut A,1h 5m,Landmine Press,1,30,10,0,0,,,`,
+    `${d},Haut A,1h 5m,Plank,1,0,0,0,60,,,`,
+    `${d},Haut A,1h 5m,Rowing Machine,1,0,0,2000,480,,,`,
+  ]),
+  ...["2026-09-09 07:00:00", "2026-09-16 07:05:00"].flatMap((d) => [
+    `${d},Bas,50m,Squat (Barbell),1,100,5,0,0,,,`,
+    `${d},Bas,50m,Squat (Barbell),2,100,5,0,0,,,`,
+    `${d},Bas,50m,Deadlift (Barbell),1,130,3,0,0,,,`,
+  ]),
+].join("\n");

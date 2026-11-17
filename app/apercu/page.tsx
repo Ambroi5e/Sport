@@ -62,6 +62,8 @@ import { ReadinessView } from "@/components/progress/readiness-view";
 import { ActivitiesView } from "@/components/training/activities-view";
 import { EnduranceView } from "@/components/training/endurance-view";
 import { GpxImport } from "@/components/training/gpx-import";
+import { StrengthImport } from "@/components/training/strength-import";
+import { importWorkouts } from "@/app/(app)/entrainement/historique/importer/actions";
 import { HyroxForm } from "@/components/training/hyrox-form";
 import { HyroxView } from "@/components/training/hyrox-view";
 import { HrZonesView } from "@/components/training/hr-zones-view";
@@ -142,6 +144,8 @@ import {
   SAMPLE_VOLUME,
   SAMPLE_WEIGHTS,
   SAMPLE_YESTERDAY,
+  SAMPLE_IMPORT_CHOICES,
+  SAMPLE_STRONG_CSV,
 } from "./exemples";
 import { AddItemForm } from "@/components/groceries/add-item-form";
 import { BudgetCard, BudgetSummary } from "@/components/groceries/budget-card";
@@ -555,6 +559,18 @@ export default async function PreviewPage({ searchParams }: { searchParams: Prom
               today={SAMPLE_DAY}
               action={saveHeartRates}
             />
+          </>
+        ) : ecran === "import-seances" || ecran === "import-seances-vide" ? (
+          <>
+            <PageHeader title="Importer des séances" back="/apercu?ecran=entrainement" />
+            <div className="md:max-w-3xl">
+              <StrengthImport
+                action={importWorkouts}
+                choices={SAMPLE_IMPORT_CHOICES}
+                unit="kg"
+                initial={ecran === "import-seances" ? { name: "strong_workouts.csv", text: SAMPLE_STRONG_CSV } : null}
+              />
+            </div>
           </>
         ) : ecran === "import-gpx" || ecran === "import-gpx-vide" ? (
           <>

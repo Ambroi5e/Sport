@@ -127,6 +127,13 @@ Les données de santé (poids, mensurations, photos, forme, nutrition) sont des 
 - Le contenu du fichier n'est jamais inséré comme HTML : seuls des nombres en sont tirés, et le nom du fichier est affiché comme texte par React.
 - Taille limitée à 20 Mo avant lecture.
 
+## Import Strong et Hevy (v0.12.1)
+
+- Minimisation : le CSV est lu sur l'appareil. Seules les séries des exercices reliés au catalogue sont envoyées ; notes de séance et d'exercice, RPE, distances et noms d'exercices écartés ne quittent pas l'appareil.
+- `importWorkouts` valide chaque paquet (50 séances au plus) avec zod, aux bornes de la base, et insère sous RLS comme une saisie normale : la politique d'insertion de `workout_sets` vérifie que l'exercice est utilisable par la personne.
+- Une série datée d'avant le lancement d'une séance commune n'entre pas dans son fil (`share_set_with_group`, testé) : importer un historique pendant une séance commune ne le montre pas aux participants.
+- Le contenu du fichier est affiché comme texte par React, jamais comme HTML.
+
 ## Garde-fous du schéma (v1.0)
 
 - `supabase/tests/schema-securite.test.ts` vérifie les règles de ce document sur toutes les tables et fonctions à la fois : une migration future qui oublie la RLS par identité, ouvre une politique au visiteur, crée une fonction `SECURITY DEFINER` sans `search_path` vide, une table sans cascade vers le compte ou une vue sans `security_invoker` fait échouer la CI.
@@ -143,7 +150,7 @@ Les données de santé (poids, mensurations, photos, forme, nutrition) sont des 
 
 ## Fichiers importés
 
-Taille maximale et type vérifiés avant lecture (CSV 5 Mo, GPX et FIT 20 Mo, export Apple Santé lu sur le téléphone). Chaque ligne validée par zod ; une ligne invalide est rejetée et signalée, jamais insérée partiellement.
+Taille maximale et type vérifiés avant lecture (CSV, GPX et FIT 20 Mo, export Apple Santé lu sur le téléphone). Chaque ligne validée par zod ; une ligne invalide est rejetée et signalée, jamais insérée partiellement.
 
 ## Avant chaque mise en production
 

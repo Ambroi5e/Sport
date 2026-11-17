@@ -4,6 +4,15 @@ Format : une entrée par version (semver), du plus récent au plus ancien. Les m
 
 ## [Non publié]
 
+### v0.12.1 : importer ses séances Strong et Hevy
+
+- « Historique » > « Importer » : choisis l'export CSV de Strong ou de Hevy. Fonte retrouve tes séances, tes séries, tes charges et tes échauffements ; records, courbes de progrès et charges préremplies repartent de ton vrai historique.
+- Les exercices sont reliés au catalogue : noms anglais courants et noms français reconnus, chacun modifiable ; « Ne pas importer » écarte un exercice.
+- Le fichier est lu sur l'appareil. Seules les séries des exercices reliés sont envoyées ; notes, RPE et cardio ne le sont pas. Relancer le même import ne crée pas de doublon.
+- Strong n'écrit pas l'unité des charges : tu choisis kg ou lb (par défaut, celle de ton profil).
+- Correctif : une série faite avant le lancement d'une séance commune n'apparaît plus dans son fil (migration non destructive `20261126000000_import_seances.sql`, appliquée).
+- Aucune nouvelle table, aucune dépendance (lecture du CSV dans `lib/engine/strength-import.ts`, 15 tests).
+
 ### v1.0 (1/3) : garde-fous
 
 - Sept tests de sécurité sur le schéma entier (`supabase/tests/schema-securite.test.ts`) : ils couvrent toutes les tables et fonctions, y compris celles des versions à venir (politiques jamais ouvertes au visiteur ni à `true`, identité vérifiée partout, `search_path` vide sur les fonctions `SECURITY DEFINER`, clé primaire, suppression en cascade avec le compte, pas de vue qui contourne la RLS).

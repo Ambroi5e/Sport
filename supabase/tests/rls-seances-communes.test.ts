@@ -18,12 +18,12 @@ describe.skipIf(!adminUrl)("RLS séances communes", () => {
   const as = (user: string) => client.query("select set_config('request.jwt.claim.sub', $1, true)", [user]);
 
   /** Une séance de musculation avec une série, faite ou non. */
-  async function logSet(options: { done?: boolean; warmup?: boolean } = {}) {
+  async function logSet(options: { done?: boolean; warmup?: boolean; at?: Date } = {}) {
     const workout = (await rows("insert into public.workouts (name, performed_on) values ('Haut A', current_date) returning id"))[0].id;
     return (
       await rows(
         "insert into public.workout_sets (workout_id, exercise_id, set_number, weight_kg, reps, is_warmup, completed_at) values ($1, $2, 1, 80, 6, $3, $4) returning id",
-        [workout, exercise, options.warmup ?? false, options.done === false ? null : new Date()],
+        [workout, exercise, options.warmup ?? false, options.done === false ? null : (options.at ?? new Date())],
       )
     )[0].id as string;
   }
@@ -158,6 +158,16 @@ describe.skipIf(!adminUrl)("RLS séances communes", () => {
         await logSet();
         await as(dana);
         await logSet();
+        await client.query("reset role");
+        expect(await count()).toBe(before);
+      });
+    });
+
+    it("rien pour une série faite avant le lancement (historique importé)", async () => {
+      const before = await count();
+      await asUser(client, alice, async () => {
+        await logSet({ at: new Date("2024-01-15T17:30:00Z") });
+        await logSet({ at: new Date(Date.now() - 60 * 60 * 1000) });
         await client.query("reset role");
         expect(await count()).toBe(before);
       });

@@ -48,7 +48,7 @@ Tableau de bord, musculation, endurance, Hyrox, sports additionnels, planning in
 | v0.11.1 | Hyrox : temps total et seize temps par course, part course / ateliers / transitions, écarts et records par segment |
 | v0.11.2 | Objectifs de course (temps visé, passages, prédiction de Riegel) et zones cardiaques |
 | v0.12 | Import d'une sortie GPX, lue sur l'appareil |
-| v0.12.1 | Imports Strong et Hevy (CSV) |
+| v0.12.1 | Imports Strong et Hevy (CSV), lus sur l'appareil, exercices reliés au catalogue |
 | v0.12.2 | Imports FIT et Apple Santé ; Strava en option |
 | v1.0 | Audit sécurité, tests end-to-end complets, auto-hébergement, checklist web |
 

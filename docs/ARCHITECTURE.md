@@ -135,6 +135,12 @@ Chaque table porte un `user_id`. Les catalogues communs (exercices, aliments de 
 - **Calculs** : distance par haversine ; temps en mouvement (intervalles de plus de 60 s écartés) ; dénivelé positif à hystérésis de 3 m ; fréquence cardiaque moyenne pondérée par le temps ; sport d'après `<type>` ; date du premier point dans le fuseau du profil.
 - Écran : `/entrainement/sports/importer`, lié depuis « Noter un sport ». Un fichier à la fois, 20 Mo au plus.
 
+### Import Strong et Hevy (v0.12.1)
+
+- **Lu dans le navigateur** : `StrengthImport` (`components/training/strength-import.tsx`) lit le CSV avec `readStrengthCsv` (`lib/engine/strength-import.ts`) : format reconnu à l'en-tête, séries groupées par séance, kg ou lb, échauffements gardés, cardio et minuteur écartés. `suggestExercise` propose un exercice du catalogue (nom français, ou table des noms anglais vers les `slug`).
+- **Enregistrement** : `importWorkouts` (`app/(app)/entrainement/historique/importer/actions.ts`), par paquets de `IMPORT_BATCH` séances. Une séance qui commence à la même minute qu'une séance existante est sautée. Séries marquées faites à la fin de la séance.
+- Écran : `/entrainement/historique/importer`, lié depuis l'historique.
+
 ### Rappels push (v0.10.3)
 
 - **Réglages** : `reminder_settings`, une ligne par personne, une heure par rappel (vide = éteint) et les jours du rappel de séance. Heures dans le fuseau du profil.

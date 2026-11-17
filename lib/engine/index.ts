@@ -22,3 +22,4 @@ export * from "./endurance";
 export * from "./hyrox";
 export * from "./race";
 export * from "./gpx";
+export * from "./strength-import";
